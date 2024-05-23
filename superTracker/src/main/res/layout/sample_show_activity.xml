@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:background="#ffffff"
+        android:paddingTop="0dp"
+        android:visibility="visible"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart1"
+            android:layout_width="match_parent"
+            android:layout_height="114dp"
+            android:layout_marginTop="0dp"
+            android:background="#000000"></com.github.mikephil.charting.charts.LineChart>
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/chart2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="2dp"
+            android:background="#000000"></com.github.mikephil.charting.charts.LineChart>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_marginBottom="0dp"
+            android:paddingTop="0dp"
+            android:layout_height="35dp">
+            <TextView
+                android:id="@+id/tv_inputData"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:textColor="#ffffff"
+                android:text="开始采集"
+                android:textSize="20dp"
+                android:layout_marginRight="5dp"
+                android:layout_gravity="center"
+                android:background="#94C4FF"
+                android:gravity="center"
+                android:layout_weight="1"
+                />
+            <TextView
+                android:id="@+id/tv_stop_test"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:text="停止采集"
+                android:textSize="20dp"
+                android:layout_gravity="center"
+                android:background="#f4C4FF"
+                android:gravity="center"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

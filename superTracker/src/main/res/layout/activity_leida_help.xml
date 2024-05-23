@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+
+    android:gravity="center_horizontal"
+    tools:context="com.zeus.tec.ui.HomeActivity"
+    android:background="@drawable/top_bluebg">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="0dp"
+        >
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/white_arrow_left"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="使用说明"
+            android:textColor="#ffffffff"
+            android:textSize="17sp"
+            />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="0dp"
+       android:paddingRight="@dimen/dp_10"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingTop="0dp"
+        >
+
+        <LinearLayout
+            android:id="@+id/lay_leidahelp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/image_leidahelp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:adjustViewBounds="true"
+                    android:layout_marginBottom="5dp"
+                    android:src="@mipmap/leidahelp1"
+                    android:scaleType="fitCenter" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:padding="5dp"
+                    android:layout_marginTop="10dp"
+
+                    android:orientation="horizontal">
+
+
+                    <Button
+                        android:id="@+id/bt_uppage"
+                        android:layout_weight= "1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textSize="20dp"
+                        android:drawableLeft="@mipmap/uppage"
+                        android:paddingLeft="@dimen/dp_10"
+                        android:drawableTint="#009fff"
+                        android:background="@drawable/sharp_rect"
+                        android:text="上一页"
+                        android:gravity="center"
+                        android:textColor="#000000"
+                        >
+                    </Button>
+
+
+                    <TextView
+                        android:id="@+id/tv_page"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="@dimen/dp_10"
+                        android:layout_marginRight="@dimen/dp_10"
+                        android:background="@drawable/bg_white"
+                        android:text="1"
+                        android:gravity="center"
+                        android:textSize="25dp"
+                        android:textColor="#000000"
+                        android:layout_weight="1">
+                    </TextView>
+
+
+                    <Button
+                        android:id="@+id/bt_nextpage"
+                        android:layout_weight= "1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:textSize="20dp"
+                        android:background="@drawable/sharp_rect"
+                        android:paddingRight="@dimen/dp_10"
+                        android:drawableRight="@mipmap/nextpage"
+                        android:drawablePadding="@dimen/dp_10"
+                        android:drawableTint="#009fff"
+                        android:textColor="#000000"
+                        android:gravity="center"
+                        android:text="下一页"
+                        >
+
+                    </Button>
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:padding="2dp"
+
+                    android:layout_height="wrap_content">
+
+
+                    <Button
+                        android:id="@+id/bt_workinfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13dp"
+                        android:text="工作原理"></Button>
+
+                    <Button
+                        android:id="@+id/bt_prjinfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13dp"
+                        android:text="产品介绍"></Button>
+
+                    <Button
+                        android:id="@+id/bt_optStep"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13dp"
+                        android:text="操作步骤"></Button>
+                    <Button
+                        android:id="@+id/bt_softInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="13dp"
+                        android:text="软件分析"></Button>
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+
+        </LinearLayout>
+
+
+
+
+
+
+
+
+    </LinearLayout>
+
+</LinearLayout>

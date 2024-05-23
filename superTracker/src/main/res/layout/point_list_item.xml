@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:orientation="horizontal"
+    android:textColor="#000000"
+    android:background="#ffffff"
+    android:textSize="10dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:text="512"
+    >
+    <TextView
+        android:id="@+id/tv_pointNumber"
+        android:layout_width="0dp"
+        android:layout_weight="9"
+        android:layout_height="wrap_content"
+        android:text="100"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textSize="15dp"
+        android:background="@drawable/btn_finish_bg"
+        android:textColor="#ff0000"
+        ></TextView>
+    <TextView
+        android:id="@+id/tv_point_time"
+        android:layout_width="0dp"
+        android:layout_weight="39"
+        android:layout_height="match_parent"
+        android:text="2024-03-21 09:07:54"
+        android:gravity="center"
+        android:textSize="15dp"
+        android:background="@drawable/btn_finish_bg"
+        android:textColor="#000000"
+
+        ></TextView>
+    <TextView
+        android:id="@+id/tv_point_distance"
+        android:layout_width="0dp"
+        android:layout_weight="14"
+        android:layout_height="match_parent"
+        android:text="11100.0"
+        android:gravity="center"
+        android:textSize="15dp"
+        android:background="@drawable/btn_finish_bg"
+        android:textColor="#000000"
+        ></TextView>
+</LinearLayout>

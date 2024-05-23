@@ -1,0 +1,772 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "2:2558490120947012052",
+      "lastPropertyId": "32:784408464820332800",
+      "name": "DrillHoleInfo",
+      "properties": [
+        {
+          "id": "1:5620471725225999065",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4137261979570223101",
+          "name": "companyId",
+          "type": 9
+        },
+        {
+          "id": "3:18802218262229062",
+          "name": "miningAreaId",
+          "type": 9
+        },
+        {
+          "id": "5:5854675435898993851",
+          "name": "drillHoleId",
+          "type": 9
+        },
+        {
+          "id": "6:1279464455933759969",
+          "name": "detector",
+          "type": 9
+        },
+        {
+          "id": "7:5692968441598501388",
+          "name": "dynamicThreshold",
+          "type": 5
+        },
+        {
+          "id": "8:1422328340674294764",
+          "name": "drillPipeLength",
+          "type": 5
+        },
+        {
+          "id": "9:7630591338500523915",
+          "name": "drillHoleLength",
+          "type": 6
+        },
+        {
+          "id": "10:4046225714321399410",
+          "name": "holeX",
+          "type": 8
+        },
+        {
+          "id": "11:2601461597268429574",
+          "name": "holeY",
+          "type": 8
+        },
+        {
+          "id": "12:4280971758859494202",
+          "name": "holeZ",
+          "type": 8
+        },
+        {
+          "id": "13:8458377253337627415",
+          "name": "jacketLength",
+          "type": 6
+        },
+        {
+          "id": "14:2670132589248700335",
+          "name": "designDirection",
+          "type": 5
+        },
+        {
+          "id": "15:1454665275031071728",
+          "name": "designAngle",
+          "type": 3
+        },
+        {
+          "id": "16:7398293500493792229",
+          "name": "adjustMode",
+          "type": 9
+        },
+        {
+          "id": "17:1788508350028568431",
+          "name": "livePhotos",
+          "type": 9
+        },
+        {
+          "id": "18:2382030145464006660",
+          "name": "collectionDateTime",
+          "type": 6
+        },
+        {
+          "id": "19:8061276798198601310",
+          "name": "workspaceName",
+          "type": 9
+        },
+        {
+          "id": "20:8960581630648539306",
+          "name": "angleAdjustValue",
+          "type": 3
+        },
+        {
+          "id": "21:6733848577736201072",
+          "name": "designDirectionAngle",
+          "type": 5
+        },
+        {
+          "id": "22:8552021592171075734",
+          "name": "directionAngleAdjustValue",
+          "type": 3
+        },
+        {
+          "id": "23:4683957413250173772",
+          "name": "designLength",
+          "type": 6
+        },
+        {
+          "id": "24:1032326648625209677",
+          "name": "measureSpacing",
+          "type": 5
+        },
+        {
+          "id": "25:6159187738716340507",
+          "name": "deviceID",
+          "type": 6
+        },
+        {
+          "id": "26:6272360919649970735",
+          "name": "livePhotosMd5",
+          "type": 9
+        },
+        {
+          "id": "27:64355595413248865",
+          "name": "isMerged",
+          "type": 1
+        },
+        {
+          "id": "28:2590719921745801228",
+          "name": "projectRoot",
+          "type": 9
+        },
+        {
+          "id": "29:1076984451890605536",
+          "name": "dataPath",
+          "type": 9
+        },
+        {
+          "id": "30:4362135499085671370",
+          "name": "zipPath",
+          "type": 9
+        },
+        {
+          "id": "31:3441801496500676793",
+          "name": "countTimeTotal",
+          "type": 6
+        },
+        {
+          "id": "32:784408464820332800",
+          "name": "collectCount",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:7308166310073599780",
+      "lastPropertyId": "16:1752656397292867796",
+      "name": "LastDrillHoleInfo",
+      "properties": [
+        {
+          "id": "1:2674883479902801509",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5270695963560217944",
+          "name": "companyId",
+          "type": 9
+        },
+        {
+          "id": "3:67787876512585151",
+          "name": "miningAreaId",
+          "type": 9
+        },
+        {
+          "id": "4:2789554368075119882",
+          "name": "namespaceName",
+          "type": 9
+        },
+        {
+          "id": "5:6921934001609601580",
+          "name": "drillHoleId",
+          "type": 9
+        },
+        {
+          "id": "6:2656096166143786146",
+          "name": "detector",
+          "type": 9
+        },
+        {
+          "id": "7:7786887358658897604",
+          "name": "dynamicThreshold",
+          "type": 8
+        },
+        {
+          "id": "8:631402852086887211",
+          "name": "drillPipeLength",
+          "type": 8
+        },
+        {
+          "id": "9:8445299741173645749",
+          "name": "drillHoleLength",
+          "type": 8
+        },
+        {
+          "id": "10:5119122336725962651",
+          "name": "holeX",
+          "type": 8
+        },
+        {
+          "id": "11:2717010685209781195",
+          "name": "holeY",
+          "type": 8
+        },
+        {
+          "id": "12:994086567844195177",
+          "name": "holeZ",
+          "type": 8
+        },
+        {
+          "id": "13:5952327657723853432",
+          "name": "jacketLength",
+          "type": 8
+        },
+        {
+          "id": "14:5761085807062062852",
+          "name": "designDirection",
+          "type": 9
+        },
+        {
+          "id": "15:6048889337794928726",
+          "name": "designAngle",
+          "type": 9
+        },
+        {
+          "id": "16:1752656397292867796",
+          "name": "adjustMode",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "4:6692417924551007800",
+      "lastPropertyId": "10:121372408399424003",
+      "name": "CollectTimeInfo",
+      "properties": [
+        {
+          "id": "1:7496507929087613089",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7223539243775437878",
+          "name": "drillInfoId",
+          "type": 6
+        },
+        {
+          "id": "3:7275265852896647146",
+          "name": "time",
+          "type": 6
+        },
+        {
+          "id": "4:3890043352370385657",
+          "name": "diffTime",
+          "type": 6
+        },
+        {
+          "id": "5:578866260716460552",
+          "name": "serialId",
+          "type": 6
+        },
+        {
+          "id": "6:2037569070999545756",
+          "name": "collectTime",
+          "type": 6
+        },
+        {
+          "id": "7:7112202349143312164",
+          "name": "rollAngle",
+          "type": 3
+        },
+        {
+          "id": "8:4948359341219548712",
+          "name": "omega",
+          "type": 3
+        },
+        {
+          "id": "9:9009594637765875484",
+          "name": "directionAngle",
+          "type": 5
+        },
+        {
+          "id": "10:121372408399424003",
+          "name": "slantAngle",
+          "type": 3
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "5:6875819776298425301",
+      "lastPropertyId": "8:938919651180507522",
+      "name": "DrillDataInfo",
+      "properties": [
+        {
+          "id": "1:661344315166423283",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7524556922549471521",
+          "name": "serialId",
+          "type": 6
+        },
+        {
+          "id": "3:3765339591423013068",
+          "name": "collectTime",
+          "type": 6
+        },
+        {
+          "id": "4:8448800319000531166",
+          "name": "rollAngle",
+          "type": 3
+        },
+        {
+          "id": "5:1153626864168571744",
+          "name": "omega",
+          "type": 3
+        },
+        {
+          "id": "6:5903980739857198888",
+          "name": "directionAngle",
+          "type": 5
+        },
+        {
+          "id": "7:7918749547542015557",
+          "name": "slantAngle",
+          "type": 3
+        },
+        {
+          "id": "8:938919651180507522",
+          "name": "drillInfoId",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "6:1984305421270682255",
+      "lastPropertyId": "41:8505047151310300136",
+      "name": "leida_info",
+      "properties": [
+        {
+          "id": "1:8643248335052285114",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3887755602092096613",
+          "name": "projectId",
+          "type": 9
+        },
+        {
+          "id": "3:1871437160985135239",
+          "name": "sampleLength",
+          "type": 5
+        },
+        {
+          "id": "4:2981400554203377179",
+          "name": "frequency",
+          "type": 5
+        },
+        {
+          "id": "8:2310002381871331887",
+          "name": "drillPipeLength",
+          "type": 7
+        },
+        {
+          "id": "9:1131318947271282398",
+          "name": "timeSpace",
+          "type": 7
+        },
+        {
+          "id": "21:859528362259994398",
+          "name": "deviceID",
+          "type": 6
+        },
+        {
+          "id": "26:117139562432667849",
+          "name": "isMerged",
+          "type": 1
+        },
+        {
+          "id": "27:4097712084110463715",
+          "name": "projectRoot",
+          "type": 9
+        },
+        {
+          "id": "28:6893219679301127470",
+          "name": "dataPath",
+          "type": 9
+        },
+        {
+          "id": "29:5503847858054275184",
+          "name": "zipPath",
+          "type": 9
+        },
+        {
+          "id": "32:663297121675105951",
+          "name": "Amp1",
+          "type": 5
+        },
+        {
+          "id": "33:3129586421437336891",
+          "name": "Delay1",
+          "type": 5
+        },
+        {
+          "id": "34:5418369594772554596",
+          "name": "overlaynumbe",
+          "type": 5
+        },
+        {
+          "id": "35:8860378831449533682",
+          "name": "GYROThreshold",
+          "type": 7
+        },
+        {
+          "id": "36:2972721511727800886",
+          "name": "creatTime",
+          "type": 9
+        },
+        {
+          "id": "37:1448133327306891012",
+          "name": "dataDownload",
+          "type": 9
+        },
+        {
+          "id": "38:8866377579315064180",
+          "name": "PointCount",
+          "type": 5
+        },
+        {
+          "id": "39:3629241876328975947",
+          "name": "TotalDis",
+          "type": 7
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "7:7410328829235459814",
+      "lastPropertyId": "35:3702792933948698871",
+      "name": "dirctionfinderDrillHoleInfo",
+      "properties": [
+        {
+          "id": "1:8560208941045683308",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "3:8833134827491679084",
+          "name": "miningAreaId",
+          "type": 9
+        },
+        {
+          "id": "4:6862794274244952827",
+          "name": "workspaceName",
+          "type": 9
+        },
+        {
+          "id": "5:4330373420786925123",
+          "name": "drillHoleId",
+          "type": 9
+        },
+        {
+          "id": "6:8550699316148023174",
+          "name": "detector",
+          "type": 9
+        },
+        {
+          "id": "10:8995101005018689138",
+          "name": "holeX",
+          "type": 8
+        },
+        {
+          "id": "11:1823053328334966401",
+          "name": "holeY",
+          "type": 8
+        },
+        {
+          "id": "12:4323646512271479937",
+          "name": "holeZ",
+          "type": 8
+        },
+        {
+          "id": "13:2439039765757264687",
+          "name": "jacketLength",
+          "type": 6
+        },
+        {
+          "id": "14:8201636401365387174",
+          "name": "designDirection",
+          "type": 5
+        },
+        {
+          "id": "15:1899041208770771011",
+          "name": "designAngle",
+          "type": 3
+        },
+        {
+          "id": "16:1501762773734456961",
+          "name": "angleAdjustValue",
+          "type": 3
+        },
+        {
+          "id": "17:7081157962769777761",
+          "name": "designDirectionAngle",
+          "type": 5
+        },
+        {
+          "id": "18:2795673027222138030",
+          "name": "directionAngleAdjustValue",
+          "type": 3
+        },
+        {
+          "id": "19:140239356451409026",
+          "name": "designLength",
+          "type": 6
+        },
+        {
+          "id": "20:2297002777404735225",
+          "name": "measureSpacing",
+          "type": 5
+        },
+        {
+          "id": "21:5236643906406438242",
+          "name": "deviceID",
+          "type": 6
+        },
+        {
+          "id": "22:2608567633149441755",
+          "name": "adjustMode",
+          "type": 9
+        },
+        {
+          "id": "23:8093574676678601161",
+          "name": "livePhotos",
+          "type": 9
+        },
+        {
+          "id": "24:1986272463841581153",
+          "name": "livePhotosMd5",
+          "type": 9
+        },
+        {
+          "id": "25:2733841562249181266",
+          "name": "collectionDateTime",
+          "type": 6
+        },
+        {
+          "id": "26:3364172114856105772",
+          "name": "isMerged",
+          "type": 1
+        },
+        {
+          "id": "27:4144664499466214186",
+          "name": "projectRoot",
+          "type": 9
+        },
+        {
+          "id": "28:8935815276908870084",
+          "name": "dataPath",
+          "type": 9
+        },
+        {
+          "id": "29:5898297288075259571",
+          "name": "zipPath",
+          "type": 9
+        },
+        {
+          "id": "30:9072950683162369487",
+          "name": "countTimeTotal",
+          "type": 6
+        },
+        {
+          "id": "31:4975710285432001058",
+          "name": "collectCount",
+          "type": 6
+        },
+        {
+          "id": "32:2915827278938629156",
+          "name": "projectName",
+          "type": 9
+        },
+        {
+          "id": "33:5963366809856259539",
+          "name": "compassCalibrationError",
+          "type": 5
+        },
+        {
+          "id": "34:5838330570281376949",
+          "name": "presetHeading",
+          "type": 5
+        },
+        {
+          "id": "35:3702792933948698871",
+          "name": "laserLevelError",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "8:3841337261734666981",
+      "lastPropertyId": "7:2316220625062857569",
+      "name": "directionfinderPointRecordInfo",
+      "properties": [
+        {
+          "id": "1:4847708195767959808",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6829381951249663456",
+          "name": "directionfinderInfoId",
+          "type": 6
+        },
+        {
+          "id": "3:7720816669753733481",
+          "name": "recordId",
+          "type": 5
+        },
+        {
+          "id": "4:6568846569029910991",
+          "name": "recordTime",
+          "type": 9
+        },
+        {
+          "id": "5:2160611334304597898",
+          "name": "oritentionAngle",
+          "type": 8
+        },
+        {
+          "id": "6:3729225839321117328",
+          "name": "dipAngle",
+          "type": 8
+        },
+        {
+          "id": "7:2316220625062857569",
+          "name": "relativeAngle",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "9:6347220010271014364",
+      "lastPropertyId": "6:1627361514004109631",
+      "name": "leidaPointRecordInfo",
+      "properties": [
+        {
+          "id": "1:5872622420422501566",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6777513597727101206",
+          "name": "leidaInfoId",
+          "type": 6
+        },
+        {
+          "id": "4:5594949262909548375",
+          "name": "recordTime",
+          "type": 9
+        },
+        {
+          "id": "5:4155083280251939746",
+          "name": "PointNumber",
+          "type": 9
+        },
+        {
+          "id": "6:1627361514004109631",
+          "name": "distance",
+          "type": 9
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "9:6347220010271014364",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [
+    6703317891890604681
+  ],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [
+    4593451218513525981,
+    3007359734756203658,
+    1912363897222288356,
+    107865970940654292,
+    1138840346797504820,
+    106464049805038416,
+    6476646666027822583,
+    9081845091448255170,
+    8579450432648904279,
+    1200518916277274406,
+    4806308458174789245,
+    8956369787232101289,
+    5711745366624943185,
+    9199656819346868684,
+    500110766938115170,
+    6284798467689988827,
+    4278844492898321789,
+    502728361375801014,
+    286945320896884514,
+    4832317189283998342,
+    3183177969696827861,
+    8254997116825010175,
+    2217119134249555934,
+    3852875233642135449,
+    4949406456765854094,
+    8336246350299954176,
+    641153132292497017,
+    1828337184614175525,
+    6864918589637978368,
+    3848608772646728515,
+    8717386791655837009,
+    7281227582177194271,
+    2668665097393647157,
+    4579931934122852618,
+    605141707496591027,
+    7174535307118782961,
+    5829542798113691890,
+    5144769733550574261,
+    8009924660070725713,
+    3523545904091155392,
+    1104321797971513292,
+    3869568714294636603,
+    6486299003616023873,
+    8505047151310300136
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

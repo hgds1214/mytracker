@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_title">长盛检测</string>
+    <string name="app_name">长盛检测</string>
+    <string name="devices">USB设备</string>
+    <string name="version">V1.0.0(radan)</string>
+    <string name="alram_msg">-----------注意事项采集过程中请不要关闭探头。采集完成后请先连接探头，点击结束采集后再关闭探头，否正可能出现数据丢失及损坏！</string>
+</resources>

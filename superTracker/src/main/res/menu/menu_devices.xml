@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/refresh"
+        android:title="刷新设备" />
+    <item
+        android:id="@+id/baud_rate"
+        android:title="波特率" />
+    <item
+        android:id="@+id/read_mode"
+        android:title="读取模式" />
+</menu>

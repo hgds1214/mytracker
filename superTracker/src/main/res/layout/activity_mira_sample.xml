@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:ignore="MissingDefaultResource"
+    android:background="#ffffff"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@android:color/white"
+        android:layout_margin="2dp"
+        android:padding="2dp"
+        >
+
+        <Button
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_margin="0dp"
+            android:background="#ffffee"
+            android:drawableLeft="@mipmap/setting"
+            android:drawablePadding="0dp"
+            android:gravity="center"
+            android:paddingLeft="2dp"
+            android:text="参数设置"
+            android:textColor="#000000"
+            android:textSize="20dp"
+            tools:ignore="TouchTargetSizeCheck"></Button>
+
+        <Button
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
+            android:background="#ffffee"
+            android:drawableLeft="@mipmap/sample"
+            android:drawablePadding="0dp"
+            android:paddingLeft="2dp"
+            android:text="波形调试"
+            android:textColor="#000000"
+            android:textSize="20dp"
+
+            tools:ignore="TouchTargetSizeCheck">
+
+        </Button>
+
+        <Button
+            android:layout_width="110dp"
+            android:layout_height="match_parent"
+            android:background="#ffffee"
+            android:text="参数设置"
+            android:textColor="#000000"
+            android:textSize="20dp"
+            android:drawableLeft="@mipmap/setting2"
+            android:drawablePadding="0dp"
+            android:paddingLeft="2dp"
+            android:layout_marginLeft="5dp"
+            tools:ignore="TouchTargetSizeCheck">
+
+        </Button>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#000000"
+        android:layout_marginBottom="2dp"
+        >
+        <com.zeus.tec.model.utils.DigitalTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10"
+            android:textSize="30dp"
+
+            android:textColor="#ffff00"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="dB"
+            android:textSize="15dp"
+
+            android:textColor="#ffff00"
+            />
+
+
+    </LinearLayout>
+    <LinearLayout
+
+
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#ffffff"
+        >
+<!--        <LinearLayout-->
+<!--            android:layout_width="100dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            >-->
+<!--            <com.github.mikephil.charting.charts.LineChart-->
+<!--                android:id="@+id/chart_onesampel"-->
+<!--                android:visibility="invisible"-->
+<!--                -->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="#ffffff"-->
+<!--                android:layout_marginRight="1dp"-->
+<!--                ></com.github.mikephil.charting.charts.LineChart>-->
+
+<!--        </LinearLayout>-->
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#000000"
+            android:layout_marginBottom="60dp"
+            android:id="@+id/chart_sample"
+            ></com.github.mikephil.charting.charts.LineChart>
+
+    </LinearLayout>
+
+
+</LinearLayout>

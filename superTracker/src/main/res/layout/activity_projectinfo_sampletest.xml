@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/top_bluebg_for_edit"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="0dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="设置参数"
+            android:textColor="#ffffffff"
+            android:textSize="17sp" />
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/dp_10"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_white_top"
+            >
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="采样点数"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <Spinner
+                            android:id="@+id/sp_sampleLength"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="right|center_vertical"
+                            android:layout_gravity="right|center_vertical"
+                            android:paddingRight="0dp"
+
+
+                            android:spinnerMode="dropdown" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="采样频率(MHz)"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <Spinner
+                            android:id="@+id/sp_Frequency"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="right|center_vertical"
+                            android:paddingRight="0dp"
+                            android:spinnerMode="dropdown" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="放大倍数"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/edt_Amp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="right|center_vertical"
+                            android:hint="请输入"
+                            android:text="0"
+                            android:inputType="number"
+                            android:maxLength="12"
+                            android:paddingLeft="10dp"
+                            android:textColor="#333333"
+                            android:textColorHint="#bbbbbb" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="延迟点数"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/edt_delay"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="right|center_vertical"
+                            android:hint="请输入"
+                            android:text="1"
+                            android:inputType="number"
+                            android:maxLength="24"
+                            android:paddingLeft="10dp"
+                            android:textColor="#333333"
+                            android:textColorHint="#bbbbbb" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="叠加次数"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/edt_overlaynumber"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="right|center_vertical"
+                            android:hint="（1-1000）"
+                            android:text="32"
+                            android:inputType="number"
+                            android:maxLength="5"
+                            android:paddingLeft="10dp"
+                            android:textColor="#333333"
+                            android:textColorHint="#bbbbbb" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="时间间隔(ms)"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/edt_time_space"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="right|center_vertical"
+                            android:hint="（100-1000ms）"
+                            android:text="100"
+                            android:inputType="numberDecimal"
+                            android:maxLength="5"
+                            android:paddingLeft="10dp"
+                            android:textColor="#333333"
+                            android:textColorHint="#bbbbbb" />
+                    </LinearLayout>
+
+
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:background="#E4F5FF"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="设备状态"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/edt_device_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="right|center_vertical"
+                            android:enabled="false"
+                            android:hint="已停止"
+                            android:inputType="numberDecimal"
+                            android:background="#E4F5FF"
+                            android:maxLength="5"
+                            android:paddingLeft="10dp"
+                            android:textColor="#333333"
+                            android:textColorHint="#bbbbbb" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:background="#E4F9FF"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="设备电压"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/edt_device_voltage"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="right|center_vertical"
+                            android:hint="0"
+                            android:enabled="false"
+                            android:inputType="numberDecimal"
+                            android:maxLength="5"
+                            android:paddingLeft="10dp"
+                            android:textColor="#333333"
+                            android:textColorHint="#bbbbbb" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:background="#E5E5E5" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:background="#E4F0FF"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="陀螺阈值"
+                            android:textColor="#ff606060"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/edt_device_gyro"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="right|center_vertical"
+                            android:hint="0"
+                            android:enabled="false"
+                            android:inputType="numberDecimal"
+                            android:maxLength="5"
+                            android:paddingLeft="10dp"
+                            android:textColor="#333333"
+                            android:textColorHint="#bbbbbb" />
+                    </LinearLayout>
+
+
+                </LinearLayout>
+            </ScrollView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/tv_setting"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_weight="3"
+                    android:background="@drawable/bg_0e65ee"
+                    android:gravity="center"
+                    android:text="设置参数"
+                    android:textColor="#ffffffff"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_start"
+                    android:visibility="gone"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_weight="3"
+                    android:background="@drawable/bg_0e65ee"
+                    android:gravity="center"
+                    android:text="开始测试"
+                    android:textColor="#ffffffff"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_stop"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="3"
+                    android:background="@drawable/bg_0e65ee"
+                    android:gravity="center"
+                    android:text="刷新状态"
+                    android:textColor="#ffffffff"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+
+</LinearLayout>
