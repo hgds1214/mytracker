@@ -16,8 +16,8 @@ android {
         targetSdkVersion 32
         vectorDrawables.useSupportLibrary = true
 
-        versionCode 110
-        versionName "V1.0.0(radan)"
+        versionCode 222
+        versionName "V2.2.2(radan)"
 
         missingDimensionStrategy 'device', 'anyDevice'
 
@@ -56,6 +56,12 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.makeramen:roundedimageview:2.3.0'
     implementation 'com.github.piasy:BigImageViewer:1.8.1'
+    implementation 'com.github.xuexiangjys:XUpdate:2.1.4'
+    implementation 'com.squareup.okio:okio:2.0.0'
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation 'com.zhy:okhttputils:2.6.2'//鸿洋okhttputils
+
+
 
     // load with glide
     implementation 'com.github.piasy:GlideImageLoader:1.8.1'

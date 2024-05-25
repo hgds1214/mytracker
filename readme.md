@@ -333,3 +333,33 @@ else {
    2.解决图片过大 用BitmapFactory导入时bitmap 为null 问题
    
    [Android之优雅地加载大图片 - 简书 (jianshu.com)](https://www.jianshu.com/p/0f56f35068e2)
+
+# 武汉长盛多模块APP开发（雷达单模块版本）
+
+## v1.0.1(Radan) 0523
+
+1修复新建项目时，手机与平板的”采样点数“与”采样频率“下拉框位置错位
+
+2修复splash页的logo图标显示过大
+
+3更新说明书
+
+## v2.1.1release(Radan)0524
+
+1修复下载大于21m的数据时进度条归零bug （由于currentLength*100>int的上限导致的赋予进度条的值为null）
+
+2增加更新模块。引入了
+
+```java
+implementation 'com.github.xuexiangjys:XUpdate:2.1.4'
+implementation 'com.squareup.okio:okio:2.0.0'
+implementation("com.squareup.okhttp3:okhttp:4.12.0")
+implementation 'com.zhy:okhttputils:2.6.2'//鸿洋okhttputils
+```
+
+### v2.2.1base(Radan)0524
+
+1修复更新提示的安装包大小不一致
+
+2优化更细提示UI
+

@@ -42,7 +42,7 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
     int Who;
     Context context = MyApplicationContext.getInstance().getAppContext();
     leida_info leidaInfo = leida_info.GetInstance();
-  public ILeidaDelectfile iLeidaDelectfile ;
+    public ILeidaDelectfile iLeidaDelectfile ;
 
 
     public MyTask(ProgressBar progressBar, String path, TextView textView ,int who,ILeidaDelectfile delectfile) {
@@ -78,8 +78,8 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
     @Override
     protected Void doInBackground(Void... voids) {
 
-        publishProgress(0);
-        Message msg = Message.obtain();
+        publishProgress(1);
+       // Message msg = Message.obtain();
 
         if (DownloadFile(this.Path)) {
             try {
@@ -90,7 +90,6 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
                     progressBar.setVisibility(View.GONE);
                     stepview.setText("下载完成");
                     fastToast.showToast("数据文件下载成功");
@@ -206,6 +205,7 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
             while (true) {
                 CurrentLength = cache.DownLoadFile(dataName, CurrentLength,tmp_file);
                 if (CurrentLength == 0) {
+                    int a =12;
                     // Toast.makeText(context, "文件不存在无法下载", Toast.LENGTH_LONG).show();
                     ((Activity) context).runOnUiThread(new Runnable() {
                         @Override
@@ -215,6 +215,7 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
                     });
                     break;
                 } else if (CurrentLength == -1) {
+                    int a =12;
                     ((Activity) context).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -235,7 +236,8 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
                         publishProgress(100);
                         break;
                     } else {
-                        double tmp = ((CurrentLength*100)/ TotalLength);
+                        double tmp = ((CurrentLength*100.0)/ TotalLength);
+
                         publishProgress((int) tmp);
                     }
                 }
@@ -289,35 +291,13 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
 
                 try {
                     iLeidaDelectfile.onDelectFile(leidaInfo);
-//                    ((Activity) context).runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            MesseagWindows.showMessageBox(context, "是否删除", "文件已成功下载到本地，是否删除远端原始文件", new DialogCallback() {
-//                                @Override
-//                                public void onPositiveButtonClick() {
-//                                    int result = cache.GetDeleteFile(leidaInfo.projectId);
-//                                    if (result == 1) {
-//                                        Context context = MyApplicationContext.getInstance().getAppContext();
-//                                        //  Toast.makeText(this, "远端原始文件删除成功!", Toast.LENGTH_LONG).show();
-//                                        Toast.makeText(context, "远端原始文件删除成功", Toast.LENGTH_LONG);
-//                                    } else {
-//                                        //Toast.makeText(this, "远端原始文件删除失败!", Toast.LENGTH_LONG).show();
-//                                        Context context = MyApplicationContext.getInstance().getAppContext();
-//                                        Toast.makeText(context, "远端原始文件删除失败", Toast.LENGTH_LONG);
-//                                    }
-//                                }
-//                                @Override
-//                                public void onNegativeButtonClick() {
-//                                }
-//                            });
-//                        }
-//                    });
+
                 }
                 catch (Exception exception){
                   ToastUtils.showLong(exception.getLocalizedMessage());
                 }
             }
-            //fi.MoveTo(save_file);
+
         }
         return complete;
 
@@ -328,4 +308,5 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
         super.onProgressUpdate(values);
         progressBar.setProgress(values[0]);
     }
+
 }

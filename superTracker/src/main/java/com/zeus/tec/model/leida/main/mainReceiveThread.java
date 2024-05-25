@@ -362,13 +362,9 @@ public class mainReceiveThread {
 
                                         if (cache.DeviceOper.CurrentLength == CurrentLength)
                                         {
-
                                             int DataLength = 0;
                                             DataLength = ConvertCode.getushort(property.data,index);
                                             index += 2;
-
-
-
                                             int begin = 1 + 1 + 32 + 4 + 4 + 2;
                                             int length = property.data_length - begin;
                                             if (length == DataLength)
