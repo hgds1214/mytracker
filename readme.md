@@ -363,3 +363,8 @@ implementation 'com.zhy:okhttputils:2.6.2'//鸿洋okhttputils
 
 2优化更细提示UI
 
+### v2.2.2base(Radan)0525
+
+1修复spalsh界面的版本号显示不正确问题
+
+2将数据管理中数据的大小从字节显示变为分不同大小用B,KB,MB显示

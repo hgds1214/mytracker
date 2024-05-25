@@ -60,14 +60,11 @@ public class ZeusApp extends Application {
                 .param("versionCode", UpdateUtils.getVersionCode(this))
                 .param("appKey", getPackageName())
                 //设置版本更新出错的监听
-                .setOnUpdateFailureListener(new OnUpdateFailureListener() {
-                    @Override
-                    public void onFailure(UpdateError error) {
-                        error.printStackTrace();
-                        //对不同错误进行处理
-                        if (error.getCode() != 200) {
-                            ToastUtils.showLong(error.toString());
-                        }
+                .setOnUpdateFailureListener(error -> {
+                    error.printStackTrace();
+                    //对不同错误进行处理
+                    if (error.getCode() != 200) {
+                        ToastUtils.showLong(error.toString());
                     }
                 })
                 //设置是否支持静默安装，默认是true
