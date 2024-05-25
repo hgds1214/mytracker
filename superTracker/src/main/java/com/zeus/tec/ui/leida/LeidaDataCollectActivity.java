@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -45,8 +44,7 @@ import com.zeus.tec.ui.leida.util.MyTask;
 import com.zeus.tec.model.utils.FeedbackUtil;
 import com.zeus.tec.model.utils.log.SuperLogUtil;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +53,7 @@ import java.util.Properties;
 public class LeidaDataCollectActivity extends AppCompatActivity {
 
     ActivityLeidaDataCollectBinding binding;
-    public static LeidaDataCollectActivity Instance;
+  //  public static LeidaDataCollectActivity Instance;
     private SuperLogUtil superLogUtil;
 
     TextView startButton;
@@ -67,7 +65,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
     ListView pointListview;
     String publicPath = "";
     String privatePath = "";
-    boolean deviceStatus = false;
+   // boolean deviceStatus = false;
     Context context1;
     private List<leidaPointRecordInfo> recordInfoList = new ArrayList<>();
     private leida_info info1 = leida_info.GetInstance();
@@ -77,7 +75,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int a =1;
         MyApplicationContext.initialize(LeidaDataCollectActivity.this);
         binding = ActivityLeidaDataCollectBinding.inflate(getLayoutInflater());
         context1 = MyApplicationContext.getInstance().getAppContext();
@@ -103,9 +100,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         cache.CreatReceiveThread(LeidaDataCollectActivity.this);
 
         cache.CreatSendSocket();
-        Thread th = new Thread(() -> {
-            RefreshStatus();
-        });
+        Thread th = new Thread(this::RefreshStatus);
         th.start();
         //cache.GetDeviceStatus();
         initListener();
@@ -159,27 +154,19 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         builder.setTitle("IP").setIcon(R.mipmap.ic_launcher).setView(view2).setInverseBackgroundForced(false);
         AlertDialog dialog = builder.create();
         dialog.show();
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FeedbackUtil.getInstance().doFeedback();
-                cache.server_ip =  deviceIP.getText().toString();
-               DataCache datacache =  DataCache.GetInstance();
-               datacache.server_ip = deviceIP.getText().toString();
-                Properties properties = new Properties();
-                properties.setProperty("server_ip",cache.server_ip);
-                INIutil.writeproperties(properties,filePath);
-                ToastUtils.showLong("IP:"+cache.server_ip+"设置成功");
-            }
+        btn.setOnClickListener(v -> {
+            FeedbackUtil.getInstance().doFeedback();
+            cache.server_ip =  deviceIP.getText().toString();
+           DataCache datacache =  DataCache.GetInstance();
+           datacache.server_ip = deviceIP.getText().toString();
+            Properties properties = new Properties();
+            properties.setProperty("server_ip",cache.server_ip);
+            INIutil.writeproperties(properties,filePath);
+            ToastUtils.showLong("IP:"+cache.server_ip+"设置成功");
         });
     }
 
-    private String intToIp(int i) {
-        return (i & 0xFF) + "." + ((i * 8) & 0xFF) + "." + ((i * 16) & 0xFF) + "."
-                + ((i * 24) & 0xFF);
-    }
-
-    float TotalDis = 0;
+  //  float TotalDis = 0;
 
     private void ivBackClick() {
         FeedbackUtil.getInstance().doFeedback();
@@ -239,7 +226,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         MesseagWindows.showMessageBox(this, "是否删除", "该项目文件删除后将无法恢复", new DialogCallback() {
             @Override
             public void onPositiveButtonClick() {
-                if (cache.selectFileName == "") {
+                if (cache.selectFileName.equals("") ) {
                     Context context = MyApplicationContext.getInstance().getAppContext();
                     Toast.makeText(context, "请选择需要删除的项目", Toast.LENGTH_LONG).show();
                     return;
@@ -269,9 +256,9 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
     public void tvDownload_click() {
         FeedbackUtil.getInstance().doFeedback();
         try {
-            if (cache.selectFileName == "" || cache.selectFileName == null) {
+            if (cache.selectFileName.equals("")) {
                 //MessageBox.Show("请选择需要下载的项目!");
-                Toast.makeText(this, "请选择需要下载的项目", Toast.LENGTH_LONG);
+                Toast.makeText(this, "请选择需要下载的项目", Toast.LENGTH_LONG).show();
                 return;
             }
             if
@@ -359,32 +346,28 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         }
     }
     int index = 10;
-    boolean first = true;
-    int oldPosition = 0;
+   // boolean first = true;
+   // int oldPosition = 0;
     public void GetFiles() {
-        List<FileBean> files = new ArrayList<FileBean>();
+        List<FileBean> files;
         files = cache.GetFilesName();
         if (files != null) {
             files.add(new FileBean());
             fileListAdapter adapter = new fileListAdapter(LeidaDataCollectActivity.this, files);
             binding.listFile.setAdapter(adapter);
-            binding.listFile.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    if (position > 0) {
-                        String tmp = ((FileBean) adapter.getItem(position - 1)).FileName;
-                        int index = tmp.lastIndexOf(".");
-                        cache.selectFileName = tmp.substring(0, index);
-                        view.setSelected(true);
-                        view.setBackgroundResource(R.drawable.list_item_background_selector);
-                        ;
-                        ImageView imageView = view.findViewById(R.id.iv_file_image);
-                        imageView.setImageResource(R.drawable.image_selector);
-                    }
+            binding.listFile.setOnItemClickListener((parent, view, position, id) -> {
+                if (position > 0) {
+                    String tmp = ((FileBean) adapter.getItem(position - 1)).FileName;
+                    int index = tmp.lastIndexOf(".");
+                    cache.selectFileName = tmp.substring(0, index);
+                    view.setSelected(true);
+                    view.setBackgroundResource(R.drawable.list_item_background_selector);
+                    ImageView imageView = view.findViewById(R.id.iv_file_image);
+                    imageView.setImageResource(R.drawable.image_selector);
                 }
             });
         } else {
-            Toast.makeText(this, "网络异常: 获取设备项目数据文件列表失败!", Toast.LENGTH_LONG);
+            Toast.makeText(this, "网络异常: 获取设备项目数据文件列表失败!", Toast.LENGTH_LONG).show();
         }
         index = index + 2;
     }
@@ -416,7 +399,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         FeedbackUtil.getInstance().doFeedback();
         if (IOtool.isFileExists(info1.dataPath)) {
             String current_time = "";
-            String content = "";
+            String content;
             LocalDateTime now;
             long timecode = System.currentTimeMillis();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -456,7 +439,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                 current_time += tmp;
             }
             info1.TotalDis = info1.TotalDis + info1.drillPipeLength;
-            content = current_time + '\t' + String.valueOf(timecode).toString() + '\t' + String.valueOf(info1.drillPipeLength) + '\t' + String.valueOf(info1.TotalDis);
+            content = current_time + '\t' + timecode + '\t' + info1.drillPipeLength + '\t' + info1.TotalDis;
             IOtool.saveText(info1.dataPath, "\n", true);
             IOtool.saveText(info1.dataPath, content, true);
             info1.PointCount++;
@@ -472,7 +455,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             binding.tv24.setText(String.valueOf(info1.PointCount));
             binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
         } else {
-            Toast.makeText(this, "项目测点文件不存在，无法打点测试！", Toast.LENGTH_LONG);
+            Toast.makeText(this, "项目测点文件不存在，无法打点测试！", Toast.LENGTH_LONG).show();
         }
     }
     private void step_1() {
@@ -482,69 +465,58 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         cache.GetDeviceStatus();
         if (cache.DeviceStatus != null) {
             if (cache.DeviceStatus.status == 1) {
-                ((Activity) context1).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        binding.ivStep1.setState(1);
-                        binding.tvStep1Text.setText("正在采集");
-                        binding.tvDataManage.setEnabled(false);
-                        binding.tvDataDownload.setEnabled(false);
-                        binding.tvBuildProgram.setEnabled(false);
-                        binding.startButton.setEnabled(true);
-                        binding.startButton.setText("停止采集");
-                    }
+                ((Activity) context1).runOnUiThread(() -> {
+                    binding.ivStep1.setState(1);
+                    binding.tvStep1Text.setText("正在采集");
+                    binding.tvDataManage.setEnabled(false);
+                    binding.tvDataDownload.setEnabled(false);
+                    binding.tvBuildProgram.setEnabled(false);
+                    binding.startButton.setEnabled(true);
+                    binding.startButton.setText("停止采集");
                 });
             } else {
-                ((Activity) context1).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        binding.ivStep1.setState(2);
-                        binding.tvStep1Text.setText("设备已连接,请开始采集");
-                        binding.startButton.setEnabled(true);
-                        float quantity = cache.DeviceStatus.quantity;
-                        String tmp = String.valueOf(quantity).substring(0, 3) + "V";
-                        binding.tv21.setText(tmp);
-                        float gyro = cache.DeviceStatus.gyro;
-                        String Gyro = String.valueOf(gyro);
-                        if (Gyro.length() > 3) {
-                            binding.tv22.setText(Gyro.substring(0, 4));
-                        } else {
-                            binding.tv22.setText(Gyro.substring(0, 3));
-                        }
-                        binding.startButton.setEnabled(true);
-                        binding.tvDataManage.setEnabled(true);
-                        binding.tvDataDownload.setEnabled(true);
-                        binding.tvBuildProgram.setEnabled(true);
-                       //  binding.tvPoint.setEnabled(true);
+                ((Activity) context1).runOnUiThread(() -> {
+                    binding.ivStep1.setState(2);
+                    binding.tvStep1Text.setText("设备已连接,请开始采集");
+                    binding.startButton.setEnabled(true);
+                    float quantity = cache.DeviceStatus.quantity;
+                    String tmp = String.valueOf(quantity).substring(0, 3) + "V";
+                    binding.tv21.setText(tmp);
+                    float gyro = cache.DeviceStatus.gyro;
+                    String Gyro = String.valueOf(gyro);
+                    if (Gyro.length() > 3) {
+                        binding.tv22.setText(Gyro.substring(0, 4));
+                    } else {
+                        binding.tv22.setText(Gyro.substring(0, 3));
                     }
+                    binding.startButton.setEnabled(true);
+                    binding.tvDataManage.setEnabled(true);
+                    binding.tvDataDownload.setEnabled(true);
+                    binding.tvBuildProgram.setEnabled(true);
+                   //  binding.tvPoint.setEnabled(true);
                 });
             }
         } else {
-            ((Activity) context1).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    binding.ivStep1.setState(3);
-                    binding.tvStep1Text.setText("设备连接失败,请检查手机热点是否打开");
-                    binding.startButton.setEnabled(false);
-                    binding.tvBuildProgram.setEnabled(false);
-                    binding.tvPoint.setEnabled(false);
-                }
+            ((Activity) context1).runOnUiThread(() -> {
+                binding.ivStep1.setState(3);
+                binding.tvStep1Text.setText("设备连接失败,请检查手机热点是否打开");
+                binding.startButton.setEnabled(false);
+                binding.tvBuildProgram.setEnabled(false);
+                binding.tvPoint.setEnabled(false);
             });
         }
     }
+
     private void LoadLastProject() {
-        String ProductName = "";
-        String CreatTime = "";
-        float intervel = 0.0f;
-        int PointsCount = 0;
-        if (cache.FileSavePath != "") {
-            ProductName = cache.projectName;
-            String FileSavePath = cache.projectName;
-            String FilePath = cache.FileSavePath + "/Data/" + ProductName + ".trd";
-            String DFilePath = cache.FileSavePath + "/Data" + ProductName + ".dat";
-            String line = "";
-            PointsCount = 0;
-            Boolean first = true;
+       // String ProductName = "";
+
+        if (!cache.FileSavePath.equals("")) {
+          //  ProductName = cache.projectName;
+//            String FileSavePath = cache.projectName;
+//            String FilePath = cache.FileSavePath + "/Data/" + ProductName + ".trd";
+//            String DFilePath = cache.FileSavePath + "/Data" + ProductName + ".dat";
+//            String line = "";
+//            Boolean first = true;
             info1 = TrackerDBManager.getLastLeidaInfo();
             leida_info.setInstance(info1);
             if (info1 != null) {
@@ -554,16 +526,13 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             InitProjectParam();
             if (info1 != null) {
                 try {
-                    BufferedReader reader = new BufferedReader(new FileReader(FilePath));
                     index = 0;
                     binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
                     binding.tv24.setText(String.valueOf(info1.PointCount));
-                } catch (Exception ex) {
+                } catch (Exception ignored) {
 
-                } finally {
                 }
             }
-        } else {
         }
     }
 
@@ -614,19 +583,15 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                 binding.tvPoint.setEnabled(true);
                 binding.startButton.setText("停止采集");
             } else {
-                if (true) {
-                    if (cache.GetStartWork() == 1) {
-                        Toast.makeText(LeidaDataCollectActivity.this, "设备开始工作！", Toast.LENGTH_SHORT).show();
-                        binding.startButton.setText("停止采集");
-                        binding.tvPoint.setEnabled(true);
-                        binding.tvStatus.setText("正在运行");
-                        binding.tvDataDownload.setEnabled(false);
-                        binding.tvDataManage.setEnabled(false);
-                    } else {
-                        Toast.makeText(LeidaDataCollectActivity.this, "开始工作请求失败！", Toast.LENGTH_SHORT).show();
-                    }
+                if (cache.GetStartWork() == 1) {
+                    Toast.makeText(LeidaDataCollectActivity.this, "设备开始工作！", Toast.LENGTH_SHORT).show();
+                    binding.startButton.setText("停止采集");
+                    binding.tvPoint.setEnabled(true);
+                    binding.tvStatus.setText("正在运行");
+                    binding.tvDataDownload.setEnabled(false);
+                    binding.tvDataManage.setEnabled(false);
                 } else {
-                    Toast.makeText(LeidaDataCollectActivity.this, "请求设备开始工作前请先设置工作参数！", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LeidaDataCollectActivity.this, "开始工作请求失败！", Toast.LENGTH_SHORT).show();
                 }
             }
         } else {
@@ -694,6 +659,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         }
     };
 
+    //震动
     public void onVibrator() {
         Vibrator vibrator = (Vibrator) this.getSystemService(this.VIBRATOR_SERVICE);
         vibrator.vibrate(1000);
