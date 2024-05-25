@@ -63,11 +63,27 @@ public class fileListAdapter extends BaseAdapter implements AdapterView.OnItemCl
             FileBean fileBean = fileBeanList.get(position-1);
             file_Name.setText(fileBean.FileName);
             file_Time.setText(fileBean.Time);
-            file_size.setText(String.valueOf(fileBean.Size));
+            file_size.setText(transSize(fileBean.Size));
 
         }
 
         return view;
+    }
+
+    @SuppressLint("DefaultLocale")
+    private String transSize(int size){
+        if (size<1024){
+           return String.valueOf(size)+"B";
+        }
+        else {
+            if (size<1024000){
+             return String.format("%.2f",size/1024.0)+"KB";
+            }
+            else {
+                return String.format("%.2f",size/1024000.0)+"MB";
+            }
+        }
+
     }
 
     @Override

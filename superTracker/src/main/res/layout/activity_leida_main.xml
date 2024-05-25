@@ -43,5 +43,37 @@
         android:background="@drawable/bg_white"
         tools:listitem="@layout/item_function_list_for_tracker"
         />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_white"
+        >
+        <LinearLayout
+            android:id="@+id/update_ll"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="12dp"
+           >
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:scaleType="fitXY"
+                android:src="@mipmap/logo"/>
+           <TextView
+               android:layout_width="wrap_content"
+               android:layout_height="23dp"
+               android:layout_marginLeft="10dp"
+               android:textColor="#ff343434"
+               android:textSize="16sp"
+               android:text="检查更新"
+               />
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>

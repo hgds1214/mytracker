@@ -43,14 +43,12 @@ public class ReceiveBean {
          lock.lock();
         if (!Status)
         {
-
           //  Monitor.Enter(LockObj);
-
             try
             {
                 if(!Status)
                 {
-                    condition.await(3000,TimeUnit.MILLISECONDS);
+                    condition.await(6000,TimeUnit.MILLISECONDS);
                     //lock.tryLock(3000,TimeUnit.MILLISECONDS);
                    // lock.wait(3000);
                 //    Monitor.Wait(LockObj, OutTime);
@@ -98,7 +96,6 @@ public class ReceiveBean {
         }
         catch (Exception ex)
         {
-
         }
         finally
         {

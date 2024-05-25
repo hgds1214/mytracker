@@ -160,7 +160,6 @@ public class sendbean {
                             Thread th = new Thread(()->{
                                 DatagramPacket datagramPacket = null;
                                 try {
-
                                     datagramPacket = new DatagramPacket(Message,Message.length, InetAddress.getByName(address),server_port);
                                 } catch (UnknownHostException e) {
                                     e.printStackTrace();
