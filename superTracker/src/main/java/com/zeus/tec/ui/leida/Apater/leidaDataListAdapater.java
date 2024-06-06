@@ -31,6 +31,7 @@ public class leidaDataListAdapater extends BaseQuickAdapter<leida_info, BaseView
         baseViewHolder.setGone(R.id.tv_view, info.isMerged);
         baseViewHolder.setGone(R.id.tv_merge, info.isMerged );
         baseViewHolder.setGone(R.id.tv_continue, info.isMerged);
+
     }
 
     @Override

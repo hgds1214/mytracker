@@ -19,8 +19,6 @@ public class ReceiveBean {
    public ReentrantLock lock  = new ReentrantLock();
     Condition condition;
 
-
-
     private Object LockObj = new Object();
 
     public ReceiveBean(byte Sign, int OutTime, String FileName)
@@ -33,8 +31,6 @@ public class ReceiveBean {
         this.FileName = FileName;
         Data = null;
         StartTime = System.currentTimeMillis();
-      //  TimeSpan Currenttime = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-       // StartTime = Convert.ToInt64(Currenttime.TotalMilliseconds);
     }
 
     public Boolean Get()
@@ -43,29 +39,12 @@ public class ReceiveBean {
          lock.lock();
         if (!Status)
         {
-          //  Monitor.Enter(LockObj);
             try
             {
                 if(!Status)
                 {
                     condition.await(6000,TimeUnit.MILLISECONDS);
-                    //lock.tryLock(3000,TimeUnit.MILLISECONDS);
-                   // lock.wait(3000);
-                //    Monitor.Wait(LockObj, OutTime);
-                   // Thread.sleep(3000);
                 }
-                    /*
-                    while (!Status)
-                    {
-                        Monitor.Wait(LockObj, OutTime);
-                        TimeSpan Currenttime = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                        long EndTime = Convert.ToInt64(Currenttime.TotalMilliseconds);
-                        if (Status || (EndTime - StartTime) >= OutTime)
-                        {
-                            break;
-                        }
-                    }
-                    */
             }
             catch (Exception ex)
             {
@@ -74,8 +53,6 @@ public class ReceiveBean {
             }
             finally
             {
-                //Monitor.Exit(LockObj);
-               // int a =10;
                 lock.unlock();
             }
         }
@@ -84,22 +61,18 @@ public class ReceiveBean {
 
     public void Set(byte[] data)
     {
-        //Monitor.Enter(LockObj);
         lock.lock();
         try
         {
             this.Data = data;
             this.Status = true;
-           //Thread.currentThread().start();
             condition.signalAll();
-           // Monitor.Pulse(LockObj);
         }
         catch (Exception ex)
         {
         }
         finally
         {
-          //  Monitor.Exit(LockObj);
             lock.unlock();
         }
 

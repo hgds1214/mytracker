@@ -65,7 +65,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
     ListView pointListview;
     String publicPath = "";
     String privatePath = "";
-   // boolean deviceStatus = false;
+    // boolean deviceStatus = false;
     Context context1;
     private List<leidaPointRecordInfo> recordInfoList = new ArrayList<>();
     private leida_info info1 = leida_info.GetInstance();
@@ -79,7 +79,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         binding = ActivityLeidaDataCollectBinding.inflate(getLayoutInflater());
         context1 = MyApplicationContext.getInstance().getAppContext();
         setContentView(binding.getRoot());
-        // setContentView(R.layout.activity_leida_data_collect);
         try {
             publicPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
             privatePath = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).toString();
@@ -88,12 +87,8 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         }
         startButton = binding.startButton;
         refreshButton = binding.tvRefreshStatus;
-        // layTitle = binding.layProgramParamter;
         layParamter = binding.layProgramParamter;
-        //binding.tvPoint.setEnabled(false);
-        //
         programParamterButton = binding.tvProgramParamter;
-
         cache = MainCache.GetInstance();
         cache.FileSavePath = privatePath;
         LoadLastProject();
@@ -181,16 +176,18 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
 
     public void startButton_click() {
         FeedbackUtil.getInstance().doFeedback();
-        if (cache.newProject == 0) {
-            ToastUtils.showLong("请先新建项目信息和设备参数");
-            return;
-        }
-        if (cache.DeviceStatus.status == 0) {
-            // Toast.makeText(LeidaDataCollectActivity.this, "正在连接设备", Toast.LENGTH_SHORT).show();
-            StartWork();
-        } else if (cache.DeviceStatus.status == 1) {
-            //  Toast.makeText(LeidaDataCollectActivity.this, "正在停止采集", Toast.LENGTH_SHORT).show();
-            StopWork();
+        if (cache.DeviceStatus!=null){
+            if (cache.DeviceStatus.status == 0) {
+                if (cache.newProject == 0) {
+                    ToastUtils.showLong("请先新建项目信息和设备参数");
+                    return;
+                }
+                // Toast.makeText(LeidaDataCollectActivity.this, "正在连接设备", Toast.LENGTH_SHORT).show();
+                StartWork();
+            } else if (cache.DeviceStatus.status == 1) {
+                //  Toast.makeText(LeidaDataCollectActivity.this, "正在停止采集", Toast.LENGTH_SHORT).show();
+                StopWork();
+            }
         }
     }
 
@@ -285,10 +282,8 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                                     MyTask task = new MyTask(progressBar, cache.selectFileName, steptext, 2, delectfile);
                                     task.execute();
                                 }
-
                                 @Override
                                 public void onNegativeButtonClick() {
-
                                 }
                             });
                         } else {
@@ -325,8 +320,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
 
     public void refreshButton_click() {
         FeedbackUtil.getInstance().doFeedback();
-
-//           Toast.makeText(LeidaDataCollectActivity.this,"正在检测设备",Toast.LENGTH_SHORT).show();
         @SuppressLint("ResourceAsColor") Thread th = new Thread(() -> {
             RefreshStatus();
             ToastUtils toastUtils = ToastUtils.make();
@@ -346,8 +339,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         }
     }
     int index = 10;
-   // boolean first = true;
-   // int oldPosition = 0;
     public void GetFiles() {
         List<FileBean> files;
         files = cache.GetFilesName();
@@ -384,80 +375,126 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         } catch (Exception exception) {
             ToastUtils.showLong(exception.getLocalizedMessage());
         }
-
     }
 
     private void initPointList(List<leidaPointRecordInfo> pointParamters) {
-        // List<PointParamter> pointParamters = new LinkedList<>();
         PointListAdapter adapter = new PointListAdapter(LeidaDataCollectActivity.this, pointParamters);
         pointListview = binding.listPoint;
         pointListview.setAdapter(adapter);
         pointListview.setSelection(adapter.getCount() - 1);
     }
 
+    private boolean isignore = false;
     private void tvPoint_Click() {
         FeedbackUtil.getInstance().doFeedback();
-        if (IOtool.isFileExists(info1.dataPath)) {
-            String current_time = "";
-            String content;
-            LocalDateTime now;
-            long timecode = System.currentTimeMillis();
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                now = LocalDateTime.now();
-                int year = now.getYear();
-                int month = now.getMonthValue();
-                int day = now.getDayOfMonth();
-                int hour = now.getHour();
-                int minute = now.getMinute();
-                int second = now.getSecond();
-                String tmp = String.valueOf(year);
-                current_time += tmp;
-                tmp = String.valueOf(month);
-                if (month < 10)
-                    tmp = "0" + tmp;
-                current_time += "-";
-                current_time += tmp;
-                tmp = String.valueOf(day);
-                if (day < 10)
-                    tmp = "0" + tmp;
-                current_time += "-";
-                current_time += tmp;
-                tmp = String.valueOf(hour);
-                if (hour < 10)
-                    tmp = "0" + tmp;
-                current_time += " ";
-                current_time += tmp;
-                tmp = String.valueOf(minute);
-                if (minute < 10)
-                    tmp = "0" + tmp;
-                current_time += ":";
-                current_time += tmp;
-                tmp = String.valueOf(second);
-                if (second < 10)
-                    tmp = "0" + tmp;
-                current_time += ":";
-                current_time += tmp;
+        if (cache.DeviceStatus!=null){
+            if (cache.DeviceStatus.status==1){
+                pointRecord();
             }
-            info1.TotalDis = info1.TotalDis + info1.drillPipeLength;
-            content = current_time + '\t' + timecode + '\t' + info1.drillPipeLength + '\t' + info1.TotalDis;
-            IOtool.saveText(info1.dataPath, "\n", true);
-            IOtool.saveText(info1.dataPath, content, true);
-            info1.PointCount++;
-            //   cache.pointList.add(new PointParamter(String.valueOf(info1.PointCount), current_time, String.valueOf(info1.TotalDis)));
-            leidaPointRecordInfo leidaPointRecordInfo = new leidaPointRecordInfo();
-            leidaPointRecordInfo.leidaInfoId = info1.id;
-            leidaPointRecordInfo.PointNumber = String.valueOf(info1.PointCount);
-            leidaPointRecordInfo.recordTime = current_time;
-            leidaPointRecordInfo.distance = String.valueOf(info1.TotalDis);
-            TrackerDBManager.saveOrUpdate(info1);
-            TrackerDBManager.saveOrUpdate(leidaPointRecordInfo);
-            initPointList(TrackerDBManager.getrecordByleidaInfoId(info1.id));
-            binding.tv24.setText(String.valueOf(info1.PointCount));
-            binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
-        } else {
-            Toast.makeText(this, "项目测点文件不存在，无法打点测试！", Toast.LENGTH_LONG).show();
+            else{
+                if (isignore){
+                    pointRecord();
+                }
+                else {
+                    MesseagWindows.showMessageBox((Context) this, "提醒", "当前状态为未采集，是否继续打点", new DialogCallback() {
+                        @Override
+                        public void onPositiveButtonClick() {
+                            pointRecord();
+                            isignore=true;
+                        }
+                        @Override
+                        public void onNegativeButtonClick() {
+                        }
+                    });
+                }
+            }
+        }
+        else {
+            if (!isignore){
+                MesseagWindows.showMessageBox((Context) this, "提醒", "当前状态为未采集，是否继续打点", new DialogCallback() {
+                    @Override
+                    public void onPositiveButtonClick() {
+                        pointRecord();
+                        isignore=true;
+                    }
+                    @Override
+                    public void onNegativeButtonClick() {
+                    }
+                });
+            }
+            else {
+                pointRecord();
+            }
         }
     }
+    private void pointRecord(){
+        try {
+            if (IOtool.isFileExists(info1.dataPath)) {
+                String current_time = "";
+                String content;
+                LocalDateTime now;
+                long timecode = System.currentTimeMillis();
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    now = LocalDateTime.now();
+                    int year = now.getYear();
+                    int month = now.getMonthValue();
+                    int day = now.getDayOfMonth();
+                    int hour = now.getHour();
+                    int minute = now.getMinute();
+                    int second = now.getSecond();
+                    String tmp = String.valueOf(year);
+                    current_time += tmp;
+                    tmp = String.valueOf(month);
+                    if (month < 10)
+                        tmp = "0" + tmp;
+                    current_time += "-";
+                    current_time += tmp;
+                    tmp = String.valueOf(day);
+                    if (day < 10)
+                        tmp = "0" + tmp;
+                    current_time += "-";
+                    current_time += tmp;
+                    tmp = String.valueOf(hour);
+                    if (hour < 10)
+                        tmp = "0" + tmp;
+                    current_time += " ";
+                    current_time += tmp;
+                    tmp = String.valueOf(minute);
+                    if (minute < 10)
+                        tmp = "0" + tmp;
+                    current_time += ":";
+                    current_time += tmp;
+                    tmp = String.valueOf(second);
+                    if (second < 10)
+                        tmp = "0" + tmp;
+                    current_time += ":";
+                    current_time += tmp;
+                }
+                info1.TotalDis = info1.TotalDis + info1.drillPipeLength;
+                content = current_time + '\t' + timecode + '\t' + info1.drillPipeLength + '\t' + info1.TotalDis;
+                IOtool.saveText(info1.dataPath, "\n", true);
+                IOtool.saveText(info1.dataPath, content, true);
+                info1.PointCount++;
+                //   cache.pointList.add(new PointParamter(String.valueOf(info1.PointCount), current_time, String.valueOf(info1.TotalDis)));
+                leidaPointRecordInfo leidaPointRecordInfo = new leidaPointRecordInfo();
+                leidaPointRecordInfo.leidaInfoId = info1.id;
+                leidaPointRecordInfo.PointNumber = String.valueOf(info1.PointCount);
+                leidaPointRecordInfo.recordTime = current_time;
+                leidaPointRecordInfo.distance = String.valueOf(info1.TotalDis);
+                TrackerDBManager.saveOrUpdate(info1);
+                TrackerDBManager.saveOrUpdate(leidaPointRecordInfo);
+                initPointList(TrackerDBManager.getrecordByleidaInfoId(info1.id));
+                binding.tv24.setText(String.valueOf(info1.PointCount));
+                binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
+            } else {
+                Toast.makeText(this, "项目测点文件不存在，无法打点测试！", Toast.LENGTH_LONG).show();
+            }
+        }
+        catch (Exception exception){
+            ToastUtils.showLong(exception.getMessage());
+        }
+    }
+
     private void step_1() {
         binding.ivStep1.setState(1);
     }
@@ -493,7 +530,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                     binding.tvDataManage.setEnabled(true);
                     binding.tvDataDownload.setEnabled(true);
                     binding.tvBuildProgram.setEnabled(true);
-                   //  binding.tvPoint.setEnabled(true);
+                    binding.tvPoint.setEnabled(true);
                 });
             }
         } else {
@@ -502,7 +539,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                 binding.tvStep1Text.setText("设备连接失败,请检查手机热点是否打开");
                 binding.startButton.setEnabled(false);
                 binding.tvBuildProgram.setEnabled(false);
-                binding.tvPoint.setEnabled(false);
+               // binding.tvPoint.setEnabled(false);
             });
         }
     }
@@ -511,12 +548,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
        // String ProductName = "";
 
         if (!cache.FileSavePath.equals("")) {
-          //  ProductName = cache.projectName;
-//            String FileSavePath = cache.projectName;
-//            String FilePath = cache.FileSavePath + "/Data/" + ProductName + ".trd";
-//            String DFilePath = cache.FileSavePath + "/Data" + ProductName + ".dat";
-//            String line = "";
-//            Boolean first = true;
             info1 = TrackerDBManager.getLastLeidaInfo();
             leida_info.setInstance(info1);
             if (info1 != null) {
@@ -530,7 +561,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                     binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
                     binding.tv24.setText(String.valueOf(info1.PointCount));
                 } catch (Exception ignored) {
-
                 }
             }
         }
@@ -576,7 +606,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         if (cache.DeviceStatus != null) {
             if (cache.DeviceStatus.status == 1) {
                 Toast.makeText(LeidaDataCollectActivity.this, "设备正在工作中，无法请求！", Toast.LENGTH_SHORT).show();
-                // binding.startButton.setEnabled(false);
                 binding.tvDataDownload.setEnabled(false);
                 binding.tvDataManage.setEnabled(false);
                 binding.tvStatus.setText("正在运行");
@@ -611,7 +640,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                 binding.tvDataManage.setEnabled(true);
             } else {
                 if (cache.GetStopWork() == 0) {
-
                     Toast.makeText(this, "设备工作停止成功!", Toast.LENGTH_SHORT).show();
                     binding.startButton.setText("开始工作");
                     binding.tvStatus.setText("已停止");
@@ -645,13 +673,10 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                     int result = cache.GetDeleteFile(leidaInfo.projectId);
                     if (result == 1) {
                         ToastUtils.showLong("远端原始文件删除成功");
-                        //  Toast.makeText(context, "远端原始文件删除成功", Toast.LENGTH_LONG);
                     } else {
-                        //Toast.makeText(this, "远端原始文件删除失败!", Toast.LENGTH_LONG).show();
                         ToastUtils.showLong("远端原始文件删除失败");
                     }
                 }
-
                 @Override
                 public void onNegativeButtonClick() {
                 }

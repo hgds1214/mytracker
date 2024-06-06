@@ -269,13 +269,25 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <TextView
+<!--                    <TextView-->
+<!--                        android:id="@+id/tv_21"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="0"-->
+<!--                        android:textColor="#ff222222"-->
+<!--                        android:textSize="22sp" />-->
+                    <EditText
                         android:id="@+id/tv_21"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:maxLength="8"
                         android:text="0"
-                        android:textColor="#ff222222"
-                        android:textSize="22sp" />
+                        android:inputType="numberDecimal"
+                        android:paddingLeft="10dp"
+                        android:hint="请输入"
+                        android:textColorHint="#bbbbbb"
+                        android:textColor="#333333"
+                        android:gravity="center"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -329,7 +341,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="俯仰角(°)"
+                        android:text="深度"
                         android:textColor="#ff606060"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -742,7 +754,7 @@
                         android:background="@drawable/btn_collect_bg"
                         android:gravity="center"
                         android:layout_marginRight="5dp"
-                        android:text="项目配置"
+                        android:text="配置滑轮直径"
                         android:textColor="#ffffff"
                         android:textSize="20dp"></TextView>
                     <TextView

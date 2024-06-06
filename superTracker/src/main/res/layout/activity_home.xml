@@ -202,7 +202,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:layout_toRightOf="@+id/fl_icon_encoderWorking"
-            android:text="YHZ90(360) 矿用开孔定向仪"
+            android:text="无线编码器"
             android:textColor="#ff343434"
             android:textSize="15sp" />
         <LinearLayout
