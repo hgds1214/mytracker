@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zeus.tec.BuildConfig;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityEncoderWorkingBinding;
@@ -117,7 +118,7 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
     private LinearLayout lldevice;
     private LinearLayout layprogramparamter;
     private ListView listpoint;
-
+//endregion
 
     private void initBLE() {
         //列表适配器
@@ -154,8 +155,19 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
                 String msg = "5a011505000000001b";
                 bleManager.sendMessage(msg);
                 //  case  R.id.
+            case R.id.tv_program_paramter:
+                try {
+                    wheelDiameter = Double.parseDouble(String.valueOf(binding.tv21.getText())) ;
+                }catch (Exception exception){
+
+                    break;
+                }
+                ToastUtils.showLong("设置成功");
+
         }
     }
+
+    private double wheelDiameter = 0;
 
     private class BLEBroadcastReceiver extends BroadcastReceiver {
 
@@ -206,7 +218,7 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
                 storgebuffer[indexbuffer++] = recBufSuc[5];
                 storgebuffer[indexbuffer++] = recBufSuc[6];
                 storgebuffer[indexbuffer++] = recBufSuc[7];
-                double depth = (Math.PI * 505.0 * (double) value) / 360.0;
+                double depth = (Math.PI * wheelDiameter * (double) value) / 360.0;
                 binding.tv23.setText(String.format("%.2f", depth));
             }
         }
@@ -433,6 +445,7 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
     private void initListener() {
         binding.tvDataDownload.setOnClickListener(this);
         binding.startButton.setOnClickListener(this);
+        binding.tvProgramParamter.setOnClickListener(this);
 //        binding.tvPointRecord.setOnClickListener(this);
 //        binding.tvPoint.setOnClickListener(this);
 //        binding.tvProgramParamter.setOnClickListener(this);

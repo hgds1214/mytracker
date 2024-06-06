@@ -45,7 +45,6 @@ public class StateIcon extends FrameLayout {
         setState(0);
     }
     private void init(AttributeSet attrs, int defStyle) {
-
     }
 
     public int getState() {

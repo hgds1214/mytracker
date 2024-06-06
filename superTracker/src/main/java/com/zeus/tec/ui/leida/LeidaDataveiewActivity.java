@@ -1,6 +1,7 @@
 package com.zeus.tec.ui.leida;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,22 +25,40 @@ import com.chad.library.adapter.base.listener.OnLoadMoreListener;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityLeidaDataveiewBinding;
 import com.zeus.tec.db.ObjectBox;
+import com.zeus.tec.model.leida.DrillPipe;
+import com.zeus.tec.model.leida.MergeCache;
+import com.zeus.tec.model.leida.ProbePoint;
 import com.zeus.tec.model.leida.leidaPointRecordInfo;
 import com.zeus.tec.model.leida.leidaPointRecordInfo_;
 import com.zeus.tec.model.leida.leida_info;
 import com.zeus.tec.model.leida.leida_info_;
 import com.zeus.tec.ui.leida.Apater.leidaDataListAdapater;
 import com.zeus.tec.ui.leida.interfaceUtil.DialogCallback;
+import com.zeus.tec.ui.leida.util.IOtool;
 import com.zeus.tec.ui.leida.util.MesseagWindows;
 import com.zeus.tec.model.utils.FeedbackUtil;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -70,22 +89,15 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
 
         RecyclerView rv = binding.rvList;
         rv.setLayoutManager(new LinearLayoutManager(this));
-//        dataListAdapter.setOnItemClickListener(new OnItemClickListener() {
-//            @Override
-//            public void onItemClick(@NonNull BaseQuickAdapter<?, ?> adapter, @NonNull View view, int position) {
-//                FeedbackUtil.getInstance().doFeedback();
-//
-//                startActivity(directionfinderDataDetailActivity.buildIntent(LeidaDataveiewActivity.this, dataListAdapter.getItem(position)));
-//            }
-//        });
         dataListAdapter.addChildClickViewIds(R.id.tv_continue, R.id.tv_view, R.id.tv_share, R.id.tv_merge, R.id.tv_export);
         dataListAdapter.setOnItemChildClickListener(new OnItemChildClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onItemChildClick(@NonNull BaseQuickAdapter<?, ?> adapter, @NonNull View view, int position) {
                 FeedbackUtil.getInstance().doFeedback();
                 switch (view.getId()) {
                     case R.id.tv_view:
-                         doShowData(dataListAdapter.getItem(position));
+                        doShowData(dataListAdapter.getItem(position));
                         break;
                     case R.id.tv_share:
                         doShare(dataListAdapter.getItem(position));
@@ -96,7 +108,8 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
                     case R.id.tv_export:
                         // doExport(dataListAdapter.getItem(position));
                         break;
-                    case R.id.tv_continue:
+                    case R.id.tv_continue://合并数据
+                        bindingData(dataListAdapter.getItem(position));
                          // doContinue(dataListAdapter.getItem(position));
                         break;
                 }
@@ -115,6 +128,214 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
             }
         });
         refreshData();
+    }
+
+
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void bindingData (leida_info info){
+        if (info.dataPath==null){
+            ToastUtils.showLong("打点记录文件不存在");
+            return;
+        }
+        File trdFile = new File(info.dataPath);
+        if(!trdFile.exists()){
+            ToastUtils.showLong("打点记录文件不存在");
+            return;
+        }
+        File datFile = new File(info.dataPath.replace("trd","dat"));
+        if (!datFile.exists()){
+            ToastUtils.showLong("数据文件不存在");
+            return;
+        }
+        try {
+            MergeCache.init();
+            pointRecordList =  new ArrayList<>();
+           MergeCache.PipeCount =  ReadRecordingData(info.dataPath);
+            DrillPipe item ;
+            for (int i = 0; i <  MergeCache.PipeCount; i++)
+            {
+                item = new DrillPipe(pointRecordList.get(i), pointRecordList.get(i + 1));
+                MergeCache.DrillPipeList.add(item);
+            }
+            FileInputStream fs = new FileInputStream(datFile);
+            //region 读取Sample数据
+            BufferedInputStream bis = new BufferedInputStream(fs);
+            readHeader(bis);
+            readProbePoint2(bis,MergeCache.dataHeader.SampleCount);
+            bis.close();
+            fs.close();
+            ToastUtils.showLong("数据合并完成");
+            //endregion
+            MergeCache.SpaceSapmle = MergeCache.GetDefaultSpacing(MergeCache.PipeCount);
+            int num5 = MergeCache.TimeMatching(MergeCache.DrillPipeList,MergeCache.probePointList);
+            if (num5 >0) {
+                int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
+                Intent intent = new Intent(LeidaDataveiewActivity.this,MergeSampleActivity.class);
+                startActivity(intent);
+            }
+            else {
+                int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
+
+                Intent intent = new Intent(LeidaDataveiewActivity.this,MergeSampleActivity.class);
+                startActivity(intent);
+            }
+        }catch (Exception exception){
+
+        }
+    }
+
+    private void  readHeader (  BufferedInputStream bis ) throws IOException {
+        byte [] timeByte = new byte[6];
+        byte [] byteName = new byte[0x20];
+        byte [] byteSampleCount = new byte[2];
+        byte [] byteStackCount = new byte[2];
+        byte [] byteNbOfSampleDelayPoint = new byte[2];
+        byte [] byteAmplifyValue= new byte[2];
+        byte [] byteSampleFrequency = new byte[2];
+        byte [] byteTimeInterval = new byte[4];
+        bis.read(timeByte);
+        bis.read(byteName);
+        bis.read(byteSampleCount);
+        bis.read(byteStackCount);
+        bis.read(byteNbOfSampleDelayPoint);
+        bis.read(byteAmplifyValue);
+        bis.read(byteSampleFrequency);
+        bis.read(byteTimeInterval);
+        MergeCache.dataHeader.Time = convertTime(timeByte);
+        MergeCache.dataHeader.Name = new String(byteName);
+        MergeCache.dataHeader.SampleCount  = bytesToShortLittle(byteSampleCount);
+        MergeCache.dataHeader.StackCount = bytesToShortLittle(byteStackCount);
+        MergeCache.dataHeader.NbOfSampleDelayPoint = bytesToShortLittle(byteNbOfSampleDelayPoint);
+        MergeCache.dataHeader.AmplifyValue = bytesToShortLittle(byteAmplifyValue);
+        MergeCache.dataHeader.SampleFrequency = bytesToShortLittle(byteSampleFrequency);
+        MergeCache.dataHeader.TimeInterval =  ByteBuffer.wrap(byteTimeInterval).order(ByteOrder.LITTLE_ENDIAN).getFloat();
+    }
+
+    private float readSingle(BufferedInputStream bis,byte [] angle) throws IOException {
+        bis.read(angle);
+       return ByteBuffer.wrap(angle).order(ByteOrder.LITTLE_ENDIAN).getFloat()  ;
+    }
+
+   // private List<ProbePoint> probePointList = new ArrayList<>();
+
+    private List<LocalDateTime> pointRecordList;
+
+  //  private List<DrillPipe> DrillPipeList = new ArrayList<>();
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private  void  readProbePoint2 (BufferedInputStream bis, short SampleCount){
+        try {
+            byte[] buffer = new byte[SampleCount*4]; // 批量读取 1024 字节
+            int bytesRead;
+            byte[] time = new byte[8];
+            byte [] angle = new byte[4];
+            ProbePoint item =  null;
+            int num5 = ((int) (bis.available() )) / (20 + (SampleCount * 4));
+            // 使用一个 ByteBuffer 来转换字节为 float
+            ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+            byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+            for (int i = 0; i < num5; i++)
+            {
+                long startTimeMillis = System.currentTimeMillis();
+                item =  new ProbePoint(SampleCount);
+                bis.read(time);
+                item.SampleTime = LocalDateTime.of(
+                        time[0]+2000, // year
+                        time[1], // month
+                        time[2], // day of month
+                        time[3], // hour
+                        time[4], // minute
+                        time[5]  // second
+                );
+                item.Roll =readSingle(bis,angle);
+                item.Pitch = readSingle(bis,angle);
+                item.Heading = readSingle(bis,angle);
+              //  bis.read(buffer);
+                byte [] tmpbuffer = new byte[4];
+                long twoTimeMillis = System.currentTimeMillis();
+                for (int j = 0; j < SampleCount; j++)
+                {
+                    item.Voltage[j] = 1000f *readSingle(bis,angle);
+                }
+                item.OriginalIndex = i;
+                long endTimeMillis = System.currentTimeMillis();
+                MergeCache.probePointList.add(item);
+                long durationMillis = endTimeMillis - startTimeMillis;
+                long onetime = twoTimeMillis - startTimeMillis;
+                long twotime = endTimeMillis - twoTimeMillis;
+               int a =10;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int ReadRecordingData(String strFileName) throws IOException {
+        int num = -1;
+        BufferedReader reader = new BufferedReader(new FileReader(strFileName));
+        try
+        {
+            String pattern = "yyyy-MM-dd HH:mm:ss";
+            String str ;
+            String [] strArray2 = reader.readLine().split("\t");
+            LocalDateTime tmp = parseToLocalDateTime (strArray2[1],pattern);
+            MergeCache.PipeLength = Float.parseFloat(strArray2[0])*10f;
+            pointRecordList.add(tmp);
+            for (num = 0; (str = reader.readLine()) != null; num++)
+            {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                     tmp = parseToLocalDateTime (str.split("\t")[0],pattern);
+                     pointRecordList.add(tmp);
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+          num=-1;
+        }
+        finally
+        {
+            reader.close();
+        }
+        return num;
+    }
+
+    public static LocalDateTime parseToLocalDateTime(String str, String pattern) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        try {
+            return LocalDateTime.parse(str, formatter);
+        } catch (DateTimeParseException e) {
+            System.err.println("Failed to parse LocalDateTime: " + e.getMessage());
+            return null;
+        }
+        }
+        else {
+            return null;
+        }
+    }
+
+    public static short bytesToShortLittle(byte [] input) {
+        byte highByte = input[1];
+        byte lowByte = input[0];
+        return (short) ((highByte << 8) | (lowByte & 0xFF));
+    }
+
+    private LocalDateTime convertTime (byte [] time){
+        LocalDateTime dateTime = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+             dateTime = LocalDateTime.of(
+                    time[0], // year
+                    time[1], // month
+                    time[2], // day of month
+                    time[3], // hour
+                    time[4], // minute
+                    time[5]  // second
+            );
+        }
+        return dateTime;
     }
 
     private void showToast(String message) {
@@ -220,7 +441,6 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
                 grantUriPermission(getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 LogUtils.e(uri);
 
-
             } else {
                 uri = Uri.fromFile(f);
             }
@@ -258,14 +478,11 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
             ToastUtils.showLong("数据合成错误，压缩文件不存在");
             return;
         }
-
         String path = PathUtils.getExternalDownloadsPath() + File.separator + "superTracker";
         File tf = new File(path);
         FileUtils.createOrExistsDir(tf);
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
         String tfPath = path + File.separator + sdf.format(info.creatTime) + ".zip";
-
         if (FileUtils.copy(info.zipPath, tfPath)) {
             showToast("数据文件已存放在 " + tfPath);
         } else {
