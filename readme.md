@@ -392,3 +392,32 @@ implementation 'com.zhy:okhttputils:2.6.2'//鸿洋okhttputils
 （bug :重新进软件不可以点打点）
 
 （bug:轨迹仪与开孔定向仪拍照后无法点击确认导致进不去采集界面）
+
+### v2.3.0base(Radan)0606
+
+1.数据读取与合并（包括右断点数据：断点数据使用前一个钻杆最后一个数据填充）
+
+2.波列显示
+
+3.带通滤波
+
+4.单页波列显示数量选择
+
+5.单页灰度图比例选择
+
+6.图像显示高度选择java
+
+7.波列填充与波形排列疏密选择
+
+怎加两个引用
+
+```java
+  implementation 'com.github.chrisbanes:PhotoView:2.3.0' //20240531
+  implementation 'com.github.arcadefire:nice-spinner:1.4.4'//20240531
+```
+
+修复了各种bug，目前主要功能已经可以使用。
+
+还未实装的模块：
+
+数据整理，灰度图刻度，灰度图与波形图深度刻度，软件增益，
