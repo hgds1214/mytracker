@@ -21,6 +21,7 @@ public class MergeCache {
     public static List<DrillPipe> DrillPipeList = new ArrayList<>();
     public static List<ProbePoint> probePointList = new ArrayList<>();
     public static float SpaceSapmle;
+    public static float sampleSpeed = 100f;//100000m/s
 
     public static double [][] originData ;
 
@@ -162,22 +163,5 @@ public class MergeCache {
 
         return num2;
     }
-
-
-    public static void drawScale (Canvas canvas){
-        float minScaleValue ;
-        double scaleWidth;
-        double scaleHeight;
-        int unitScaleNumber;
-        int backgroundColor ;
-        int scaleColor;
-        float scaleValueSize;
-        boolean isVertical;
-
-
-
-    }
-
-
 
 }

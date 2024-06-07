@@ -3,6 +3,9 @@ package com.zeus.tec.model.utils;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
+import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.fonts.Font;
 
 public class Scale {
@@ -81,9 +84,17 @@ public class Scale {
       //  pen.setTypeface()
         backgroundPaint.setColor(background);
 
+
+        //以下为雷达数据显示左侧深度刻度专用设置
+        textPen.setColor(Color.argb(255,255,255,255));
+       // textPen.setTextSize(2f);
+
+        textPen.setAntiAlias(true);
+        textPen.setStrokeWidth(3f);
+
     }
 
-
+    private Paint textPen = new Paint();
 
     public Scale(float width,float height)
     {
@@ -98,17 +109,19 @@ public class Scale {
         public float Height;
         public float Width;
     }
+
+
     public void drawScale(Canvas g, int locationX, int locationY, float width, float height)
     {
         Size.Width = width;
         Size.Height = height;
-        g.drawRect( locationX, locationY, Size.Width,Size.Height,backgroundPaint);
+        g.drawRect( locationX, locationY, Size.Width,locationY+Size.Height,backgroundPaint);
         float count = ((scaleMax - scaleMin) / sacleinterval);
         if (orientation)//垂直
         {
             float interval = (Size.Height / count);
             count++;
-            if (setverticallocation)
+            if (setverticallocation)//右侧
             {
                 for (int i = 0; i < (int)count; i++)
                 {
@@ -135,7 +148,6 @@ public class Scale {
                                 g.drawLine(Size.Width, Y, Size.Width - scaleTenLength, Y,Tenpen);
                                 g.drawText(String.valueOf(i * sacleinterval),Size.Width - scaleTenLength - ((String.valueOf(i * sacleinterval).length() -1)), Y,pen );
                             }
-
                         }
                         else
                         {
@@ -148,8 +160,9 @@ public class Scale {
                     }
                 }
             }
-            else
+            else//左侧
             {
+
                 for (int i = 0; i < (int)count; i++)
                 {
                     float Y = i * interval + locationY;
@@ -157,21 +170,21 @@ public class Scale {
                     {
                         if ((i % 10) == 0)
                         {
-
                             if (i == 0)
                             {
                                 g.drawLine(0, Y , scaleTenLength, Y,Tenpen);
-                                g.drawText(String.valueOf(i * sacleinterval), scaleTenLength + 2, Y,pen);
+                                //雷达左侧深度刻度专用设置
+                               // g.drawText(String.valueOf(i * sacleinterval), scaleTenLength + 2, Y,pen);
                             }
                             else if (i == count - 1)
                             {
                                 g.drawLine( 0, Y, scaleTenLength, Y,Tenpen);
-                                g.drawText(String.valueOf(i * sacleinterval), scaleTenLength + 2, Y- 2+locationY,pen);
+                                g.drawText(String.valueOf(i * sacleinterval), scaleTenLength + 2, Y- 2+locationY,textPen);
                             }
                             else
                             {
                                 g.drawLine( 0, Y, scaleTenLength, Y,Tenpen);
-                                g.drawText(String.valueOf(i * sacleinterval), scaleTenLength + 2, Y - 6,pen);
+                                g.drawText(String.valueOf(i * sacleinterval), scaleTenLength + 2, Y - 6,textPen);
                             }
 
                         }

@@ -421,3 +421,25 @@ implementation 'com.zhy:okhttputils:2.6.2'//鸿洋okhttputils
 还未实装的模块：
 
 数据整理，灰度图刻度，灰度图与波形图深度刻度，软件增益，
+
+## 分支：scale工具开发
+
+快速绘制刻度轴
+
+### v2.3.1base(Radan)0607
+
+1.波列图与灰度图增加进尺刻度轴和深度刻度轴
+
+2.深度刻度轴透明切浮动在图片上方
+
+3.使用波速与采样频率和采样点数计算出最大深度作为参数带入深度刻度轴
+
+4.深度刻度轴用另外的photoView 显示，两个photoView放入FrameLayout。都使用wrap_content
+
+将FrameLayout放入ScrollView。ScrollView   Fill父容器。
+
+这样深度刻度轴可以随图片放大，可以上下滚动，左右滚动。且解决了phototView没有靠左显示的视图，当生成的bmp宽度ScrollView时
+
+会靠左显示。
+
+5.更改画图时预留的ScaleHeight为动态。根据高度的缩放大小，在图像放大前先将预留的高度缩小指定倍数，放大后刚好为固定刻度高度的高度。图像放大后再将刻度轴绘画至bmp，以保持刻度轴不变。
