@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Binder;
@@ -21,6 +24,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -28,20 +32,36 @@ import android.widget.Toast;
 import com.blankj.utilcode.util.BarUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;
+import com.github.chrisbanes.photoview.PhotoView;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.google.android.material.snackbar.Snackbar;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityMergeSampleBinding;
 import com.zeus.tec.model.leida.MergeCache;
 import com.zeus.tec.model.leida.ProbePoint;
+import com.zeus.tec.model.leida.sampleTest.DataCache;
 import com.zeus.tec.model.utils.FeedbackUtil;
 import com.zeus.tec.model.utils.FirFilter;
 import com.zeus.tec.model.utils.Scale;
 import com.zeus.tec.ui.directionfinder.util.BLEDevice;
 import com.zeus.tec.ui.directionfinder.util.TypeConversion;
+import com.zeus.tec.ui.leida.Apater.dataMsgAdapater;
+import com.zeus.tec.ui.leida.Apater.drillMsgAdapter;
+import com.zeus.tec.ui.leida.interfaceUtil.DialogCallback;
+import com.zeus.tec.ui.leida.util.MesseagWindows;
 
 import org.angmarch.views.NiceSpinner;
 import org.angmarch.views.OnSpinnerItemSelectedListener;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -50,22 +70,33 @@ import java.util.List;
 public class MergeSampleActivity extends AppCompatActivity implements View.OnClickListener {
 
     com.zeus.tec.databinding.ActivityMergeSampleBinding binding;
+    Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMergeSampleBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         try {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
             initParams();
-            initListener();
             initView();
+            initListener();
             initUi();
-        }
-        catch (Exception exception)
-        {
+            Intent intent = getIntent();
+            int tmpa = intent.getIntExtra("INT_KEY",3);
+            if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Success) {
+               // binding.DataListLl.setVisibility(View.GONE);
+               // binding.mainShowFrg.setVisibility(View.VISIBLE);
+            } else if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Fail) {
+               // binding.mainShowFrg.setVisibility(View.GONE);
+               // binding.DataListLl.setVisibility(View.VISIBLE);
+              //  showStatus = ShowStatus_Datalist;
+            }
+
+        } catch (Exception exception) {
             ToastUtils.showLong(exception.getMessage());
         }
         // 全屏模式
@@ -75,10 +106,10 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     //region 全局变量
     Bitmap graybitmap = null;//灰度图
 
-    private final int [] grayMapBmpRatios = new int[]{0,1,2,3,4,5,8};//灰度图宽度比例
+    private final int[] grayMapBmpRatios = new int[]{0, 1, 2, 3, 4, 5, 8};//灰度图宽度比例
 
     private final int[] sampleNumber = {20, 40, 60, 80, 120, 160};
-    private final float [] bmpHeightRatios = {1f,1.2f,1.4f,1.6f,1.8f,2.0f};
+    private final float[] bmpHeightRatios = {1f, 1.2f, 1.4f, 1.6f, 1.8f, 2.0f};
     private boolean isLoose = true; //是否疏松
     Bitmap sampleBitmap = null;
 
@@ -86,13 +117,14 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     private static final int DrawGrayMap_Success = 0x02;
 
 
+
     private boolean isDrawing = false;
     private double[] maxList;
     private double[] minList;
     private double globalMax;
     private double globalMin;
-    private float scaleWidth;
-    private final float scaleHeight =40;
+    private float scaleWidth=40;
+    private final float scaleHeight = 40;
 
     private final int[] lowfreq = {20, 30, 40, 50, 60};
     private final int[] highfreq = {100, 110, 120, 130, 150};
@@ -101,6 +133,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     private int high1 = 100;
     private final int Showstatus_GrayMap = 0x01;
     private final int ShowStatus_SampleMap = 0x02;
+    private final int ShowStatus_Datalist = 0x03;
     private int showStatus = Showstatus_GrayMap;
 
     private int photoViewWidth = 1280;
@@ -112,6 +145,9 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     private void initUi() {
         binding.bmpHeightSpinner.setSelectedIndex(0);
         binding.imageRatioSpinner.setSelectedIndex(0);
+        binding.niceSpinnerLowFreq.setSelectedIndex(1);
+        binding.niceSpinnerHighFreq.setSelectedIndex(4);
+        binding.niceSpinnerIsLoose.setSelectedIndex(1);
         binding.sampleImg.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -132,11 +168,72 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         isSampleFill = true;
     }
 
+    int currentIndex =0;
+
     private void initListener() {
-        binding.sampleshowBtn.setOnClickListener(this);
-        binding.SampleBt.setOnClickListener(this);
-        binding.refreshBtv.setOnClickListener(this);
-        binding.graymapshowBtn.setOnClickListener(this);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            binding.sampleshowBtn.setOnClickListener(this);
+            binding.SampleBt.setOnClickListener(this);
+            binding.refreshBtv.setOnClickListener(this);
+            binding.graymapshowBtn.setOnClickListener(this);
+            binding.dataReductionBtn.setOnClickListener(this);
+            binding.drillMsgListv.setOnItemClickListener((parent, view, position, id) -> {
+                view.setSelected(true);
+                FeedbackUtil.getInstance().doFeedback();
+                if (MergeCache.DrillPipeList.get(position).ValidCount!=0){
+                    List tmpList = MergeCache.probePointList.subList(MergeCache.DrillPipeList.get(position).IndexFrom, MergeCache.DrillPipeList.get(position).IndexTo);
+                    tmpList.add(MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position).IndexTo));
+                    dataMsgAdapater DataMsgAdapater = null;
+                    DataMsgAdapater = new dataMsgAdapater(MergeSampleActivity.this, tmpList);
+                    binding.drilldataMsgListTv.setAdapter(DataMsgAdapater);
+                    currentIndex = MergeCache.DrillPipeList.get(position).IndexFrom;
+                }
+                else {
+                    if (position!=0){
+                        MesseagWindows.showMessageBox(MergeSampleActivity.this, "缺少数据点", "该钻杆未采集到数据点，是否采用前一根钻杆的最后一个数据填充该钻杆", new DialogCallback() {
+                            @Override
+                            public void onPositiveButtonClick() {
+                                ProbePoint tmpPrpbePoint = MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position-1).IndexTo);
+                                List<ProbePoint> tmpList = new LinkedList<>();
+                                tmpList.add(tmpPrpbePoint);
+                                dataMsgAdapater DataMsgAdapater = null;
+                                DataMsgAdapater = new dataMsgAdapater(MergeSampleActivity.this, tmpList);
+                                binding.drilldataMsgListTv.setAdapter(DataMsgAdapater);
+                                currentIndex = MergeCache.DrillPipeList.get(position-1).IndexTo;
+                            }
+                            @Override
+                            public void onNegativeButtonClick() {
+
+                            }
+                        });
+                    }
+                    else {
+                        MesseagWindows.showMessageBox(MergeSampleActivity.this, "缺少数据点", "该钻杆未采集到数据点，是否采用后一根钻杆的第一个数据填充该钻杆", new DialogCallback() {
+                            @Override
+                            public void onPositiveButtonClick() {
+                                ProbePoint tmpPrpbePoint = MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position+1).IndexTo);
+                                List<ProbePoint> tmpList = new LinkedList<>();
+                                tmpList.add(tmpPrpbePoint);
+                                dataMsgAdapater DataMsgAdapater = null;
+                                DataMsgAdapater = new dataMsgAdapater(MergeSampleActivity.this, tmpList);
+                                binding.drilldataMsgListTv.setAdapter(DataMsgAdapater);
+                                currentIndex = MergeCache.DrillPipeList.get(position+1).IndexTo;
+                            }
+                            @Override
+                            public void onNegativeButtonClick() {
+
+                            }
+                        });
+                    }
+                }
+            });
+            binding.drilldataMsgListTv.setOnItemClickListener((parent, view, position, id) -> {
+                view.setSelected(true);
+                view.findViewById(R.id.serial_tv);
+                drawOneSample(MergeCache.probePointList.get(currentIndex+position),binding.onePointSamplePhoto,currentIndex+position+1);
+              //  drawOneSampleChart(MergeCache.probePointList.get(currentIndex+position));
+            });
+        }
     }
 
     @Override
@@ -168,29 +265,27 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initView() {
+        drillMsgAdapter drillMsgAdapter = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            drillMsgAdapter = new drillMsgAdapter(this, MergeCache.DrillPipeList);
+        }
+        binding.drillMsgListv.setAdapter(drillMsgAdapter);
         binding.sampleImg.setScaleType(ImageView.ScaleType.CENTER);
-        // 创建一个新的矩阵对象
-//        Matrix matrix = new Matrix();
-//        // 设置图片在左侧显示
-//        // 这里的0表示图片的左上角在控件的左上角
-//        matrix.postTranslate(0, 0);
-//        // 设置矩阵到PhotoView
-//        binding.sampleImg.setImageMatrix(matrix);
-       // binding.sampleImg.setScaleType(ImageView.ScaleType.CENTER);
-        NiceSpinner  imageRatioSpinner = binding.imageRatioSpinner;
-        NiceSpinner  highFreq = binding.niceSpinnerHighFreq;
-        NiceSpinner  lowFreq = binding.niceSpinnerLowFreq;
-        NiceSpinner  sampleFill = binding.niceSpinnerSamplefill;
-        NiceSpinner  spinner_isLoose = binding.niceSpinnerIsLoose;
-        NiceSpinner  sampleCount_Spinner = binding.sampleCountSpinner;
-        NiceSpinner  bmpHeight_spinner = binding.bmpHeightSpinner;
+
+        NiceSpinner imageRatioSpinner = binding.imageRatioSpinner;
+        NiceSpinner highFreq = binding.niceSpinnerHighFreq;
+        NiceSpinner lowFreq = binding.niceSpinnerLowFreq;
+        NiceSpinner sampleFill = binding.niceSpinnerSamplefill;
+        NiceSpinner spinner_isLoose = binding.niceSpinnerIsLoose;
+        NiceSpinner sampleCount_Spinner = binding.sampleCountSpinner;
+        NiceSpinner bmpHeight_spinner = binding.bmpHeightSpinner;
         List<String> dataset = new LinkedList<>(Arrays.asList("填充", "1:1", "1:2", "1:3", "1:5", "1:8"));//20,40,80,160
         List<String> lowfreqList = new LinkedList<>(Arrays.asList("20Mhz", "30Mhz", "40Mhz", "50Mhz", "60Mhz"));
         List<String> highfreqList = new LinkedList<>(Arrays.asList("100Mhz", "110Mhz", "120Mhz", "130Mhz", "150Mhz"));
         List<String> sampleFillList = new LinkedList<>(Arrays.asList("填充", "不填充"));
         List<String> LooseList = new LinkedList<>(Arrays.asList("疏松", "紧密"));
         List<String> sampleCountList = new LinkedList<>(Arrays.asList("20", "40", "60", "80", "120", "160"));
-        bmpHeight_spinner.attachDataSource(new LinkedList<>(Arrays.asList("100%","90%","80%","70%","60%","50%")));
+        bmpHeight_spinner.attachDataSource(new LinkedList<>(Arrays.asList("100%", "90%", "80%", "70%", "60%", "50%")));
         spinner_isLoose.attachDataSource(LooseList);
         imageRatioSpinner.attachDataSource(dataset);
         lowFreq.attachDataSource(lowfreqList);
@@ -199,16 +294,70 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         sampleCount_Spinner.attachDataSource(sampleCountList);
         if (MergeCache.lstPointsOrder.size() > 80) {
             binding.sampleCountSpinner.setSelectedIndex(2);
-           // imageRatioSpinner.setSelectedIndex(2);
+            // imageRatioSpinner.setSelectedIndex(2);
         } else {
             binding.sampleCountSpinner.setSelectedIndex(1);
-           // imageRatioSpinner.setSelectedIndex(1);
+            // imageRatioSpinner.setSelectedIndex(1);
         }
         lowFreq.setOnSpinnerItemSelectedListener((parent, view, position, id) -> low1 = lowfreq[position]);
         highFreq.setOnSpinnerItemSelectedListener((parent, view, position, id) -> high1 = highfreq[position]);
 
         sampleFill.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isSampleFill = position == 0);
         spinner_isLoose.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isLoose = position == 0);
+
+//        Description onedescription = new Description();
+//        onedescription.setText("Current Waveform");
+//        onedescription.setTextColor(Color.GREEN);
+//        onedescription.setYOffset(15);
+//        binding.onePointSampleChart.setDescription(onedescription);
+//        initLineChart(binding.onePointSampleChart);
+    }
+
+    private void initLineChart(LineChart chart) {
+
+
+        XAxis xAxis = chart.getXAxis();
+        //   oneSampleChart.animateY(1000);
+        //  oneSampleChart.animateX(1000);
+        chart.setDrawBorders(false);
+        chart.setMinOffset(0);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
+        xAxis.setEnabled(true);
+        xAxis.setTextColor(Color.WHITE);
+        xAxis.setGridLineWidth(1);
+        xAxis.setDrawGridLinesBehindData(true);
+        xAxis.setAvoidFirstLastClipping(false);
+        DashPathEffect dashPathEffect = new DashPathEffect(new float[] {5f,5f},1);
+        xAxis.setGridDashedLine(dashPathEffect );
+        xAxis.setAxisLineWidth(2);
+
+        xAxis.setLabelCount(8);
+        YAxis leftYAxis = chart.getAxisLeft();
+        YAxis rightYaxis = chart.getAxisRight();
+        leftYAxis.setEnabled(true);
+        leftYAxis.setDrawGridLines(true);
+        leftYAxis.setGridDashedLine(dashPathEffect);
+        leftYAxis.setDrawGridLinesBehindData(true);
+        leftYAxis.setGridLineWidth(1);
+        leftYAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+        leftYAxis.setTextColor(Color.WHITE);
+        leftYAxis.setDrawZeroLine(true);
+        leftYAxis.setYOffset(5);
+
+        Legend legend = chart.getLegend();
+        legend.setForm(Legend.LegendForm.LINE);
+        legend.setTextSize(12f);
+        legend.setDrawInside(false);
+        rightYaxis.setEnabled(false);
+        legend.setEnabled(false);
+        DataCache.SampleBean oneSample = new DataCache.SampleBean();
+        oneSample.Sample = new float[1024];
+        oneSample.SampleLength = 1024;
+        oneSample.Max = 1024;
+        oneSample.Min = 0;
+       // drawFirstSampleChart( oneSample,chart);
+        // leftYAxis.setEnabled(false);
+
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -218,22 +367,26 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         switch (v.getId()) {
             case R.id.sampleshow_btn: {
                 try {
-                    if (showStatus == ShowStatus_SampleMap)
-                    {
-                    }
-                    else if
-                    (showStatus == Showstatus_GrayMap)
-                    {
-                        if (sampleBitmap == null)
-                        {
+                    if (showStatus == ShowStatus_SampleMap) {
+                    } else if
+                    (showStatus == Showstatus_GrayMap) {
+                        if (sampleBitmap == null) {
                             drawSampleImg(binding.sampleCountSpinner.getSelectedIndex());
-                        }
-                        else
-                        {
+                        } else {
                             binding.sampleImg.setImageBitmap(sampleBitmap);
                         }
                         showStatus = ShowStatus_SampleMap;
-
+                    }
+                    else if (showStatus==ShowStatus_Datalist)
+                    {
+                        binding.mainShowFrg.setVisibility(View.VISIBLE);
+                        binding.DataListLl.setVisibility(View.GONE);
+                        if (sampleBitmap == null) {
+                            drawSampleImg(binding.sampleCountSpinner.getSelectedIndex());
+                        } else {
+                            binding.sampleImg.setImageBitmap(sampleBitmap);
+                        }
+                        showStatus = ShowStatus_SampleMap;
                     }
                 } catch (Exception exception) {
                     ToastUtils.showLong(exception.getMessage());
@@ -259,6 +412,17 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                                 binding.sampleImg.setImageBitmap(graybitmap);
                             }
                         }
+                        else if (showStatus == ShowStatus_Datalist)
+                        {
+                            binding.mainShowFrg.setVisibility(View.VISIBLE);
+                            binding.DataListLl.setVisibility(View.GONE);
+                            showStatus = Showstatus_GrayMap;
+                            if (graybitmap == null) {
+                                drawGrayMapBmp();
+                            } else {
+                                binding.sampleImg.setImageBitmap(graybitmap);
+                            }
+                        }
                     } catch (Exception exception) {
                         ToastUtils.showLong(exception.getMessage());
                     }
@@ -266,6 +430,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                 }
             }
             case R.id.refresh_btv: {
+                photoViewHeight = binding.showScro.getHeight();
                 for (int i = 0; i < MergeCache.lstPointsOrder.size(); i++) {
                     MergeCache.lstPointsOrder.get(i).Voltage = (FirFilter.ProcessSample(MergeCache.originData[i], MergeCache.dataHeader.SampleCount, MergeCache.dataHeader.SampleFrequency, low1, high1, 40));
                 }
@@ -276,9 +441,90 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                         drawGrayMapBmp();
                     }
                 }
+                else if (showStatus == ShowStatus_Datalist)
+                {
+                    binding.mainShowFrg.setVisibility(View.GONE);
+                   binding.DataListLl.setVisibility(View.VISIBLE);
+                }
+                break;
+            }
+            case R.id.data_reduction_btn:{
+                if (showStatus ==ShowStatus_Datalist)
+                {
+
+                }
+                else
+                {
+                    binding.mainShowFrg.setVisibility(View.GONE);
+                    binding.DataListLl.setVisibility(View.VISIBLE);
+                }
+                showStatus = ShowStatus_Datalist;
                 break;
             }
         }
+    }
+
+    DecimalFormat df = new DecimalFormat("00.##");//保留两位小数
+    private Bitmap oneSampleBmp ;
+    private void drawOneSample (ProbePoint probePoint, PhotoView photoView,int currentSerial){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            oneSampleBmp = Bitmap.createBitmap(photoView.getWidth(),  photoView.getHeight(), Bitmap.Config.ARGB_8888);
+        }
+        Canvas canvas = new Canvas(oneSampleBmp);
+        canvas.drawColor(Color.WHITE);
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setColor(Color.RED);
+        paint.setStrokeWidth(1);
+        paint.setTextSize(13f);
+
+        float sampleWidth = photoView.getWidth()-scaleWidth;
+        float spaceHeight = (float)photoView.getHeight()/(float) probePoint.Voltage.length;
+        double max = getArrayMax(probePoint.Voltage);
+
+        canvas.drawText("第"+currentSerial+"道",scaleWidth+10,20,paint);
+        canvas.drawText("max:"+df.format(max),scaleWidth+10,35,paint);
+
+        max = max*1.1;
+        paint.setColor(Color.BLACK);
+        float x1;
+        float y1;
+        float y=0;
+        float x = scaleWidth+sampleWidth/2;
+//        if (!isSampleFill) {
+            for (int j = 0; j < probePoint.Voltage.length; j++) {
+                x1 = (float) (scaleWidth+(sampleWidth / 2+sampleWidth / 2 * (probePoint.Voltage[j] / max)));
+                y1 =  j* spaceHeight;
+                canvas.drawLine(x, y, x1, y1, paint);
+                y = y1;
+                x = x1;
+            }
+
+      //  depthScaleBmp = Bitmap.createBitmap(50, ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), Bitmap.Config.ARGB_8888);
+        //Canvas depthCanvas = new Canvas();
+       // canvas.setBitmap(depthScaleBmp);
+        float maxDepth = ((1.0f / MergeCache.dataHeader.SampleFrequency) * 512f * MergeCache.sampleSpeed) / 2;
+       // canvas.drawColor(Color.argb(0, 0, 0, 0));
+        Scale DepthScale = new Scale(
+                canvas.getWidth(),
+                canvas.getHeight() ,
+                Color.argb(50, 0, 0, 0),
+                true,
+                maxDepth,
+                0,
+                false,
+                0.25f,
+                Color.BLACK,
+                Color.RED,
+                Color.BLUE,
+                15,
+                10
+        );
+        DepthScale.drawScale(canvas, 0, 0, scaleHeight, canvas.getHeight());
+
+        photoView.setImageBitmap(oneSampleBmp);
+
+
     }
 
     private void drawGrayMapBmp() {
@@ -299,28 +545,26 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         Thread drawgrayThread = new Thread(() -> {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    float initRatio =(float)(photoViewHeight-40)/(float) MergeCache.dataHeader.SampleCount;
-                    float sampleScaleHeight = scaleHeight/(initRatio)/(bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()]);
-                   // float sampleHeight = canvas.getHeight()-sampleScaleHeight;
+                    float initRatio = (float) (photoViewHeight - 40) / (float) MergeCache.dataHeader.SampleCount;
+                    float sampleScaleHeight = scaleHeight / (initRatio) / (bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()]);
+                    // float sampleHeight = canvas.getHeight()-sampleScaleHeight;
                     for (int i = 0; i < MergeCache.lstPointsOrder.size(); i++) {
                         ProbePoint onePoint = MergeCache.lstPointsOrder.get(i);
                         for (int j = 0; j < onePoint.Voltage.length; j++) {
                             paint.setColor(MapValueToColor((onePoint.Voltage[j] - globalMin) / m_distance * 100));
-                            canvas.drawPoint(i, j+sampleScaleHeight, paint);
+                            canvas.drawPoint(i, j + sampleScaleHeight, paint);
                         }
                     }
                 }
                 isDrawing = true;
-                if (bmpRatio==0){
-                    graybitmap = Bitmap.createScaledBitmap(graybitmap, photoViewWidth, ((int)(photoViewHeight*bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
+                if (bmpRatio == 0) {
+                    graybitmap = Bitmap.createScaledBitmap(graybitmap, photoViewWidth, ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
+                } else if (bmpRatio == 1) {
+                    graybitmap = Bitmap.createScaledBitmap(graybitmap, graybitmap.getWidth(), ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
+                } else {
+                    graybitmap = Bitmap.createScaledBitmap(graybitmap, graybitmap.getWidth() * bmpRatio, ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
                 }
-                else if(bmpRatio==1){
-                    graybitmap = Bitmap.createScaledBitmap(graybitmap, graybitmap.getWidth(), ((int)(photoViewHeight*bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
-                }
-                else {
-                    graybitmap = Bitmap.createScaledBitmap(graybitmap, graybitmap.getWidth()*bmpRatio, ((int)(photoViewHeight*bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
-                }
-                graybitmap = Bitmap.createScaledBitmap(graybitmap, graybitmap.getWidth(), ((int)(photoViewHeight*bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
+                graybitmap = Bitmap.createScaledBitmap(graybitmap, graybitmap.getWidth(), ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
                 canvas.setBitmap(graybitmap);
                 Scale DrillLengthScale = new Scale(
                         canvas.getWidth(),
@@ -337,8 +581,8 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                         15,
                         10
                 );
-                DrillLengthScale.drawScale(canvas,0,0,canvas.getWidth(),scaleHeight);
-                drawDepthScale ();
+                DrillLengthScale.drawScale(canvas, 0, 0, canvas.getWidth(), scaleHeight);
+                drawDepthScale();
                 Message message = new Message();
                 message.what = DrawGrayMap_Success;
                 mHandler.sendMessage(message);
@@ -430,8 +674,8 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         } else {
             sampleWidth = ((float) canvas.getWidth()) / MergeCache.lstPointsOrder.size() * 2;
         }
-        float sampleScaleHeight = scaleHeight/(bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()]);
-        float sampleHeight = canvas.getHeight()-sampleScaleHeight;
+        float sampleScaleHeight = scaleHeight / (bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()]);
+        float sampleHeight = canvas.getHeight() - sampleScaleHeight;
         float spaceHeight = sampleHeight / MergeCache.dataHeader.SampleCount;
         maxList = new double[MergeCache.lstPointsOrder.size()];
         minList = new double[MergeCache.lstPointsOrder.size()];
@@ -453,7 +697,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
             if (!isSampleFill) {
                 for (int j = 0; j < oneSample.Voltage.length; j++) {
                     x1 = (float) (tmp + (sampleWidth / 2 * (oneSample.Voltage[j] / max)));
-                    y1 = spaceHeight * j+sampleScaleHeight;
+                    y1 = spaceHeight * j + sampleScaleHeight;
                     canvas.drawLine(x, y, x1, y1, linepaint);
                     y = y1;
                     x = x1;
@@ -461,7 +705,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
             } else {
                 for (int j = 0; j < oneSample.Voltage.length; j++) {
                     x1 = (float) (tmp + (sampleWidth / 2 * (oneSample.Voltage[j] / max)));
-                    y1 = spaceHeight * j+sampleScaleHeight;
+                    y1 = spaceHeight * j + sampleScaleHeight;
                     canvas.drawLine(x, y, x1, y1, linepaint);
                     if (oneSample.Voltage[j] > 0) {
                         canvas.drawLine(tmp, y1, x1, y1, fillPaint);
@@ -471,7 +715,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         }
-        sampleBitmap = Bitmap.createScaledBitmap(sampleBitmap, sampleBitmap.getWidth(), ((int)(photoViewHeight*bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
+        sampleBitmap = Bitmap.createScaledBitmap(sampleBitmap, sampleBitmap.getWidth(), ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), true);
         canvas.setBitmap(sampleBitmap);
         Scale DrillLengthScale = new Scale(
                 canvas.getWidth(),
@@ -488,23 +732,23 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                 15,
                 10
         );
-        DrillLengthScale.drawScale(canvas,0,0,canvas.getWidth(),scaleHeight);
-        drawDepthScale ();
+        DrillLengthScale.drawScale(canvas, 0, 0, canvas.getWidth(), scaleHeight);
+        drawDepthScale();
         Message message = new Message();
         message.what = DrawSample_Success;
         mHandler.sendMessage(message);
     }
 
-    private void drawDepthScale (){
-        depthScaleBmp =  Bitmap.createBitmap(50,  ((int)(photoViewHeight*bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), Bitmap.Config.ARGB_8888);
+    private void drawDepthScale() {
+        depthScaleBmp = Bitmap.createBitmap(50, ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), Bitmap.Config.ARGB_8888);
         Canvas depthCanvas = new Canvas();
         depthCanvas.setBitmap(depthScaleBmp);
-        float maxDepth = ((1.0f/MergeCache.dataHeader.SampleFrequency)*512f*MergeCache.sampleSpeed)/2;
-        depthCanvas.drawColor(Color.argb(0,0,0,0));
+        float maxDepth = ((1.0f / MergeCache.dataHeader.SampleFrequency) * 512f * MergeCache.sampleSpeed) / 2;
+        depthCanvas.drawColor(Color.argb(0, 0, 0, 0));
         Scale DepthScale = new Scale(
                 depthCanvas.getWidth(),
-                depthCanvas.getHeight()-scaleHeight,
-                Color.argb(50,0,0,0),
+                depthCanvas.getHeight() - scaleHeight,
+                Color.argb(50, 0, 0, 0),
                 true,
                 maxDepth,
                 0,
@@ -516,10 +760,10 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                 15,
                 10
         );
-        DepthScale.drawScale(depthCanvas,0,(int)scaleHeight,scaleHeight,depthCanvas.getHeight()-scaleHeight);
+        DepthScale.drawScale(depthCanvas, 0, (int) scaleHeight, scaleHeight, depthCanvas.getHeight() - scaleHeight);
     }
 
-    private Bitmap depthScaleBmp ;
+    private Bitmap depthScaleBmp;
 
     @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler() {
