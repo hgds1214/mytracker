@@ -22,6 +22,8 @@ public class MergeCache {
     public static List<ProbePoint> probePointList = new ArrayList<>();
     public static float SpaceSapmle;
     public static float sampleSpeed = 100f;//100000m/s
+    public static int Merge_Success = 0x01;
+    public static int Merge_Fail = 0x02;
 
     public static double [][] originData ;
 

@@ -172,12 +172,13 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
             if (num5 >0) {
                 int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
                 Intent intent = new Intent(LeidaDataveiewActivity.this,MergeSampleActivity.class);
+                intent.putExtra("INT_KEY", MergeCache.Merge_Fail);
                 startActivity(intent);
             }
             else {
                 int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
-
                 Intent intent = new Intent(LeidaDataveiewActivity.this,MergeSampleActivity.class);
+                intent.putExtra("INT_KEY", MergeCache.Merge_Success);
                 startActivity(intent);
             }
         }catch (Exception exception){

@@ -7,6 +7,7 @@
     tools:ignore="MissingDefaultResource"
     android:background="#ffffff"
     android:orientation="vertical">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
@@ -58,6 +59,7 @@
             tools:ignore="TouchTargetSizeCheck">
         </Button>
         <Button
+            android:id="@+id/data_reduction_btn"
             android:layout_width="110dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="5dp"
@@ -71,6 +73,7 @@
             tools:ignore="TouchTargetSizeCheck">
         </Button>
     </LinearLayout>
+
     <LinearLayout
         android:visibility="gone"
         android:layout_width="match_parent"
@@ -93,10 +96,13 @@
             android:textColor="#ffff00"
             />
     </LinearLayout>
+
     <FrameLayout
+        android:id="@+id/main_show_frg"
         android:layout_marginTop="3dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="visible"
         >
         <LinearLayout
             android:layout_width="match_parent"
@@ -127,12 +133,10 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/depthscale_photo"
                         />
-
                 </FrameLayout>
-
             </ScrollView>
             <ScrollView
-                android:layout_width="200dp"
+                android:layout_width="210dp"
                 android:layout_height="match_parent"
                 android:padding="3dp"
                 android:background="#cccccc"
@@ -144,6 +148,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
+
                     >
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -165,6 +170,13 @@
                             android:textColor="#000000"
                             app:textTint="#000000" />
                     </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cccccc"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -184,20 +196,25 @@
                             android:textColor="#000000"
                             app:textTint="#000000" />
                     </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cccccc"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
                         android:paddingLeft="10dp"
                         android:orientation="horizontal">
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="显示高度"
                             android:textColor="#000000"
                             android:textSize="17dp" />
-
                         <org.angmarch.views.NiceSpinner
                             android:id="@+id/bmpHeight_spinner"
                             android:layout_width="wrap_content"
@@ -205,6 +222,13 @@
                             android:textColor="#000000"
                             app:textTint="#000000" />
                     </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cccccc"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -227,6 +251,13 @@
                             app:textTint="#000000"
                             tools:ignore="SpeakableTextPresentCheck" />
                     </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cccccc"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -248,6 +279,13 @@
                             app:textTint="#000000"
                             tools:ignore="SpeakableTextPresentCheck" />
                     </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cccccc"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -270,6 +308,13 @@
                             app:textTint="#000000"
                             tools:ignore="SpeakableTextPresentCheck" />
                     </LinearLayout>
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#cccccc"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
@@ -312,7 +357,205 @@
            app:indicatorName="BallSpinFadeLoaderIndicator"
            android:visibility="gone"
            app:indicatorColor="#5533ce" />
-
     </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/DataList_ll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#dddddd"
+        android:orientation="horizontal"
+        android:visibility="visible"
+        >
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#ffffff"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="钻杆信息列表"
+                android:textSize="20dp"
+                android:textColor="#000000"
+                android:background="#cccccc"
+                android:gravity="center"
+                />
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/list_item_background_selector2"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="编号"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:background="@drawable/list_item_bg"
+                    android:gravity="center"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:gravity="center"
+                    android:text="开始时间"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:background="@drawable/list_item_bg"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="计数"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:gravity="center"
+                    android:background="@drawable/list_item_bg"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="3"
+                    android:text="采集序号"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:gravity="center"
+                    android:background="@drawable/list_item_bg"
+                    />
+            </LinearLayout>
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/drillMsg_listv"
+                />
+        </LinearLayout>
+        <TextView
+            android:layout_width="3dp"
+            android:layout_height="match_parent"
+            android:background="#eeeeee"
+            />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="4"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#ffffff"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="数据信息列表"
+                android:textSize="20dp"
+                android:textColor="#000000"
+                android:background="#cccccc"
+                android:gravity="center"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="序号"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:background="@drawable/list_item_bg"
+                    android:gravity="center"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:gravity="center"
+                    android:text="采集时间"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:background="@drawable/list_item_bg"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="方向角"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:gravity="center"
+                    android:background="@drawable/list_item_bg"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="俯仰角"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:gravity="center"
+                    android:background="@drawable/list_item_bg"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="横滚角"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:gravity="center"
+                    android:background="@drawable/list_item_bg"
+                    />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:text="距离"
+                    android:textSize="15dp"
+                    android:textColor="#000000"
+                    android:gravity="center"
+                    android:background="@drawable/list_item_bg"
+                    />
+            </LinearLayout>
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/drilldataMsg_list_tv"
+                />
+        </LinearLayout>
+        <TextView
+            android:layout_width="2dp"
+            android:layout_height="match_parent"
+            android:background="#666666"
+            />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1.5"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#ffffff"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="当前波形"
+                android:textSize="15dp"
+                android:textColor="#000000"
+                android:background="#dddddd"
+                android:gravity="center"
+                />
+            <com.github.chrisbanes.photoview.PhotoView
+                android:id="@+id/onePoint_sample_photo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+
+        </LinearLayout>
+    </LinearLayout>
 
 </LinearLayout>
