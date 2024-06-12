@@ -45,7 +45,7 @@ public class HomeActivity extends AppCompatActivity {
         findViewById(R.id.rl_tracker_leida).setOnClickListener(view -> clickTrackerLeiDa());
         findViewById(R.id.rl_Directionfinder).setOnClickListener(View -> clickDirectionfinder());
         findViewById(R.id.rl_EncoderWorking).setOnClickListener(View->clickEncoderWorking());
-        findViewById(R.id.rl_EncoderWorking).setVisibility(View.GONE);
+        findViewById(R.id.rl_EncoderWorking).setVisibility(View.VISIBLE);
        findViewById(R.id.rl_Directionfinder).setVisibility(View.GONE);
         findViewById(R.id.rl_tracker).setVisibility(View.GONE);
     }
