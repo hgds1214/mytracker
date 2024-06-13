@@ -28,10 +28,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.blankj.utilcode.util.FileUtils;
+import com.blankj.utilcode.util.LogUtils;
+import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.zeus.tec.BuildConfig;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityEncoderWorkingBinding;
+import com.zeus.tec.model.leida.MergeCache;
 import com.zeus.tec.ui.directionfinder.util.BLEDevice;
 import com.zeus.tec.ui.directionfinder.util.BLEManager;
 import com.zeus.tec.ui.directionfinder.util.LVDevicesAdapter;
@@ -42,7 +46,17 @@ import com.zeus.tec.ui.leida.util.ConvertCode;
 import com.zeus.tec.model.utils.FeedbackUtil;
 import com.zeus.tec.model.utils.log.SuperLogUtil;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class EncoderWorkingActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -72,10 +86,10 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
     private void initView() {
         lvDevices = binding.lvDevices;
         lldevice = binding.llDevices;
-        layprogramparamter = binding.layProgramParamter;
-        binding.ivStep1.setState(3);
-        //  listpoint = binding.listPoint;
 
+        binding.ivStep1.setState(3);
+
+        //  listpoint = binding.listPoint;
         // listpoint.setAdapter(directionfinderPointRecordApater);
         binding.tvStep1Text.setText("设备未连接,请先连接设备");
     }
@@ -129,19 +143,16 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
             Log.d(TAG, "该设备不支持低功耗蓝牙");
             Toast.makeText(mContext, "该设备不支持低功耗蓝牙", Toast.LENGTH_SHORT).show();
         } else {
-//            if(!bleManager.isEnable()){
-//                //去打开蓝牙
-//                bleManager.openBluetooth(mContext,false);
-//            }
         }
     }
+
     @Override
     public void onClick(View v) {
+        FeedbackUtil.getInstance().doFeedback();
         switch (v.getId()) {
             case R.id.tv_Data_Download:
                 if (binding.tvDataDownload.getText().toString().equals("连接设备")) {
                     superLogUtil.d("连接设备...");
-                    layprogramparamter.setVisibility(View.GONE);
                     // binding.layoutPointRecord.setVisibility(View.GONE);
                     binding.tvPointRecord.setVisibility(View.GONE);
                     binding.tvProgramParamter.setVisibility(View.GONE);
@@ -154,20 +165,94 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
             case R.id.start_button:
                 String msg = "5a011505000000001b";
                 bleManager.sendMessage(msg);
+                break;
                 //  case  R.id.
             case R.id.tv_program_paramter:
                 try {
-                    wheelDiameter = Double.parseDouble(String.valueOf(binding.tv21.getText())) ;
-                }catch (Exception exception){
+
+                    wheelDiameter = Integer.parseInt(String.valueOf(binding.tv21.getText()));
+                    int digit = getdigit(wheelDiameter,1);
+                     WheelDiameterStr =String.valueOf(wheelDiameter) ;
+                    for (int i = 0; i < 4-digit; i++) {
+                        WheelDiameterStr = "0"+WheelDiameterStr;
+                    }
+                    num2 = 0.001*wheelDiameter;
+
+
+                } catch (Exception exception) {
 
                     break;
                 }
                 ToastUtils.showLong("设置成功");
+                break;
+            case R.id.tv_begin_working: {
+                ToastUtils.showLong("开始工作");
+                String rootPath = PathUtils.getExternalAppFilesPath() + File.separator + "wirelessEncoderData";
+                if (!FileUtils.createOrExistsDir(rootPath)) {
+                    LogUtils.e("创建文件失败：" + rootPath);
+                    ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
+                    return;
+                }
+                String strFileName = "";
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    strFileName = rootPath + File.separator + LocalDateTime.now().toString() + ".ini";
+                }
+                if (!FileUtils.createOrExistsFile(strFileName)) {
+                    LogUtils.e("创建文件失败：" + strFileName);
+                    ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
+                    return;
+                }
+                try {
+                    fos = new FileOutputStream(strFileName);
+                } catch (Exception exception) {
+
+                    ToastUtils.showLong(exception.getMessage());
+                }
+                currentStatus = Status_Working;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    currentTimeMillis = System.currentTimeMillis();
+                }
+                break;
+            }
+            case R.id.tv_stop_working:{
+                currentStatus = Status_Sleeping;
+                pointIndex =0;
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+
 
         }
     }
+    String WheelDiameterStr ;
 
-    private double wheelDiameter = 0;
+
+    private int getdigit (int WheelDiameter,int digit) {
+        double num1 = Math.pow(10,digit);
+        if (WheelDiameter / num1 >= 1) {
+            digit++;
+          return   getdigit(WheelDiameter, digit);
+        }
+        else
+        {
+            return digit ;
+        }
+
+    }
+
+
+    @SuppressLint("NewApi")
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    FileOutputStream fos;
+    private String beginDate =null;
+
+    private int wheelDiameter = 0;
+    long currentTimeMillis ;
 
     private class BLEBroadcastReceiver extends BroadcastReceiver {
 
@@ -202,109 +287,79 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
         }
     }
 
+    String [] zeroStrList = {"00000","0000","000","00","0",""};
+
     private byte[] angelByte = new byte[2];
     double orientationAngle = 0;
     double dipAngle = 0;
     double relativeAngle = 0;
     double elct = 0;
     boolean firstTime = true;
-
-    private void receiveMessage(byte[] recBufSuc) {
-
+    private int Status_Working = 0x01;
+    private int Status_Sleeping = 0x02;
+    private int currentStatus = Status_Sleeping;
+    private int pointIndex =0;
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss:");
+    private double num2 = 0;
+    String formattedDate;
+    private void receiveMessage(byte[] recBufSuc) throws IOException {
         if (recBufSuc[0] == 0x5a && recBufSuc[1] == 0x01) {
             if (recBufSuc[2] == 0x50 && recBufSuc[3] == 0x05) {
                 int value = ((recBufSuc[4] & 0xFF) << 24) | ((recBufSuc[5] & 0xFF) << 16) | ((recBufSuc[6] & 0xFF) << 8) | (recBufSuc[7] & 0xFF);
-                storgebuffer[indexbuffer++] = recBufSuc[4];
-                storgebuffer[indexbuffer++] = recBufSuc[5];
-                storgebuffer[indexbuffer++] = recBufSuc[6];
-                storgebuffer[indexbuffer++] = recBufSuc[7];
-                double depth = (Math.PI * wheelDiameter * (double) value) / 360.0;
+               // double depth = (Math.PI * wheelDiameter * (double) value) / 360.0;
+                double depth = (num2*value)/1000.0;
+                if (currentStatus == Status_Working) {
+                    // 将毫秒时间戳转换为Date对象
+                    Date resultDate = new Date(currentTimeMillis);
+                    // 格式化Date对象为字符串
+                    formattedDate = sdf.format(resultDate);
+                    int digit = getdigit(value,1);
+                    String tmpStr ;
+                    if (pointIndex%100>=10){
+                        tmpStr = formattedDate+pointIndex%100+" "+pointIndex+" "+zeroStrList[digit-1]+value+" "+WheelDiameterStr+" -90 100 0\n";
+                    }
+                    else {
+                        tmpStr = formattedDate+"0"+pointIndex%100+" "+pointIndex+" "+zeroStrList[digit-1]+value+" "+WheelDiameterStr+" -90 100 0\n";
+                    }
+                    fos.write(tmpStr.getBytes(StandardCharsets.UTF_8)); // 把字符串写入文件输出流
+                    currentTimeMillis = currentTimeMillis+100;
+                    pointIndex++;
+                }
                 binding.tv23.setText(String.format("%.2f", depth));
+               // binding.tv23.setText(String.valueOf(value));
             }
         }
-
         if (recBufSuc[0] == 0x5a && (recBufSuc[1] & 0xFF) == 0xa5) {
             if (recBufSuc[2] == 0x0a) {
                 if (recBufSuc[3] == 0x0d) {
                     angelByte[0] = recBufSuc[4];
                     angelByte[1] = recBufSuc[5];
                     orientationAngle = ((double) ConvertCode.getushort(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
-
                     angelByte[0] = recBufSuc[6];
                     angelByte[1] = recBufSuc[7];
                     dipAngle = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
-
                     angelByte[0] = recBufSuc[8];
                     angelByte[1] = recBufSuc[9];
                     relativeAngle = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
-
                     angelByte[0] = recBufSuc[10];
                     angelByte[1] = recBufSuc[11];
                     elct = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 1000;
-//                    binding.tv24.setText(String.valueOf(relativeAngle));
-//                    binding.tv23.setText(String.valueOf(dipAngle));
-//                    binding.tv21.setText(String.valueOf(elct));
-//                    binding.tv22.setText(String.valueOf(orientationAngle));
-//                    if (!binding.tvStatus.getText().equals("寻北完成")){
-//                        binding.tvStatus.setText("寻北完成");
-//                    }
-//                    if (binding.tvCountTime.getText().equals("00:00:00")&&firstTime)
-//                    {
-//                        firstTime = false;
-//                        long currentTime = System.currentTimeMillis();
-//                        binding.tvCountTime.setStartTime(currentTime);
-//                        binding.tvCountTime.start();
-//                    }
-
                 }
             } else if (recBufSuc[2] == 0x05 && recBufSuc[3] == 0x06) {
                 switch (recBufSuc[4]) {
-//                    case 0x01:
-//                        binding.tvStatus.setText("开始启动");
-//                        break;
-//                    case 0x02:
-//                        binding.tvStatus.setText("正在寻北");
-//                        break;
-//                    case 0x03:
-//                        long currentTime = System.currentTimeMillis();
-//                        binding.tvCountTime.setStartTime(currentTime);
-//                        binding.tvCountTimeLabel.setText("运行时间");
-//                        binding.tvCountTime.start();
-//                        binding.tvStatus.setText("寻北完成");
-//                        break;
-//                    case 0x05:
-//                        binding.tvStatus.setText("退出测量");
-//                        break;
-//                    case 0x06:
-//                        binding.tvStatus.setText("退出并保存");
-//                        break;
-//                    case 0x07:
-//                        binding.tvStatus.setText("退出不保存");
-//                        break;
-//                    default:
-//                        binding.tvStatus.setText("启动失败");
-//                        break;
                 }
             } else if (recBufSuc[2] == 0x06 && recBufSuc[3] == 0x07) {
                 int sec = (recBufSuc[4] & 0xff) * 256 + (int) (recBufSuc[5] & 0xff);
                 int min = sec / 60;
                 sec = sec % 60;
-//                if (!binding.tvStatus.getText().equals("正在寻北"))
-//                {
-//                    binding.tvStatus.setText("正在寻北");
-//                }
-//                binding.tvCountTimeLabel.setText("寻北时间");
                 String secTime = String.valueOf(sec);
                 if (sec < 10) {
                     secTime = "0" + sec;
                 }
                 String findTime = "00:" + "0" + min + ":" + secTime;
-                //   binding.tvCountTime.setText(findTime);
             } else if (recBufSuc[2] == 0x02 && recBufSuc[3] == 0x06) {
                 if (recBufSuc[4] == 0x01) {
-                    //   binding.tvStatus.setText("启动激光");
                 } else if (recBufSuc[4] == 0x01) {
-                    //  binding.tvStatus.setText("关闭激光");
                 }
             }
         }
@@ -344,11 +399,7 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
                     break;
 
                 case SELECT_DEVICE:
-                    //  tvName.setText(bluetoothDevice.getName());
-                    // tvAddress.setText(bluetoothDevice.getAddress());
                     curBluetoothDevice = (BluetoothDevice) msg.obj;
-                    //   binding.ivStep1.setState(1);
-                    //   binding.tvStep1Text.setText("正在连接设备：" + curBluetoothDevice.getName());
                     Toast.makeText(mContext, "正在连接设备：" + curBluetoothDevice.getName(), Toast.LENGTH_SHORT).show();
                     bleManager.connectBleDevice(mContext, curBluetoothDevice, 15000, SERVICE_UUID, READ_UUID, WRITE_UUID, onBleConnectListener);
                     break;
@@ -369,24 +420,13 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
                     binding.tvStep1Text.setText("已连接：" + curBluetoothDevice.getName());
                     Toast.makeText(mContext, "连接成功", Toast.LENGTH_LONG).show();
                     bleManager.sendMessage("5a0106020008");
-//                    binding.tvDataDownload.setText("连接设备");
-//                    binding.llDevices.setVisibility(View.GONE);
-//                    binding.layoutPointRecord.setVisibility(View.GONE);
-//                    binding.layProgramParamter.setVisibility(View.VISIBLE);
-//                    binding.tvPointRecord.setVisibility(View.VISIBLE);
-//                    binding.tvProgramParamter.setVisibility(View.VISIBLE);
-                    //llDataSendReceive.setVisibility(View.VISIBLE);
-                    // llDeviceList.setVisibility(View.GONE);
                     break;
                 case DISCONNECT_SUCCESS:
                     Log.d(TAG, "断开成功");
-                    // tvCurConState.setText("断开成功");
-                    //   curConnState = false;
                     break;
                 case SEND_FAILURE: //发送失败
                     byte[] sendBufFail = (byte[]) msg.obj;
                     String sendFail = TypeConversion.bytes2HexString(sendBufFail, sendBufFail.length);
-                    //  tvSendResult.setText("发送数据失败，长度" + sendBufFail.length + "--> " + sendFail);
                     break;
                 case SEND_SUCCESS:  //发送成功
                     byte[] sendBufSuc = (byte[]) msg.obj;
@@ -400,7 +440,11 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
                 case RECEIVE_SUCCESS:  //接收成功
                     byte[] recBufSuc = (byte[]) msg.obj;
                     Log.d(TAG, recBufSuc.toString());
-                    receiveMessage(recBufSuc);
+                    try {
+                        receiveMessage(recBufSuc);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     String receiveResult = TypeConversion.bytes2HexString(recBufSuc, recBufSuc.length);
                     // tvReceive.setText("接收数据成功，长度" + recBufSuc.length + "--> " + receiveResult);
                     break;
@@ -446,6 +490,8 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
         binding.tvDataDownload.setOnClickListener(this);
         binding.startButton.setOnClickListener(this);
         binding.tvProgramParamter.setOnClickListener(this);
+        binding.tvBeginWorking.setOnClickListener(this);
+        binding.tvStopWorking.setOnClickListener(this);
 //        binding.tvPointRecord.setOnClickListener(this);
 //        binding.tvPoint.setOnClickListener(this);
 //        binding.tvProgramParamter.setOnClickListener(this);

@@ -368,21 +368,6 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
                     INIutil.writeproperties(cache.properties,filePath);
 
                     cache.RefreshInitFile();
-                    //  String filePath = projectRoot + File.separator + "scene.png";
-//                                    if (!ImageUtils.save(shotPicture, filePath, Bitmap.CompressFormat.PNG)) {
-//                                        LogUtils.e("保存图片失败：" + filePath);
-//                                        ToastUtils.showLong("保存图片失败，请重试!");
-//                                        return null;
-//                                    }
-                    //info.holeX = x;
-                    // info.holeY = y;
-                    // info.holeZ = z;
-                    //  info.jacketLength = jacketLength;
-                    //  info.designDirection = designDirection;
-                    //  info.designAngle = designAngle;
-                    //   info.adjustMode = adjustMode;
-                    //   info.livePhotos = filePath;
-                    //   info.livePhotosMd5 = ConvertUtils.bytes2HexString(EncryptUtils.encryptMD5File(filePath));
                     info.projectRoot = projectRoot;
                     info.dataPath = dataPath;
                     String SharePath = PathUtils.getExternalAppFilesPath()+ File.separator + "leidaShareData";
