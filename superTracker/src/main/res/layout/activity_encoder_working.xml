@@ -7,7 +7,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -90,8 +89,6 @@
                 android:textColor="#ffff4c00"
                 android:textSize="14sp" />
         </LinearLayout>
-
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="70dp"
@@ -104,7 +101,6 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <com.zeus.tec.ui.widget.CountTimeTextView
                     android:id="@+id/tv_count_time"
                     android:layout_width="wrap_content"
@@ -128,7 +124,6 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-
                 <TextView
                     android:id="@+id/tv_status"
                     android:layout_width="wrap_content"
@@ -136,7 +131,6 @@
                     android:text="已停止"
                     android:textColor="#a0ffffff"
                     android:textSize="18sp" />
-
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -144,9 +138,7 @@
                     android:textColor="#a0ffffff"
                     android:textSize="13sp" />
             </LinearLayout>
-
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -157,105 +149,6 @@
             android:orientation="vertical"
             android:paddingTop="20dp"
             android:paddingBottom="20dp">
-
-            <!--<LinearLayout
-                android:layout_width="match_parent"
-                android:orientation="horizontal"
-                android:layout_height="wrap_content"
-                >
-              &lt;!&ndash;  <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:id="@+id/tv_11"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#45;&#45;"
-                        android:textColor="#ff222222"
-                        android:textSize="22sp"
-                        />
-                    <TextView
-                        android:layout_marginTop="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="设备电压"
-                        android:textColor="#ff606060"
-                        android:textSize="14sp"
-                        />
-                </LinearLayout>&ndash;&gt;
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:id="@+id/tv_12"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#45;&#45;"
-                        android:textColor="#ff222222"
-                        android:textSize="22sp"
-                        />
-                    <TextView
-                        android:layout_marginTop="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="陀螺值"
-                        android:textColor="#ff606060"
-                        android:textSize="14sp"
-                        />
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:id="@+id/tv_13"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#45;&#45;"
-                        android:textColor="#ff222222"
-                        android:textSize="22sp"
-                        />
-                    <TextView
-                        android:layout_marginTop="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="倾角值"
-                        android:textColor="#ff606060"
-                        android:textSize="14sp"
-                        />
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:id="@+id/tv_14"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#45;&#45;"
-                        android:textColor="#ff222222"
-                        android:textSize="22sp"
-                        />
-                    <TextView
-                        android:layout_marginTop="5dp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="方位角"
-                        android:textColor="#ff606060"
-                        android:textSize="14sp"
-                        />
-                </LinearLayout>
-            </LinearLayout>-->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -269,19 +162,12 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-<!--                    <TextView-->
-<!--                        android:id="@+id/tv_21"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="0"-->
-<!--                        android:textColor="#ff222222"-->
-<!--                        android:textSize="22sp" />-->
                     <EditText
                         android:id="@+id/tv_21"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:maxLength="8"
-                        android:text="0"
+                        android:text="245"
                         android:inputType="numberDecimal"
                         android:paddingLeft="10dp"
                         android:hint="请输入"
@@ -293,38 +179,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="滑轮直径"
+                        android:text="编码深度"
                         android:textColor="#ff606060"
                         android:textSize="13sp" />
                 </LinearLayout>
 
-<!--                <LinearLayout-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_weight="1"-->
-<!--                    android:gravity="center"-->
-<!--                    android:orientation="vertical">-->
-
-<!--                    <TextView-->
-<!--                        android:id="@+id/tv_22"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="0"-->
-<!--                        android:textColor="#ff222222"-->
-<!--                        android:textSize="22sp" />-->
-
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_marginTop="5dp"-->
-<!--                        android:text="方位角(°)"-->
-<!--                        android:textColor="#ff606060"-->
-<!--                        android:textSize="13sp" />-->
-<!--                </LinearLayout>-->
-
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
@@ -348,7 +210,7 @@
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
@@ -360,7 +222,6 @@
                         android:text="0"
                         android:textColor="#ff222222"
                         android:textSize="22sp" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -371,133 +232,6 @@
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
-
-        <!--       <ScrollView
-            android:id="@+id/svCharts"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="visible">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                android:orientation="vertical"
-                android:padding="12dp">
-
-                &lt;!&ndash; <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:clipToPadding="false"
-                    android:clipChildren="false"
-                    android:paddingTop="10dp"
-                    android:paddingLeft="0dp"
-                    android:paddingRight="10dp"
-                    android:background="@drawable/bg_white"
-                    >
-                 &lt;!&ndash;   <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chart2"
-                        android:layout_marginLeft="20dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/bg_white"
-                        />&ndash;&gt;
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="左"
-                        android:textColor="#303030"
-                        android:textSize="14sp"
-                        android:layout_marginTop="-2dp"
-                        android:layout_marginLeft="6dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:text="右"
-                        android:textColor="#303030"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="2dp"
-                        android:layout_marginLeft="6dp"/>
-                </FrameLayout>&ndash;&gt;
-
-                &lt;!&ndash; <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:clipToPadding="false"
-                    android:layout_marginTop="10dp"
-                    android:clipChildren="false"
-                    android:paddingTop="10dp"
-                    android:paddingLeft="0dp"
-                    android:paddingRight="10dp"
-                    android:background="@drawable/bg_white"
-                    >
-                 &lt;!&ndash;   <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chart1"
-                        android:layout_marginLeft="20dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        />&ndash;&gt;
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="上"
-                        android:textColor="#303030"
-                        android:textSize="14sp"
-                        android:layout_marginTop="2dp"
-                        android:layout_marginLeft="6dp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:text="下"
-                        android:textColor="#303030"
-                        android:textSize="14sp"
-                        android:layout_marginBottom="4dp"
-                        android:layout_marginLeft="6dp"/>
-                </FrameLayout>&ndash;&gt;
-
-                &lt;!&ndash;   <LinearLayout
-                    android:id="@+id/llPrevNext"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:background="#ffffff"
-                    android:layout_marginTop="10dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-                    <TextView
-                        android:id="@+id/tvPrev"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="40dp"
-                        android:layout_marginLeft="10dp"
-                        android:gravity="center"
-                        android:text="上一点"
-                        android:textColor="@color/btn_finish_color"
-                        android:textSize="16sp"
-                        android:background="@drawable/btn_finish_bg"
-                        android:enabled="false"
-                        />
-                    <TextView
-                        android:id="@+id/tvNext"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="40dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:gravity="center"
-                        android:text="下一点"
-                        android:textColor="@color/btn_finish_color"
-                        android:textSize="16sp"
-                        android:background="@drawable/btn_finish_bg"
-                        />
-                </LinearLayout>&ndash;&gt;
-
-            </LinearLayout>
-        </ScrollView>-->
 
         <FrameLayout
             android:id="@+id/flStep"
@@ -573,10 +307,7 @@
                     android:max="100"
                     android:progress="0"
                     android:visibility="gone" />
-
-
             </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
@@ -589,7 +320,6 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_below="@id/iv_line_1" />
-
                 <TextView
                     android:id="@+id/tv_step_2_text"
                     android:layout_width="wrap_content"
@@ -599,7 +329,6 @@
                     android:textColor="#ffcacaca"
                     android:textSize="13sp" />
             </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
@@ -628,14 +357,12 @@
                     android:textColor="@color/btn_step_text_color"
                     android:textSize="14sp" />
             </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_marginTop="150dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
-
                 <com.zeus.tec.ui.tracker.widget.StateIcon
                     android:id="@+id/iv_step_3"
                     android:layout_width="30dp"
@@ -654,15 +381,11 @@
                     android:text="点击清空探头数据"
                     android:textColor="@color/btn_step_text_color"
                     android:textSize="14sp" />
-
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="50dp">
-
-
                 </RelativeLayout>
             </LinearLayout>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
@@ -754,7 +477,7 @@
                         android:background="@drawable/btn_collect_bg"
                         android:gravity="center"
                         android:layout_marginRight="5dp"
-                        android:text="配置滑轮直径"
+                        android:text="配置编码深度"
                         android:textColor="#ffffff"
                         android:textSize="20dp"></TextView>
                     <TextView
@@ -776,230 +499,27 @@
                     android:layout_height="wrap_content"
                     tools:visibility="visible"
                     >
-
-
                 </ScrollView>
-                <!--<LinearLayout
-                    android:id="@+id/lay_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginTop="25dp"
-
-                    android:orientation="vertical"
-                    android:paddingTop="5dp"
-                    >
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "项目名称:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "创建时间:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "打点距离:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "采集点数:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "叠加次数:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "延迟点数:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "放大倍数:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "采样频率:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "时间间隔:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "陀螺阈值:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-                    <TextView
-                        android:layout_width="100dp"
-                        android:layout_height="20dp"
-                        android:text = "远端数据下载:"
-                        android:textColor="#ff0000"
-                        android:gravity="center"
-                        ></TextView>
-
-
-                </LinearLayout>-->
-                <!--   <LinearLayout
-                       android:id="@+id/lay_paramter"
-                       android:layout_width="match_parent"
-                       android:layout_height="100dp"
-                       android:layout_marginTop="25dp"
-                       android:paddingLeft="100dp"
-                       android:paddingTop="5dp">
-
-                       <TextView
-                           android:layout_width="match_parent"
-                           android:layout_height="wrap_content"
-                           android:gravity="left"
-                           android:text="RR"
-                           android:background="@drawable/bg_dddddd"
-                           android:textColor="@color/program_text_color"></TextView>
-                   </LinearLayout>-->
-                <!--<LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="250dp"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:text="新建项目"
-                        android:textSize="25dp"
-                        android:gravity="center"
-                        android:textColor="#000000"
-                        android:background="@drawable/btn_collect_bg"
-
-                        ></TextView>
-                </LinearLayout>-->
-
-
-
-                <!--  <LinearLayout
-                      android:id="@+id/lay_Download_windows"
-                      android:visibility="visible"
-                      android:layout_marginTop="35dp"
-                      android:orientation="vertical"
-                      android:padding="5dp"
-                      android:layout_width="match_parent"
-                      android:layout_height="match_parent"
-                      tools:visibility="gone"
-                      android:background="@drawable/bg_white">
-                      <LinearLayout
-                          android:layout_width="match_parent"
-                          android:orientation="horizontal"
-                          android:layout_height="30dp">
-                          <TextView
-                              android:id="@+id/tv_Download"
-                              android:enabled="true"
-                              android:layout_width="0dp"
-                              android:layout_weight="1"
-                              android:layout_height="match_parent"
-                              android:gravity="center"
-                              android:text="下载"
-                              android:layout_marginRight="5dp"
-                              android:textColor="@color/btn_finish_color"
-                              android:textSize="16sp"
-                              android:background="@drawable/btn_finish_bg"
-                              />
-                          <TextView
-                              android:id="@+id/tv_Delete"
-                              android:enabled="true"
-                              android:layout_width="0dp"
-                              android:layout_weight="1"
-                              android:layout_height="match_parent"
-                              android:gravity="center"
-                              android:text="删除"
-                              android:layout_marginRight="5dp"
-                              android:textColor="@color/btn_finish_color"
-                              android:textSize="16sp"
-                              android:background="@drawable/btn_finish_bg"
-                              />
-                          <TextView
-                              android:id="@+id/tv_refresh"
-                              android:enabled="true"
-                              android:layout_width="0dp"
-                              android:layout_weight="1"
-                              android:layout_height="match_parent"
-                              android:gravity="center"
-                              android:text="刷新"
-                              android:layout_marginRight="5dp"
-                              android:textColor="@color/btn_finish_color"
-                              android:textSize="16sp"
-                              android:background="@drawable/btn_finish_bg"
-                              />
-                          <TextView
-                              android:id="@+id/tv_exit"
-                              android:enabled="true"
-                              android:layout_width="0dp"
-                              android:layout_weight="1"
-                              android:layout_height="match_parent"
-                              android:gravity="center"
-                              android:text="退出"
-                              android:textColor="@color/btn_finish_color"
-                              android:textSize="16sp"
-                              android:background="@drawable/btn_finish_bg"
-                              />
-
-                      </LinearLayout>
-                      <View
-                          android:layout_width="match_parent"
-                          android:layout_height="0.5dp"
-                          android:layout_marginTop="10dp"
-                          android:background="#E5E5E5"/>
-                      <ListView
-                          android:id="@+id/list_File"
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:choiceMode="singleChoice"
-
-                          android:background="#9CCEFF"
-                          tools:visibility="visible"
-                          android:layout_marginTop="10dp" />
-                  </LinearLayout>
-
-                   android:layout_below="@+id/lay_title"-->
-
             </RelativeLayout>
-
         </LinearLayout>
-
         <androidx.legacy.widget.Space
             android:layout_width="1dp"
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+        <TextView
+            android:id="@+id/start_button"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginLeft="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_collect_bg"
+            android:enabled="true"
+            android:gravity="center"
+            android:text="深度归零"
+            android:textColor="#ffffffff"
+            android:textSize="16sp" />
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/llBtns"
         android:layout_width="match_parent"
@@ -1008,7 +528,7 @@
         android:padding="12dp"
         android:orientation="horizontal">
         <TextView
-            android:id="@+id/tv_Data_Download"
+            android:id="@+id/tv_binding_device"
             android:enabled="true"
             android:layout_width="0dp"
             android:layout_weight="1"
@@ -1020,20 +540,6 @@
             android:textSize="16sp"
             android:background="@drawable/btn_finish_bg"
             />
-
-
-        <TextView
-            android:id="@+id/start_button"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="44dp"
-            android:layout_marginLeft="0dp"
-            android:gravity="center"
-            android:text="深度归零"
-            android:textColor="#ffffffff"
-            android:textSize="16sp"
-            android:enabled="true"
-            android:background="@drawable/btn_collect_bg"/>
 
         <TextView
             android:id="@+id/tv_begin_working"
@@ -1061,8 +567,5 @@
             android:textSize="16sp"
             android:enabled="true"
             android:background="@drawable/btn_collect_bg"/>
-
     </LinearLayout>
-
-
 </FrameLayout>

@@ -86,7 +86,6 @@ public class BLEManager {
             //在onLeScan()回调中尽量做少的操作，可以将扫描到的设备扔到另一个线程中处理
             if (bluetoothDevice == null)
                 return;
-
             if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
@@ -125,27 +124,14 @@ public class BLEManager {
             Log.e(TAG, "startDiscoveryDevice-->bluetooth4Adapter == null");
             return;
         }
-
         this.onDeviceSearchListener = onDeviceSearchListener;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             Log.d(TAG, "开始扫描设备");
-//            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-//                // TODO: Consider calling
-//                //    ActivityCompat#requestPermissions
-//                // here to request the missing permissions, and then overriding
-//                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//                //                                          int[] grantResults)
-//                // to handle the case where the user grants the permission. See the documentation
-//                // for ActivityCompat#requestPermissions for more details.
-//                return;
-//            }
             bluetooth4Adapter.startLeScan(leScanCallback);
-
         } else {
             return;
         }
-
         //设定最长扫描时间
         mHandler.postDelayed(stopScanRunnable, scanTime);
     }
@@ -174,12 +160,10 @@ public class BLEManager {
             Log.e(TAG, "stopDiscoveryDevice-->bluetooth4Adapter == null");
             return;
         }
-
         if (leScanCallback == null) {
             Log.e(TAG, "stopDiscoveryDevice-->leScanCallback == null");
             return;
         }
-
         Log.d(TAG, "停止扫描设备");
         bluetooth4Adapter.stopLeScan(leScanCallback);
     }
@@ -191,12 +175,10 @@ public class BLEManager {
         public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
             super.onPhyUpdate(gatt, txPhy, rxPhy, status);
         }
-
         @Override
         public void onPhyRead(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
             super.onPhyRead(gatt, txPhy, rxPhy, status);
         }
-
         //连接状态回调-连接成功/断开连接
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
@@ -241,14 +223,11 @@ public class BLEManager {
             mHandler.removeCallbacks(connectOutTimeRunnable);
 
             if (newState == BluetoothGatt.STATE_CONNECTED) {
-
-
                 Log.w(TAG, "连接成功");
                 //连接成功去发现服务
                 gatt.discoverServices();
                 //设置发现服务超时时间
                 mHandler.postDelayed(serviceDiscoverOutTimeRunnable, MAX_CONNECT_TIME);
-
                 if (onBleConnectListener != null) {
                     onBleConnectListener.onConnectSuccess(gatt, bluetoothDevice, status);   //连接成功回调
                 }
@@ -257,7 +236,6 @@ public class BLEManager {
                 ClsUtils.refreshDeviceCache(gatt);
                 Log.e(TAG, "断开连接status:" + status);
                 gatt.close();  //断开连接释放连接
-
                 if (status == 133) {
                     //无法连接
                     if (onBleConnectListener != null) {
@@ -272,7 +250,6 @@ public class BLEManager {
                         onBleConnectListener.onConnectFailure(gatt, bluetoothDevice, "连接成功服务未发现断开！", status); //62没有发现服务 异常断开
                         Log.e(TAG, "连接成功服务未发现断开status:" + status);
                     }
-
                 } else if (status == 0) {
                     if (onBleConnectListener != null) {
                         onBleConnectListener.onDisConnectSuccess(gatt, bluetoothDevice, status); //0正常断开 回调
@@ -311,7 +288,6 @@ public class BLEManager {
                 }
             }
         }
-
         //发现服务
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
@@ -319,9 +295,7 @@ public class BLEManager {
             //移除发现服务超时
             mHandler.removeCallbacks(serviceDiscoverOutTimeRunnable);
             Log.d(TAG, "移除发现服务超时");
-
             Log.d(TAG, "发现服务");
-
             List<BluetoothGattService> servicesList = gatt.getServices();
             String[] serviceUuid = new String[servicesList.size()];
             for (int i = 0; i < servicesList.size(); i++) {
@@ -332,11 +306,9 @@ public class BLEManager {
             BluetoothGattService service = servicesList.get(2);
             serviceUUID = service.getUuid().toString();
             if (service != null) {
-
                 List<BluetoothGattCharacteristic> characteristic = service.getCharacteristics();
                 readUUID = characteristic.get(0).getUuid().toString();
                 writeUUID = characteristic.get(1).getUuid().toString();
-
                 String[] charUuid = new String[characteristic.size()];
                 for (int i = 0; i < characteristic.size(); i++) {
                     charUuid[i] = characteristic.get(i).getUuid().toString();
@@ -353,18 +325,15 @@ public class BLEManager {
                 }
             }
         }
-
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicRead(gatt, characteristic, status);
             Log.d(TAG, "读status: " + status);
         }
-
         //向蓝牙设备写入数据结果回调
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-
             if (characteristic.getValue() == null) {
                 Log.e(TAG, "characteristic.getValue() == null");
                 return;
@@ -389,12 +358,10 @@ public class BLEManager {
                 Log.e(TAG, "没有权限！");
             }
         }
-
         //读取蓝牙设备发出来的数据回调
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
-
             //接收数据
             byte[] bytes = characteristic.getValue();
             Log.w("TAG", "收到数据str:" + TypeConversion.bytes2HexString(bytes, bytes.length));
@@ -402,12 +369,10 @@ public class BLEManager {
                 onBleConnectListener.onReceiveMessage(gatt, gatt.getDevice(), characteristic, characteristic.getValue());  //接收数据回调
             }
         }
-
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             super.onDescriptorRead(gatt, descriptor, status);
         }
-
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             super.onDescriptorWrite(gatt, descriptor, status);
@@ -444,14 +409,12 @@ public class BLEManager {
                 if (onBleConnectListener != null) {
                     onBleConnectListener.onMTUSetSuccess("设置后新的MTU值 = " + (mtu - 3) + "   status = " + status, mtu - 3);  //MTU设置成功
                 }
-
             } else if (status == BluetoothGatt.GATT_FAILURE) {  //设置MTU失败
                 Log.e(TAG, "设置MTU值失败：" + (mtu - 3) + ",status" + status);
                 if (onBleConnectListener != null) {
                     onBleConnectListener.onMTUSetFailure("设置MTU值失败：" + (mtu - 3) + "   status：" + status);  //MTU设置失败
                 }
             }
-
         }
     };
     /**
@@ -505,10 +468,8 @@ public class BLEManager {
                 Log.e(TAG, "connectOuttimeRunnable-->mBluetoothGatt == null");
                 return;
             }
-
             isConnectIng = false;
             mBluetoothGatt.disconnect();
-
             //连接超时当作连接失败回调
             if (onBleConnectListener != null) {
                 onBleConnectListener.onConnectFailure(mBluetoothGatt, curConnDevice, "连接超时！", -1);  //连接失败回调
@@ -524,10 +485,8 @@ public class BLEManager {
                 Log.e(TAG, "connectOuttimeRunnable-->mBluetoothGatt == null");
                 return;
             }
-
             isConnectIng = false;
             mBluetoothGatt.disconnect();
-
             //发现服务超时当作连接失败回调
             if (onBleConnectListener != null) {
                 onBleConnectListener.onConnectFailure(mBluetoothGatt, curConnDevice, "发现服务超时！", -1);  //连接失败回调
@@ -574,7 +533,6 @@ public class BLEManager {
             Log.e(TAG, "setupService()-->readUUID == null || writeUUID == null");
             return false;
         }
-
         for (BluetoothGattCharacteristic characteristic : bluetoothGattService.getCharacteristics()) {
             if (characteristic.getUuid().toString().equals(readUUID)) {  //读特征
                 readCharacteristic = characteristic;
@@ -607,9 +565,7 @@ public class BLEManager {
 
             }
         }, 2000);
-
         return true;
-
     }
     /////////////////////////////////////////  打开通知  //////////////////////////////////////////
     /**
@@ -668,8 +624,9 @@ public class BLEManager {
         }
         //系统断开
         mBluetoothGatt.disconnect();
+        closeBluetooth();
         //close()方法应该放在断开回调处，放在此处，会没有回调信息
-//        mBluetoothGatt.close();
+        mBluetoothGatt.close();
     }
     /**
      * 检测手机是否支持4.0蓝牙
@@ -728,7 +685,6 @@ public class BLEManager {
     public void closeBluetooth() {
         if (bluetooth4Adapter == null)
             return;
-
         bluetooth4Adapter.disable();
     }
     /**
