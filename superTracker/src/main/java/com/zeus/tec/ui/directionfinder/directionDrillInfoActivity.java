@@ -2,14 +2,17 @@ package com.zeus.tec.ui.directionfinder;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
+import android.Manifest;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.TextView;
@@ -46,6 +49,11 @@ public class directionDrillInfoActivity extends BaseActivity {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分");
     File picfile = new File(PathUtils.getExternalAppFilesPath()+ File.separator+ "picData" + File.separator + "tmp.png");
     private dirctionfinderDrillHoleInfo info = ProjectInfoManager.getInstance().getOrNewDirctionfinderDrillHoleInfo();
+
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,8 +70,13 @@ public class directionDrillInfoActivity extends BaseActivity {
         });
         binding.tvCapture.setOnClickListener( v-> {
             FeedbackUtil.getInstance().doFeedback();
+            try {
+                resultLauncher.launch(takePhoto(picfile.getAbsolutePath()));
+            }catch (Exception exception){
+                ToastUtils.showLong(exception.getMessage());
+            }
            // resultLauncher.launch(new Intent(MediaStore.ACTION_IMAGE_CAPTURE));
-            resultLauncher.launch(takePhoto(picfile.getAbsolutePath()));
+
         });
         binding.ivSpot.setOnClickListener( v -> {
             FeedbackUtil.getInstance().doFeedback();
@@ -79,9 +92,21 @@ public class directionDrillInfoActivity extends BaseActivity {
             if (result.getResultCode() != RESULT_OK) return;
             onGetPicture(loadBmpChangeSize(picfile,4));
         });
-
         initUI();
+        requestPermissions();
     }
+
+    private void requestPermissions() {
+        String[] permissions = {
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+        };
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
+
+    }
+    private static final int REQUEST_PERMISSIONS = 1;
+    private static final int REQUEST_TAKE_PHOTO = 2;
 
     /**
      *
@@ -124,7 +149,6 @@ public class directionDrillInfoActivity extends BaseActivity {
         binding.edtDesignDirection.setText(TextHelper.safeString(info.designDirection + ""));
         binding.edtDesignAngle.setText(TextHelper.safeString(""+info.designAngle));
         binding.edtAdjustMode.setText(TextHelper.safeString(""+info.adjustMode));
-
     }
 
     private void clickOK() {
@@ -173,11 +197,6 @@ public class directionDrillInfoActivity extends BaseActivity {
         }
         short designAngle = (short) tmp;
 
-        //String adjustModeStr = binding.edtAdjustMode.getText().toString();
-        /*if (adjustModeStr.isEmpty()) {
-            ToastUtils.showLong("校准模式不能为空");
-            return;
-        }*/
         String adjustMode = "";//adjustModeStr;
 
         if (uri == null) {
@@ -245,6 +264,7 @@ public class directionDrillInfoActivity extends BaseActivity {
             }
         });
     }
+
     private void showPhotoView() {
         if (View.GONE == binding.ivSpot.getVisibility()) {
             binding.ivSpot.setVisibility(View.VISIBLE);

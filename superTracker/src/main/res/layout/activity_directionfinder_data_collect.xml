@@ -37,7 +37,6 @@
                 android:text="采集运行"
                 android:textColor="#ffffffff"
                 android:textSize="17sp" />
-
             <TextView
                 android:id="@+id/tv_show_debug"
                 android:layout_width="wrap_content"
@@ -49,7 +48,6 @@
                 android:textSize="15sp"
                 android:visibility="gone"
                 tools:visibility="visible" />
-
             <TextView
                 android:id="@+id/tv_get_data"
                 android:layout_width="wrap_content"

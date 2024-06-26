@@ -43,44 +43,40 @@ public class OKHttpUpdateHttpService implements IUpdateHttpService {
                     public void onError(Call call, Exception e, int id) {
                         callBack.onError(e);
                     }
+
                     @Override
                     public void onResponse(String response, int id) {
-                        String [] versionList = response.split("\n");
-                        String [] newVersion = versionList[versionList.length-1].split(",");
+                        String[] versionList = response.split("\n");
+                        String[] newVersion = versionList[versionList.length - 1].split(",");
 
-                        if (hasNewVersion(newVersion))
-                        {
-                            callBack.onSuccess(versionList[versionList.length-1]);
+                        if (hasNewVersion(newVersion)) {
+                            callBack.onSuccess(versionList[versionList.length - 1]);
                         }
-                        _XUpdate.setCheckUrlStatus(url,false);
+                        _XUpdate.setCheckUrlStatus(url, false);
                     }
                 });
+
     }
 
-    public boolean hasNewVersion (String [] lastVersion){
-        boolean result =false ;
-        int lastCode=1;
-        try{
-             lastCode = Integer.parseInt(lastVersion[1]);
-
-        }catch (Exception e){
+    public boolean hasNewVersion(String[] lastVersion) {
+        boolean result = false;
+        int lastCode = 1;
+        try {
+            lastCode = Integer.parseInt(lastVersion[1]);
+        } catch (Exception e) {
             e.printStackTrace();
-            return false ;
-        }
-        if (versionInfo.versionCode<lastCode)
-        {
-            return true ;
-        }
-        else if (versionInfo.versionCode==lastCode){
-            ToastUtils.showLong("已经是最新版本！");
             return false;
         }
-        else {
+        if (versionInfo.versionCode < lastCode) {
+            return true;
+        } else if (versionInfo.versionCode == lastCode) {
+            ToastUtils.showLong("已经是最新版本！");
+            return false;
+        } else {
             ToastUtils.showLong("该软件可能存在错误，请及时联系生产厂家！");
             return false;
         }
     }
-
 
 
     @Override
@@ -119,6 +115,7 @@ public class OKHttpUpdateHttpService implements IUpdateHttpService {
                     public void inProgress(float progress, long total, int id) {
                         callback.onProgress(progress, total);
                     }
+
                     @Override
                     public void onError(Call call, Exception e, int id) {
                         callback.onError(e);
@@ -140,6 +137,5 @@ public class OKHttpUpdateHttpService implements IUpdateHttpService {
     @Override
     public void cancelDownload(@NonNull String url) {
         OkHttpUtils.getInstance().cancelTag(url);
-
     }
 }

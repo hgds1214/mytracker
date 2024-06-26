@@ -22,6 +22,8 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
+import com.blankj.utilcode.util.ToastUtils;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -610,7 +612,9 @@ public class BLEManager {
 
         boolean b = writeCharacteristic.setValue(TypeConversion.hexString2Bytes(msg));
         Log.d(TAG, "写特征设置值结果：" + b);
-        return mBluetoothGatt.writeCharacteristic(writeCharacteristic);
+        boolean result = mBluetoothGatt.writeCharacteristic(writeCharacteristic);
+       // ToastUtils.showLong(String.valueOf(result));
+        return result ;
     }
     ///////////////////////////////////  断开连接  ///////////////////////////////////////////////
     /**
@@ -624,7 +628,7 @@ public class BLEManager {
         }
         //系统断开
         mBluetoothGatt.disconnect();
-        closeBluetooth();
+       // closeBluetooth();
         //close()方法应该放在断开回调处，放在此处，会没有回调信息
         mBluetoothGatt.close();
     }

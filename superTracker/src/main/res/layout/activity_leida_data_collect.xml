@@ -956,7 +956,6 @@
                             android:textColor="#000000"
                             ></TextView>
 
-
                     </LinearLayout>
                     <ListView
                         android:visibility="visible"
@@ -966,9 +965,7 @@
                         android:background="@drawable/bg_border_606060"
                         tools:visibility="visible"
                         android:layout_marginTop="3dp" />
-
                 </LinearLayout>
-
                 <LinearLayout
                     android:id="@+id/lay_Download_windows"
                     android:visibility="gone"

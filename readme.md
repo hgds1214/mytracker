@@ -468,3 +468,8 @@ implementation 'com.zhy:okhttputils:2.6.2'//鸿洋okhttputils
 2.重构版本号
 3.界面显示无线编码器模块
 和雷达模块(暂时)
+
+### v1.1.2 base(wirelessEncodring)2024-06-26
+
+1.增加深度采样周期设置
+2.优化开始采集和停止采集控制

@@ -18,6 +18,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA"/>
     <!--
  true 表示手机必须支持BLE，否则无法安装！
 	这里设为false, 运行后在Activity中检查

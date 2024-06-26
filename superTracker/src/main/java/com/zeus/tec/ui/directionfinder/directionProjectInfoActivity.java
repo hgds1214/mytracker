@@ -38,16 +38,6 @@ public class directionProjectInfoActivity extends AppCompatActivity {
         binding.edtPresetHeading.setText(TextHelper.safeString(""+info.presetHeading));
         binding.edtLaserError.setText(TextHelper.safeString(""+info.laserLevelError));
 
-//        binding.edtProject.setText(TextHelper.safeString(info.projectId));
-//        //binding.spSampleLength.setSelection(info.sampleLength);
-//        // binding.spFrequency.setSelection(info.frequency);
-//        //   binding.spSampleLength.setOnItemSelectedListener(this);
-//        binding.edtAmp.setText(TextHelper.safeString(""+info.Amp1));
-//        binding.edtDelay.setText(TextHelper.safeString(""+info.Delay1));
-//        binding.edtOverlaynumber.setText(TextHelper.safeString(""+info.overlaynumbe));
-//        binding.edtPipeLength.setText(TextHelper.safeString(""+info.presetHeading));
-//        binding.edtTimeSpace.setText(TextHelper.safeString(""+info.timeSpace));
-//        binding.tvGyRO2.setText(TextHelper.safeString(""+info.GYROThreshold));
     }
 
     private  void tvNext_click (){

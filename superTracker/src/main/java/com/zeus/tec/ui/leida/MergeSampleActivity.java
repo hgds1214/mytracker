@@ -95,14 +95,11 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                // binding.DataListLl.setVisibility(View.VISIBLE);
               //  showStatus = ShowStatus_Datalist;
             }
-
         } catch (Exception exception) {
             ToastUtils.showLong(exception.getMessage());
         }
         // 全屏模式
-
     }
-
     //region 全局变量
     Bitmap graybitmap = null;//灰度图
 
@@ -115,9 +112,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
 
     private static final int DrawSample_Success = 0x01;
     private static final int DrawGrayMap_Success = 0x02;
-
-
-
     private boolean isDrawing = false;
     private double[] maxList;
     private double[] minList;
@@ -135,10 +129,8 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     private final int ShowStatus_SampleMap = 0x02;
     private final int ShowStatus_Datalist = 0x03;
     private int showStatus = Showstatus_GrayMap;
-
     private int photoViewWidth = 1280;
     private int photoViewHeight = 500;
-
     //endregion
 
     //控件绘制完场后获取宽高
@@ -231,7 +223,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                 view.setSelected(true);
                 view.findViewById(R.id.serial_tv);
                 drawOneSample(MergeCache.probePointList.get(currentIndex+position),binding.onePointSamplePhoto,currentIndex+position+1);
-              //  drawOneSampleChart(MergeCache.probePointList.get(currentIndex+position));
             });
         }
     }
@@ -304,60 +295,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
 
         sampleFill.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isSampleFill = position == 0);
         spinner_isLoose.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isLoose = position == 0);
-
-//        Description onedescription = new Description();
-//        onedescription.setText("Current Waveform");
-//        onedescription.setTextColor(Color.GREEN);
-//        onedescription.setYOffset(15);
-//        binding.onePointSampleChart.setDescription(onedescription);
-//        initLineChart(binding.onePointSampleChart);
-    }
-
-    private void initLineChart(LineChart chart) {
-
-
-        XAxis xAxis = chart.getXAxis();
-        //   oneSampleChart.animateY(1000);
-        //  oneSampleChart.animateX(1000);
-        chart.setDrawBorders(false);
-        chart.setMinOffset(0);
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
-        xAxis.setEnabled(true);
-        xAxis.setTextColor(Color.WHITE);
-        xAxis.setGridLineWidth(1);
-        xAxis.setDrawGridLinesBehindData(true);
-        xAxis.setAvoidFirstLastClipping(false);
-        DashPathEffect dashPathEffect = new DashPathEffect(new float[] {5f,5f},1);
-        xAxis.setGridDashedLine(dashPathEffect );
-        xAxis.setAxisLineWidth(2);
-
-        xAxis.setLabelCount(8);
-        YAxis leftYAxis = chart.getAxisLeft();
-        YAxis rightYaxis = chart.getAxisRight();
-        leftYAxis.setEnabled(true);
-        leftYAxis.setDrawGridLines(true);
-        leftYAxis.setGridDashedLine(dashPathEffect);
-        leftYAxis.setDrawGridLinesBehindData(true);
-        leftYAxis.setGridLineWidth(1);
-        leftYAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
-        leftYAxis.setTextColor(Color.WHITE);
-        leftYAxis.setDrawZeroLine(true);
-        leftYAxis.setYOffset(5);
-
-        Legend legend = chart.getLegend();
-        legend.setForm(Legend.LegendForm.LINE);
-        legend.setTextSize(12f);
-        legend.setDrawInside(false);
-        rightYaxis.setEnabled(false);
-        legend.setEnabled(false);
-        DataCache.SampleBean oneSample = new DataCache.SampleBean();
-        oneSample.Sample = new float[1024];
-        oneSample.SampleLength = 1024;
-        oneSample.Max = 1024;
-        oneSample.Min = 0;
-       // drawFirstSampleChart( oneSample,chart);
-        // leftYAxis.setEnabled(false);
-
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -499,12 +436,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                 y = y1;
                 x = x1;
             }
-
-      //  depthScaleBmp = Bitmap.createBitmap(50, ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), Bitmap.Config.ARGB_8888);
-        //Canvas depthCanvas = new Canvas();
-       // canvas.setBitmap(depthScaleBmp);
         float maxDepth = ((1.0f / MergeCache.dataHeader.SampleFrequency) * 512f * MergeCache.sampleSpeed) / 2;
-       // canvas.drawColor(Color.argb(0, 0, 0, 0));
         Scale DepthScale = new Scale(
                 canvas.getWidth(),
                 canvas.getHeight() ,
@@ -521,10 +453,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                 10
         );
         DepthScale.drawScale(canvas, 0, 0, scaleHeight, canvas.getHeight());
-
         photoView.setImageBitmap(oneSampleBmp);
-
-
     }
 
     private void drawGrayMapBmp() {
@@ -623,7 +552,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         red = (int) (MergeCache.currentColorMap.get(step)[1] - MergeCache.currentColorMap.get(step)[4] * (MergeCache.currentColorMap.get(step)[0] - value));
         green = (int) (MergeCache.currentColorMap.get(step)[2] - MergeCache.currentColorMap.get(step)[5] * (MergeCache.currentColorMap.get(step)[0] - value));
         blue = (int) (MergeCache.currentColorMap.get(step)[3] - MergeCache.currentColorMap.get(step)[6] * (MergeCache.currentColorMap.get(step)[0] - value));
-
         return Color.argb(255, red, green, blue);
     }
 
@@ -649,8 +577,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         // paint.setStyle(Paint.Style.FILL);
         // 文本水平居左对齐
         binding.loadingAvi.setVisibility(View.VISIBLE);
-
-        // paint.setTextAlign(Paint.Align.LEFT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             isDrawing = true;
             Thread drawThread = new Thread(() -> drawSample(canvas));

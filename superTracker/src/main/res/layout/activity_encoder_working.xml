@@ -14,7 +14,6 @@
         android:gravity="center_horizontal"
         android:orientation="vertical"
         tools:context="com.zeus.tec.ui.HomeActivity">
-
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="40dp"
@@ -94,13 +93,13 @@
             android:layout_height="70dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
-
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
+
                 <com.zeus.tec.ui.widget.CountTimeTextView
                     android:id="@+id/tv_count_time"
                     android:layout_width="wrap_content"
@@ -108,7 +107,6 @@
                     android:text="00:00:00"
                     android:textColor="#ffffffff"
                     android:textSize="22sp" />
-
                 <TextView
                     android:id="@+id/tv_count_time_label"
                     android:layout_width="wrap_content"
@@ -179,7 +177,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="编码深度"
+                        android:text="编码深度(nm)"
                         android:textColor="#ff606060"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -202,7 +200,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
+                        android:layout_marginTop="10dp"
                         android:text="深度(m)"
                         android:textColor="#ff606060"
                         android:textSize="13sp" />
@@ -210,23 +208,28 @@
 
                 <LinearLayout
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tv_24"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="#ff222222"
-                        android:textSize="22sp" />
+                    <EditText
+                        android:id="@+id/tv_frenquence_depth"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:maxLength="8"
+                        android:text="50"
+                        android:inputType="numberDecimal"
+                        android:paddingLeft="10dp"
+                        android:hint="请输入"
+                        android:textColorHint="#bbbbbb"
+                        android:textColor="#333333"
+                        android:gravity="center"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="滑轮方向"
+                        android:text="深度采样周期(ms)"
                         android:textColor="#ff606060"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -432,17 +435,9 @@
                     android:visibility="gone"
                     android:orientation="vertical"
                     tools:visibility="visible"
+                    android:layout_marginTop="25dp"
                     >
-                    <TextView
-                        android:id="@+id/tv_device_listTitle"
-                        android:layout_width="match_parent"
-                        android:text="设备列表"
-                        android:background="@drawable/btn_collect_bg"
-                        android:textColor="#ffffff"
-                        android:gravity="center"
-                        android:layout_height="30dp">
 
-                    </TextView>
                     <TextView
                         android:id="@+id/tv_not_device"
                         android:layout_width="match_parent"
@@ -481,25 +476,17 @@
                         android:textColor="#ffffff"
                         android:textSize="20dp"></TextView>
                     <TextView
-                        android:id="@+id/tv_point_record"
+                        android:id="@+id/tv_set_frenquence"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_finish_bg"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="测点记录"
+                        android:text="设置采样频率"
                         android:textColor="#000000"
                         android:textSize="20dp"/>
                 </LinearLayout>
 
-                <ScrollView
-                    android:visibility="visible"
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="35dp"
-                    android:layout_height="wrap_content"
-                    tools:visibility="visible"
-                    >
-                </ScrollView>
             </RelativeLayout>
         </LinearLayout>
         <androidx.legacy.widget.Space
@@ -507,18 +494,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/start_button"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_marginLeft="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/btn_collect_bg"
-            android:enabled="true"
-            android:gravity="center"
-            android:text="深度归零"
-            android:textColor="#ffffffff"
-            android:textSize="16sp" />
+
     </LinearLayout>
     <LinearLayout
         android:id="@+id/llBtns"
@@ -540,6 +516,18 @@
             android:textSize="16sp"
             android:background="@drawable/btn_finish_bg"
             />
+        <TextView
+            android:id="@+id/start_button"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginLeft="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/btn_collect_bg"
+            android:enabled="true"
+            android:gravity="center"
+            android:text="深度归零"
+            android:textColor="#ffffffff"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_begin_working"
