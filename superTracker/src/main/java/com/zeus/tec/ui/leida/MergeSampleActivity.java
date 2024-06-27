@@ -88,19 +88,13 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
             Intent intent = getIntent();
             int tmpa = intent.getIntExtra("INT_KEY",3);
             if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Success) {
-               // binding.DataListLl.setVisibility(View.GONE);
-               // binding.mainShowFrg.setVisibility(View.VISIBLE);
-            } else if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Fail) {
-               // binding.mainShowFrg.setVisibility(View.GONE);
-               // binding.DataListLl.setVisibility(View.VISIBLE);
-              //  showStatus = ShowStatus_Datalist;
             }
-
+            else if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Fail) {
+            }
         } catch (Exception exception) {
             ToastUtils.showLong(exception.getMessage());
         }
         // 全屏模式
-
     }
 
     //region 全局变量
@@ -167,7 +161,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         getGlobalMax();
         isSampleFill = true;
     }
-
     int currentIndex =0;
 
     private void initListener() {
@@ -292,73 +285,24 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         highFreq.attachDataSource(highfreqList);
         sampleFill.attachDataSource(sampleFillList);
         sampleCount_Spinner.attachDataSource(sampleCountList);
-        if (MergeCache.lstPointsOrder.size() > 80) {
-            binding.sampleCountSpinner.setSelectedIndex(2);
+        if (MergeCache.lstPointsOrder.size() > 160) {
+            binding.sampleCountSpinner.setSelectedIndex(4);
             // imageRatioSpinner.setSelectedIndex(2);
-        } else {
-            binding.sampleCountSpinner.setSelectedIndex(1);
+        } else if (MergeCache.lstPointsOrder.size() >80 )   {
+            binding.sampleCountSpinner.setSelectedIndex(2);
             // imageRatioSpinner.setSelectedIndex(1);
+        }
+        else {
+            binding.sampleCountSpinner.setSelectedIndex(1);
         }
         lowFreq.setOnSpinnerItemSelectedListener((parent, view, position, id) -> low1 = lowfreq[position]);
         highFreq.setOnSpinnerItemSelectedListener((parent, view, position, id) -> high1 = highfreq[position]);
 
         sampleFill.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isSampleFill = position == 0);
-        spinner_isLoose.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isLoose = position == 0);
-
-//        Description onedescription = new Description();
-//        onedescription.setText("Current Waveform");
-//        onedescription.setTextColor(Color.GREEN);
-//        onedescription.setYOffset(15);
-//        binding.onePointSampleChart.setDescription(onedescription);
-//        initLineChart(binding.onePointSampleChart);
-    }
-
-    private void initLineChart(LineChart chart) {
-
-
-        XAxis xAxis = chart.getXAxis();
-        //   oneSampleChart.animateY(1000);
-        //  oneSampleChart.animateX(1000);
-        chart.setDrawBorders(false);
-        chart.setMinOffset(0);
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM_INSIDE);
-        xAxis.setEnabled(true);
-        xAxis.setTextColor(Color.WHITE);
-        xAxis.setGridLineWidth(1);
-        xAxis.setDrawGridLinesBehindData(true);
-        xAxis.setAvoidFirstLastClipping(false);
-        DashPathEffect dashPathEffect = new DashPathEffect(new float[] {5f,5f},1);
-        xAxis.setGridDashedLine(dashPathEffect );
-        xAxis.setAxisLineWidth(2);
-
-        xAxis.setLabelCount(8);
-        YAxis leftYAxis = chart.getAxisLeft();
-        YAxis rightYaxis = chart.getAxisRight();
-        leftYAxis.setEnabled(true);
-        leftYAxis.setDrawGridLines(true);
-        leftYAxis.setGridDashedLine(dashPathEffect);
-        leftYAxis.setDrawGridLinesBehindData(true);
-        leftYAxis.setGridLineWidth(1);
-        leftYAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
-        leftYAxis.setTextColor(Color.WHITE);
-        leftYAxis.setDrawZeroLine(true);
-        leftYAxis.setYOffset(5);
-
-        Legend legend = chart.getLegend();
-        legend.setForm(Legend.LegendForm.LINE);
-        legend.setTextSize(12f);
-        legend.setDrawInside(false);
-        rightYaxis.setEnabled(false);
-        legend.setEnabled(false);
-        DataCache.SampleBean oneSample = new DataCache.SampleBean();
-        oneSample.Sample = new float[1024];
-        oneSample.SampleLength = 1024;
-        oneSample.Max = 1024;
-        oneSample.Min = 0;
-       // drawFirstSampleChart( oneSample,chart);
-        // leftYAxis.setEnabled(false);
+        spinner_isLoose.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isLoose = position == 1);
 
     }
+
 
     @SuppressLint("NonConstantResourceId")
     @Override

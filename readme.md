@@ -457,3 +457,11 @@ implementation 'com.zhy:okhttputils:2.6.2'//鸿洋okhttputils
 3.增加单个数据波形浏览
 
 4.增加合并成功与合并失败的提示
+
+### v2.3.5relese(Radan)0627
+
+1.修改缺省的陀螺阈值为40
+
+2.修改默认的采样间距为50
+
+3.修改波列显示规则

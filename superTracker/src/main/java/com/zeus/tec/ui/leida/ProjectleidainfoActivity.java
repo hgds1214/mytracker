@@ -86,26 +86,18 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
             }
         });
 
-        //binding.spSampleLength.setAdapter(startAdapter);
-       // binding.spSampleLength.setOnItemSelectedListener(this);
-        //binding.spFrequency.setOnItemSelectedListener(this);
-       // binding.spFrequency.setAdapter(frequencyAdapter);
         binding.tvNext.setOnClickListener( v-> {
             FeedbackUtil.getInstance().doFeedback();
             clickNext();
         });
 
         initUI();
-        //setContentView(R.layout.activity_projectleidainfo);
     }
 
 
     //region 初始化UI
     private void  initUI (){
         binding.edtProject.setText(TextHelper.safeString(info.projectId));
-       //binding.spSampleLength.setSelection(info.sampleLength);
-       // binding.spFrequency.setSelection(info.frequency);
-     //   binding.spSampleLength.setOnItemSelectedListener(this);
         binding.edtAmp.setText(TextHelper.safeString(""+info.Amp1));
         binding.edtDelay.setText(TextHelper.safeString(""+info.Delay1));
         binding.edtOverlaynumber.setText(TextHelper.safeString(""+info.overlaynumbe));
@@ -163,8 +155,8 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
             return;
         }
         float timeSpace = Float.parseFloat(edtTimeSpace);
-        if (timeSpace < 100 || timeSpace > 1000) {
-            ToastUtils.showLong("时间间隔只能是100到"+1000+"之间");
+        if (timeSpace < 10 || timeSpace > 1000) {
+            ToastUtils.showLong("时间间隔只能是10到"+1000+"之间");
             return;
         }
         String GYRO = binding.tvGyRO2.getText().toString();
@@ -173,8 +165,8 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
             ToastUtils.showLong("陀螺阈值");
         }
         float GYRO1 = Float.parseFloat(GYRO);
-        if (GYRO1<66){
-            ToastUtils.showLong("陀螺阈值必须大于66！");
+        if (GYRO1<5){
+            ToastUtils.showLong("陀螺阈值必须大于5！");
             return;
         }
         if (TrackerDBManager.isHaveData(project).size()==0)
@@ -311,17 +303,6 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
             else
             {
                 saveData(path,finalContent,rootPath,cache);
-             //   FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite);
-              //  StreamWriter sw = new StreamWriter(fs);
-              //  IOtool.saveText(path,content);
-                //sw.WriteLine(content);
-               // sw.Close();
-               // fs.Close();
-               // TrackerDBManager.saveOrUpdate(info);
-              //  String filePath = cache.FileSavePath +"/"+ "sys.properties";
-                //InitUtil.Write("Local", "ProjectName", Name, filePath);
-              //  cache.properties.setProperty("ProjectName",info.projectId);
-               // INIutil.writeproperties(cache.properties,filePath);
 
                 if (!cache.RefreshInitFile())
                 {

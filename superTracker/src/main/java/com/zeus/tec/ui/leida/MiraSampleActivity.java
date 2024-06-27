@@ -55,7 +55,6 @@ public class MiraSampleActivity extends AppCompatActivity {
         }
         transparentNavBar(this);
 
-
         oneSampleChart = binding.chartSample;
         DataCache.SampleBean oneSample = new DataCache.SampleBean();
         oneSample.Sample = new float[1024];
@@ -86,8 +85,6 @@ public class MiraSampleActivity extends AppCompatActivity {
         onedescription.setTextColor(Color.YELLOW);
 
         oneSampleChart.setDescription(onedescription);
-
-
         // oneSampleChart.setRotation(90);
         //oneSampleChart.setFitsSystemWindows(true);
     }

@@ -130,8 +130,6 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
         refreshData();
     }
 
-
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void bindingData (leida_info info){
         if (info.dataPath==null){
