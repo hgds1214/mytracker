@@ -154,24 +154,7 @@ public class DataCache {
 
     }
 
-    /*public void InitSamples(int MainWidth, int MainHeight, int LastWidth, int LastHeight)
-    {
-        LastNo = 0;
-        SampleQue.Clear();
-        ImageList.Clear();
-        ScreenWidth = MainWidth;
-        ScreenHeight = MainHeight;
-        SampleWidth = ScreenWidth / ShowSampleNum;
-        SampleHeight = ScreenHeight;
-        this.LastWidth = LastWidth;
-        this.LastHeight = LastHeight;
 
-        LastSampleRect = new Rectangle(0, 0, LastWidth, LastHeight);
-
-        if (MainImage != null)
-            MainImage.Dispose();
-        MainImage = new Bitmap(ScreenWidth, ScreenHeight);
-    }*/
 
   public void CreateSendSocket() throws IOException, InterruptedException {
       mainCache.CloseReceiveThread();

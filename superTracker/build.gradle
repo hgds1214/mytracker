@@ -16,8 +16,8 @@ android {
         targetSdkVersion 32
         vectorDrawables.useSupportLibrary = true
 
-        versionCode 234
-        versionName "V2.3.4(radan)"
+        versionCode 300
+        versionName "V3.0.0(whcs)"
 
         missingDimensionStrategy 'device', 'anyDevice'
 

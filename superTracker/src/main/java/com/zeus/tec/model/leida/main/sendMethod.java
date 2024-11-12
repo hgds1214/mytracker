@@ -4,6 +4,7 @@ import android.os.Environment;
 import android.widget.Toast;
 
 import com.zeus.tec.model.leida.leida_info;
+
 import com.zeus.tec.ui.leida.LeidaDataCollectActivity;
 import com.zeus.tec.ui.leida.util.ConvertCode;
 import com.zeus.tec.ui.leida.util.IOtool;
@@ -22,7 +23,6 @@ public class sendMethod {
 
     public int OutTime = 0;
     public int DataSize = 0;
-    // char pathChar = Path.AltDirectorySeparatorChar;//  获取：系统路径分隔符
     public byte code = 0x00;
     MainCache cache = MainCache.GetInstance();
     leida_info leidaInfo = leida_info.GetInstance();
@@ -142,9 +142,6 @@ public class sendMethod {
                     TotalLength = (int) cache.DeviceOper.TotalLength;
                     int length = cache.DeviceOper.Data.length;
                     String Datapath =tmpPath;
-                    //IOtool.writeToFileInPrivateSpace(,"leidaData.dat",cache.DeviceOper.Data);
-                    //   fos.Write(cache.DeviceOper.Data, 0, length);
-                    //  fos.Flush();
                     IOtool.saveText(Datapath, cache.DeviceOper.Data, true);
                     CurrentLength = CurrentLength + length;
                     if (CurrentLength >= TotalLength) {

@@ -59,7 +59,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.zip.ZipEntry;
@@ -67,7 +69,7 @@ import java.util.zip.ZipOutputStream;
 
 public class directionfinderDataCollectActivity extends AppCompatActivity implements View.OnClickListener {
 
-    //region 全局变量
+    //region /*******全局变量********/
     public static final String SERVICE_UUID = "49535343-fe7d-4ae5-8fa9-9fafd205e455";  //蓝牙通讯服务
     public static final String READ_UUID = "49535343-1e4d-4bd9-ba61-23c647249616";  //读特征
     public static final String WRITE_UUID = "49535343-8841-43f4-a8d4-ecbe34729bb3";  //写特征
@@ -112,6 +114,8 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
     private directionfinderPointRecordApater directionfinderPointRecordApater;
 
     //endregion
+
+
     public ActivityDirectionfinderDataCollectBinding binding;
 
     @Override
@@ -177,12 +181,10 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
             binding.tvTImeSpace.setText(String.valueOf(drillInfo.compassCalibrationError));
             binding.tvGyro.setText(String.valueOf(drillInfo.presetHeading));
             binding.tvIsDownload.setText(String.valueOf(drillInfo.laserLevelError));
-
         } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
-
 
     public static void launch(Context context, long drillInfoId) {
         launch(context, drillInfoId, 0);
@@ -250,8 +252,7 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                     recordInfo.relativeAngle = relativeAngle;
                     recordInfo.recordTime = sdf.format(new Date(System.currentTimeMillis()));
                     directionfinderPointRecordApater.addPointRecord(recordInfo);
-                }
-                else {
+                } else {
                     Toast.makeText(mContext, "请先进入寻北模式", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -264,10 +265,10 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                                 TrackerDBManager.saveOrUpdate(directionfinderPointRecordApater.DirectionfinderPointRecordInfo.get(downloadNumber + i));
                             }
                             SimpleDateFormat sdfTmp = new SimpleDateFormat("yyyyMMdd-HHmmss");
-                            String curTime =   sdfTmp.format(new Date(System.currentTimeMillis()));
+                            String curTime = sdfTmp.format(new Date(System.currentTimeMillis()));
                             String projectRoot = drillInfo.projectRoot;
-                            if (drillInfo.dataPath.equals("")){
-                                drillInfo.dataPath = projectRoot + File.separator+ curTime+".csv";
+                            if (drillInfo.dataPath.equals("")) {
+                                drillInfo.dataPath = projectRoot + File.separator + curTime + ".csv";
                             }
                             File pR = new File(drillInfo.dataPath);
                             if (pR.exists()) {
@@ -278,35 +279,33 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                                         try {
                                             pR.createNewFile();
                                             writeData(drillInfo.dataPath);
-                                            if (drillInfo.zipPath.equals("")){
-                                                drillInfo.zipPath = projectRoot+File.separator+curTime+"zip.zip";
+                                            if (drillInfo.zipPath.equals("")) {
+                                                drillInfo.zipPath = projectRoot + File.separator + curTime + "zip.zip";
                                             }
-                                            zipFiles(drillInfo.zipPath,drillInfo.dataPath,drillInfo.livePhotos);
+                                            zipFiles(drillInfo.zipPath, drillInfo.dataPath, drillInfo.livePhotos);
                                             Toast.makeText(directionfinderDataCollectActivity.this, changeNumber + "个测点数据保存成功", Toast.LENGTH_LONG).show();
                                             downloadNumber = directionfinderPointRecordApater.DirectionfinderPointRecordInfo.size();
-                                        }
-                                        catch (Exception ex){
+                                        } catch (Exception ex) {
                                             ex.printStackTrace();
                                         }
                                     }
+
                                     @Override
                                     public void onNegativeButtonClick() {
 
                                     }
                                 });
-                            }
-                            else {
+                            } else {
                                 try {
                                     pR.createNewFile();
                                     writeData(drillInfo.dataPath);
-                                    if (drillInfo.zipPath.equals("")){
-                                        drillInfo.zipPath = projectRoot+File.separator+curTime+"zip.zip";
+                                    if (drillInfo.zipPath.equals("")) {
+                                        drillInfo.zipPath = projectRoot + File.separator + curTime + "zip.zip";
                                     }
-                                    zipFiles(drillInfo.zipPath,drillInfo.dataPath,drillInfo.livePhotos);
+                                    zipFiles(drillInfo.zipPath, drillInfo.dataPath, drillInfo.livePhotos);
                                     Toast.makeText(directionfinderDataCollectActivity.this, changeNumber + "个测点数据保存成功", Toast.LENGTH_LONG).show();
                                     downloadNumber = directionfinderPointRecordApater.DirectionfinderPointRecordInfo.size();
-                                }
-                                catch (Exception exception){
+                                } catch (Exception exception) {
                                     exception.printStackTrace();
                                 }
                             }
@@ -321,17 +320,22 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                     Toast.makeText(directionfinderDataCollectActivity.this, "测点数据不存在", Toast.LENGTH_LONG).show();
                 }
                 break;
+            case R.id.iv_back:
+                FeedbackUtil.getInstance().doFeedback();
+                finish();
+                break;
+
         }
     }
 
-    private  void  writeData (String csvFilePath){
+    private void writeData(String csvFilePath) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFilePath))) {
             // 写入CSV文件头部
             writer.write("项目名称,钻孔编号,方向角,倾斜角,相关角,采集时间,检查员");
             writer.newLine();
             for (int i = 0; i < directionfinderPointRecordApater.DirectionfinderPointRecordInfo.size(); i++) {
-                directionfinderPointRecordInfo  dirRecordInfo = directionfinderPointRecordApater.DirectionfinderPointRecordInfo.get(i);
-                String line =  drillInfo.projectName +"," + drillInfo.drillHoleId +","+dirRecordInfo.oritentionAngle+","+dirRecordInfo.dipAngle+","+dirRecordInfo.relativeAngle+","+dirRecordInfo.recordTime+","+drillInfo.detector;
+                directionfinderPointRecordInfo dirRecordInfo = directionfinderPointRecordApater.DirectionfinderPointRecordInfo.get(i);
+                String line = drillInfo.projectName + "," + drillInfo.drillHoleId + "," + dirRecordInfo.oritentionAngle + "," + dirRecordInfo.dipAngle + "," + dirRecordInfo.relativeAngle + "," + dirRecordInfo.recordTime + "," + drillInfo.detector;
                 writer.write(line);
                 writer.newLine();
             }
@@ -342,8 +346,7 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
     }
 
     /**
-     *
-     * @param zipFilePath zip文件存放路径
+     * @param zipFilePath     zip文件存放路径
      * @param sourceFilePaths 需要压缩的原文件路径
      */
     public static void zipFiles(String zipFilePath, String... sourceFilePaths) {
@@ -399,7 +402,7 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                     BLEDevice bleDevice = (BLEDevice) msg.obj;
                     String bleDeviceName = bleDevice.getBluetoothDevice().getName();
                     if (bleDeviceName != null) {
-                        if (bleDeviceName.contains("YHZ")) {
+                        if (bleDeviceName.contains("YHZ") || bleDeviceName.contains("HLK")) {
 
                             lvDevicesAdapter.addDevice(bleDevice);
                             if (binding.tvNotDevice.getVisibility() == View.VISIBLE) {
@@ -410,8 +413,6 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                     break;
 
                 case SELECT_DEVICE:
-                    //  tvName.setText(bluetoothDevice.getName());
-                    // tvAddress.setText(bluetoothDevice.getAddress());
                     curBluetoothDevice = (BluetoothDevice) msg.obj;
                     binding.ivStep1.setState(1);
                     binding.tvStep1Text.setText("正在连接设备：" + curBluetoothDevice.getName());
@@ -487,11 +488,16 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
     };
 
     private byte[] angelByte = new byte[2];
+    private byte[] distanceByte = new byte[4];
     double orientationAngle = 0;
     double dipAngle = 0;
     double relativeAngle = 0;
     double elct = 0;
+    double distance = 0;
     boolean firstTime = true;
+    String errorCode;
+    DecimalFormat df =new DecimalFormat("#0.0");
+    DecimalFormat df2 =new DecimalFormat("#0.00");
 
     private void receiveMessage(byte[] recBufSuc) {
         if (recBufSuc[0] == 0x5a && (recBufSuc[1] & 0xFF) == 0xa5) {
@@ -516,11 +522,10 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                     binding.tv23.setText(String.valueOf(dipAngle));
                     binding.tv21.setText(String.valueOf(elct));
                     binding.tv22.setText(String.valueOf(orientationAngle));
-                    if (!binding.tvStatus.getText().equals("寻北完成")){
+                    if (!binding.tvStatus.getText().equals("寻北完成")) {
                         binding.tvStatus.setText("寻北完成");
                     }
-                    if (binding.tvCountTime.getText().equals("00:00:00")&&firstTime)
-                    {
+                    if (binding.tvCountTime.getText().equals("00:00:00") && firstTime) {
                         firstTime = false;
                         long currentTime = System.currentTimeMillis();
                         binding.tvCountTime.setStartTime(currentTime);
@@ -528,7 +533,8 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                     }
 
                 }
-            } else if (recBufSuc[2] == 0x05 && recBufSuc[3] == 0x06) {
+            }
+            else if (recBufSuc[2] == 0x05 && recBufSuc[3] == 0x06) {
                 switch (recBufSuc[4]) {
                     case 0x01:
                         binding.tvStatus.setText("开始启动");
@@ -556,12 +562,12 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                         binding.tvStatus.setText("启动失败");
                         break;
                 }
-            } else if (recBufSuc[2] == 0x06 && recBufSuc[3] == 0x07) {
+            }
+            else if (recBufSuc[2] == 0x06 && recBufSuc[3] == 0x07) {
                 int sec = (recBufSuc[4] & 0xff) * 256 + (int) (recBufSuc[5] & 0xff);
                 int min = sec / 60;
                 sec = sec % 60;
-                if (!binding.tvStatus.getText().equals("正在寻北"))
-                {
+                if (!binding.tvStatus.getText().equals("正在寻北")) {
                     binding.tvStatus.setText("正在寻北");
                 }
                 binding.tvCountTimeLabel.setText("寻北时间");
@@ -578,6 +584,143 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
                     binding.tvStatus.setText("关闭激光");
                 }
             }
+            else if (recBufSuc[2] == 0x0b && recBufSuc[3] == 0x13)
+            {
+                angelByte[0] = recBufSuc[4];
+                angelByte[1] = recBufSuc[5];
+                orientationAngle = ((double) ConvertCode.getushort(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
+
+                angelByte[0] = recBufSuc[6];
+                angelByte[1] = recBufSuc[7];
+                dipAngle = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
+
+                angelByte[0] = recBufSuc[8];
+                angelByte[1] = recBufSuc[9];
+                relativeAngle = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
+
+                angelByte[0] = recBufSuc[10];
+                angelByte[1] = recBufSuc[11];
+                elct = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 1000;
+                distanceByte[0] = recBufSuc[12];
+                distanceByte[1] = recBufSuc[13];
+                distanceByte[2] = recBufSuc[14];
+                distanceByte[3] = recBufSuc[15];
+
+                try {
+                    distance = (double) ByteBuffer.wrap(distanceByte).order(ByteOrder.BIG_ENDIAN).getInt();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (!binding.tvStatus.getText().equals("寻北完成")) {
+                    binding.tvStatus.setText("寻北完成");
+                }
+                binding.tv24.setText(df2.format(distance/1000));
+                binding.tv23.setText(String.valueOf(dipAngle));
+                binding.tv21.setText(df.format(elct)+"v");
+                binding.tv22.setText(String.valueOf(orientationAngle));
+                binding.tv66.setText("距离(m)");
+                errorCode = String.format("%8s", Integer.toBinaryString(recBufSuc[16] & 0xFF)).replace(' ', '0');
+                errorCode = String.format("%8s", Integer.toBinaryString(recBufSuc[17] & 0xFF)).replace(' ', '0') + errorCode;
+                readErrorCode(errorCode);
+            }
+            else if
+            (recBufSuc[2] == 0x0c && recBufSuc[3] == 0x0a) {
+                String w = String.valueOf(recBufSuc[4]);
+                int n = recBufSuc[5];
+                int r = recBufSuc[6];
+                if (recBufSuc[4]==78 && (n == 18)&&recBufSuc[6]==49 ) {
+                    binding.tvStatus.setText("寻北完成");
+                } else {
+                   // binding.tvStatus.setText("正在寻北");
+                }
+                errorCode = String.format("%8s", Integer.toBinaryString(recBufSuc[7] & 0xFF)).replace(' ', '0');
+                errorCode = String.format("%8s", Integer.toBinaryString(recBufSuc[8] & 0xFF)).replace(' ', '0') + errorCode;
+                readErrorCode(errorCode);
+            }
+            else if
+            (recBufSuc[2] == 0x0b && recBufSuc[3] == 0x0f){
+                angelByte[0] = recBufSuc[4];
+                angelByte[1] = recBufSuc[5];
+                orientationAngle = ((double) ConvertCode.getushort(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
+
+                angelByte[0] = recBufSuc[6];
+                angelByte[1] = recBufSuc[7];
+                dipAngle = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
+
+                angelByte[0] = recBufSuc[8];
+                angelByte[1] = recBufSuc[9];
+                relativeAngle = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 100;
+
+                angelByte[0] = recBufSuc[10];
+                angelByte[1] = recBufSuc[11];
+                elct = ((double) ConvertCode.getint16(angelByte, ByteOrder.BIG_ENDIAN)) / 1000;
+
+                binding.tv24.setText(String.valueOf(0));
+                binding.tv23.setText(String.valueOf(dipAngle));
+                binding.tv21.setText(String.valueOf(elct));
+                binding.tv22.setText(String.valueOf(orientationAngle));
+                binding.tv66.setText("距离");
+                errorCode = String.format("%8s", Integer.toBinaryString(recBufSuc[12] & 0xFF)).replace(' ', '0');
+                errorCode = String.format("%8s", Integer.toBinaryString(recBufSuc[13] & 0xFF)).replace(' ', '0') + errorCode;
+                readErrorCode(errorCode);
+            }
+        }
+    }
+
+    private String[] errorMsg =
+            {
+                    "B15纬度测算异常，应重新寻北",
+                    "B14电机转位4光纤陀螺检测溢出",
+                    "B13电机转位3光纤陀螺检测溢出",
+                    "B12电机转位2光纤陀螺检测溢出",
+                    "B11电机转位1光纤陀螺检测溢出",
+                    "B10IMU陀螺检测到冲击震动，在寻北中为1，应重新寻北",
+                    "B9IMU加速度检测到冲击震动，在寻北中为1，应重新寻北",
+                    "B8寻北时寻北仪倾角过大(>=20°)，角度过大会导致寻北航向误差增大",
+                    "B7马达故障，应重新寻北",
+                    "B6光纤陀螺仪自校失败或寻北过程中光纤陀螺仪角速度过大，应重新寻北",
+                    "B5IMU MEMS上电自检失败，此故障提示应放弃寻北",
+                    "B4IMU角速度超量程，会影响航向保持精度",
+                    "B3IMU加速度超量程，应重新寻北",
+                    "B2纬度测算异常，应重新寻北",
+                    "B1保留位",
+                    "B0保留位",
+            };
+
+    //region errorMsg 寻北状态错误信息
+
+//        private final String B15ErrorCode = "纬度测算异常，应重新寻北";
+//        private final String B14ErrorCode = "电机转位4光纤陀螺检测溢出";
+//        private final String B13ErrorCode = "电机转位3光纤陀螺检测溢出";
+//        private final String B12ErrorCode = "电机转位2光纤陀螺检测溢出";
+//        private final String B11ErrorCode = "电机转位1光纤陀螺检测溢出";
+//        private final String B10ErrorCode = "IMU陀螺检测到冲击震动，在寻北中为1，应重新寻北";
+//        private final String B9ErrorCode = "IMU加速度检测到冲击震动，在寻北中为1，应重新寻北";
+//        private final String B8ErrorCode = "寻北时寻北仪倾角过大(>=20°)，角度过大会导致寻北航向误差增大";
+//        private final String B7ErrorCode = "马达故障，应重新寻北";
+//        private final String B6ErrorCode = "光纤陀螺仪自校失败或寻北过程中光纤陀螺仪角速度过大，应重新寻北";
+//        private final String B5ErrorCode = "IMU MEMS上电自检失败，此故障提示应放弃寻北";
+//        private final String B4ErrorCode = "IMU角速度超量程，会影响航向保持精度";
+//        private final String B3ErrorCode = "IMU加速度超量程，应重新寻北";
+//        private final String B2ErrorCode = "纬度测算异常，应重新寻北";
+//        private final String B1ErrorCode = "B1保留位";
+//        private final String B0ErrorCode = "B0保留位";
+
+
+    //endregion
+
+
+    private void readErrorCode(String errorCode) {
+        if (errorCode.equals("0000000000000000")) {
+
+        } else {
+            char[] errorChar = errorCode.toCharArray();
+            for (int i = 0; i < errorChar.length-2; i++) {
+                if (errorChar[i] == '1') {
+                    ToastUtils.showLong(errorMsg[i]);
+                }
+            }
+
         }
     }
 
@@ -610,6 +753,7 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
         binding.tvPoint.setOnClickListener(this);
         binding.tvProgramParamter.setOnClickListener(this);
         binding.startButton.setOnClickListener(this);
+        binding.ivBack.setOnClickListener(this);
         lvDevices.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -735,7 +879,7 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
     /**
      * 蓝牙广播接收器
      */
-    private class BLEBroadcastReceiver extends BroadcastReceiver {
+    public class BLEBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -807,11 +951,10 @@ public class directionfinderDataCollectActivity extends AppCompatActivity implem
         public void onDiscoveryOutTime() {
             Message message = new Message();
             message.what = DISCOVERY_OUT_TIME;
-            if (binding.tvNotDevice.getVisibility()==View.VISIBLE){
+            if (binding.tvNotDevice.getVisibility() == View.VISIBLE) {
                 binding.ivStep1.setState(3);
                 binding.tvStep1Text.setText("扫描设备超时");
-            }
-            else if (binding.tvNotDevice.getVisibility()==View.GONE){
+            } else if (binding.tvNotDevice.getVisibility() == View.GONE) {
                 binding.ivStep1.setState(2);
                 binding.tvStep1Text.setText("扫描成功");
             }

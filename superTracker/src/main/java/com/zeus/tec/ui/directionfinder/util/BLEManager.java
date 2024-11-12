@@ -128,23 +128,19 @@ public class BLEManager {
 
         this.onDeviceSearchListener = onDeviceSearchListener;
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            Log.d(TAG, "开始扫描设备");
-//            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-//                // TODO: Consider calling
-//                //    ActivityCompat#requestPermissions
-//                // here to request the missing permissions, and then overriding
-//                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//                //                                          int[] grantResults)
-//                // to handle the case where the user grants the permission. See the documentation
-//                // for ActivityCompat#requestPermissions for more details.
-//                return;
-//            }
-            bluetooth4Adapter.startLeScan(leScanCallback);
+        Log.d(TAG, "开始扫描设备");
+//        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return;
+//        }
 
-        } else {
-            return;
-        }
+        bluetooth4Adapter.startLeScan(leScanCallback);
 
         //设定最长扫描时间
         mHandler.postDelayed(stopScanRunnable, scanTime);
@@ -327,16 +323,13 @@ public class BLEManager {
             for (int i = 0; i < servicesList.size(); i++) {
                 serviceUuid [i] = servicesList.get(i).getUuid().toString();
             }
-             ParcelUuid [] uuid = curConnDevice.getUuids();
-            //BluetoothGattService service = gatt.getService(UUID.fromString(uuid[0].toString()));
+            ParcelUuid [] uuid = curConnDevice.getUuids();
             BluetoothGattService service = servicesList.get(2);
             serviceUUID = service.getUuid().toString();
             if (service != null) {
-
                 List<BluetoothGattCharacteristic> characteristic = service.getCharacteristics();
                 readUUID = characteristic.get(0).getUuid().toString();
                 writeUUID = characteristic.get(1).getUuid().toString();
-
                 String[] charUuid = new String[characteristic.size()];
                 for (int i = 0; i < characteristic.size(); i++) {
                     charUuid[i] = characteristic.get(i).getUuid().toString();
@@ -394,7 +387,6 @@ public class BLEManager {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
-
             //接收数据
             byte[] bytes = characteristic.getValue();
             Log.w("TAG", "收到数据str:" + TypeConversion.bytes2HexString(bytes, bytes.length));
@@ -642,16 +634,15 @@ public class BLEManager {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public boolean sendMessage(String msg) {
         if (writeCharacteristic == null) {
-            Log.e(TAG, "sendMessage(byte[])-->writeGattCharacteristic == null");
+          //  Log.e(TAG, "sendMessage(byte[])-->writeGattCharacteristic == null");
             return false;
         }
 
         if (mBluetoothGatt == null) {
-            Log.e(TAG, "sendMessage(byte[])-->mBluetoothGatt == null");
+          //  Log.e(TAG, "sendMessage(byte[])-->mBluetoothGatt == null");
             return false;
         }
-        byte [] test = TypeConversion.hexString2Bytes(msg);
-
+        //byte [] test = TypeConversion.hexString2Bytes(msg);
         boolean b = writeCharacteristic.setValue(TypeConversion.hexString2Bytes(msg));
         Log.d(TAG, "写特征设置值结果：" + b);
         return mBluetoothGatt.writeCharacteristic(writeCharacteristic);

@@ -3,6 +3,7 @@ package com.zeus.tec.model.leida.main;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
+import com.zeus.tec.model.ycs.YcsMainCache;
 import com.zeus.tec.ui.leida.util.ConvertCode;
 import com.zeus.tec.ui.leida.util.MyApplicationContext;
 
@@ -129,21 +130,18 @@ public class sendbean {
 
     public Boolean SendOrder(ReceiveBean order, DatagramSocket socket, String address, int local_port,int server_port)
     {
-
         Boolean success = false;
         MainCache cache = MainCache.GetInstance();
         if (order != null)
         {
             if (order.Data != null && order.Data.length > 0)
             {
-
                 byte[] Message = new byte[order.Data.length];
                 System.arraycopy(order.Data,0,Message,0,order.Data.length);
-                //Buffer.BlockCopy(order.Data, 0, Message, 0, order.Data.Length);
-                ReceiveBean old_order = null;
+               // ReceiveBean old_order = null;
                 if (order.Sign == (byte)0x67)
                 {
-                    old_order = cache.DeviceInfo;
+                  //  old_order = cache.DeviceInfo;
                     order.Data = null;
                     cache.DeviceInfo = order;
                     if (address != null)
@@ -152,9 +150,7 @@ public class sendbean {
                         {
                             if (socket == null)
                             {
-
                                 socket = new DatagramSocket(local_port);
-
                             }
                             DatagramSocket finalSocket1 = socket;
                             Thread th = new Thread(()->{
@@ -171,13 +167,10 @@ public class sendbean {
                                 }
                             });
                             th.start();
-
-                            //int tmp=socket.SendTo(Message, address);
                             success = cache.DeviceInfo.Get();
                         }
                         catch (Exception ex)
                         {
-
                             success = false;
                             ReceiveBean tmp = cache.DeviceInfo;
                             cache.DeviceInfo = null;
@@ -189,11 +182,10 @@ public class sendbean {
                             //socket = null;
                         }
                     }
-
                 }
                 else
                 {
-                    old_order = cache.DeviceOper;
+                 //   old_order = cache.DeviceOper;
                     order.Data = null;
                     cache.DeviceOper = order;
                     if (address != null)
@@ -203,12 +195,8 @@ public class sendbean {
                             if (socket == null)
                             {
                                 socket = new DatagramSocket(2222);
-                                //socket.Bind(new IPEndPoint(IPAddress.Any, local_port));
                             }
-                           // TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                            //long time1 = Convert.ToInt64(ts.TotalMilliseconds);
                             long time1 = System.currentTimeMillis();
-                           // Debug.WriteLine("发送时间" + time1);
                             DatagramSocket finalSocket = socket;
                             Thread th = new Thread(()->{
                                 try {
@@ -219,23 +207,17 @@ public class sendbean {
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                //  int tmp=socket.SendTo(Message, address);
                             });
                             th.setDaemon(true);
                             th.start();
                             long time2 = System.currentTimeMillis();
-//                            ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-//                            long time2 = Convert.ToInt64(ts.TotalMilliseconds);
-//                            Debug.WriteLine("发送成功时间：" + time2);
                             success = cache.DeviceOper.Get();
                         }
                         catch (Exception ex)
                         {
-                           // Debug.WriteLine("error");
                             success = false;
                             ReceiveBean tmp = cache.DeviceOper;
                             cache.DeviceOper = null;
-                            //MessageBox.Show(ex.ToString());
                         }
                         finally
                         {
@@ -265,7 +247,7 @@ public class sendbean {
         else
         {
             try
-            {
+            {//0x7e
                 long sum = 0;
                 byte head = 0x7E;
                 buffer[index] = head;

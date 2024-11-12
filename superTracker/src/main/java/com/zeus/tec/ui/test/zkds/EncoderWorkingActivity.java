@@ -334,7 +334,7 @@ public class EncoderWorkingActivity extends AppCompatActivity implements View.On
                     BLEDevice bleDevice = (BLEDevice) msg.obj;
                     String bleDeviceName = bleDevice.getBluetoothDevice().getName();
                     if (bleDeviceName != null) {
-                        if (bleDeviceName.contains("无线")) {
+                        if (bleDeviceName.contains("HLK")||bleDeviceName.contains("无线")) {
                             lvDevicesAdapter.addDevice(bleDevice);
                             if (binding.tvNotDevice.getVisibility() == View.VISIBLE) {
                                 binding.tvNotDevice.setVisibility(View.GONE);

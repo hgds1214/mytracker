@@ -53,23 +53,21 @@ import java.util.Properties;
 public class LeidaDataCollectActivity extends AppCompatActivity {
 
     ActivityLeidaDataCollectBinding binding;
-  //  public static LeidaDataCollectActivity Instance;
-    private SuperLogUtil superLogUtil;
 
+    private SuperLogUtil superLogUtil;
     TextView startButton;
     TextView refreshButton;
     TextView programParamterButton;
-    // LinearLayout layTitle;
     LinearLayout layParamter;
     MainCache cache;
     ListView pointListview;
     String publicPath = "";
     String privatePath = "";
-    // boolean deviceStatus = false;
     Context context1;
-    private List<leidaPointRecordInfo> recordInfoList = new ArrayList<>();
+
     private leida_info info1 = leida_info.GetInstance();
 
+    private List<leidaPointRecordInfo> recordInfoList = new ArrayList<>();
 
     @SuppressLint("ResourceAsColor")
     @Override
@@ -134,7 +132,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         binding.tvDownload.setOnClickListener(v -> tvDownload_click());
         binding.tvDelete.setOnClickListener(v -> tvDelete_click());
         binding.ivBack.setOnClickListener(V -> ivBackClick());
-      //  @SuppressLint("WrongViewCast") MarqueeTextView tip = findViewById(R.id.tv_get_data);
     }
 
     private void setDeviveClick() {
@@ -144,7 +141,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         View view2 = View.inflate(LeidaDataCollectActivity.this, R.layout.set_device_ip, null);
         final EditText deviceIP = (EditText) view2.findViewById(R.id.et_device_ip);
         deviceIP.setText( INIutil.readINI(filePath,"server_ip","192.168.43.100"));
-        // final EditText password = (EditText) view2.findViewById(R.id.password);
         final Button btn = (Button) view2.findViewById(R.id.btn_sure);
         builder.setTitle("IP").setIcon(R.mipmap.ic_launcher).setView(view2).setInverseBackgroundForced(false);
         AlertDialog dialog = builder.create();
@@ -160,8 +156,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             ToastUtils.showLong("IP:"+cache.server_ip+"设置成功");
         });
     }
-
-  //  float TotalDis = 0;
 
     private void ivBackClick() {
         FeedbackUtil.getInstance().doFeedback();
@@ -247,7 +241,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             public void onNegativeButtonClick() {
             }
         });
-
     }
 
     public void tvDownload_click() {
@@ -305,7 +298,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         } catch (Exception ex) {
             ToastUtils.showLong(ex.getLocalizedMessage());
         }
-
     }
 
     public void tvExit_click() {
@@ -338,7 +330,9 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             binding.layDownloadWindows.setVisibility(View.VISIBLE);
         }
     }
+
     int index = 10;
+
     public void GetFiles() {
         List<FileBean> files;
         files = cache.GetFilesName();
@@ -427,6 +421,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             }
         }
     }
+
     private void pointRecord(){
         try {
             if (IOtool.isFileExists(info1.dataPath)) {
@@ -480,12 +475,13 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                 leidaPointRecordInfo.leidaInfoId = info1.id;
                 leidaPointRecordInfo.PointNumber = String.valueOf(info1.PointCount);
                 leidaPointRecordInfo.recordTime = current_time;
-                leidaPointRecordInfo.distance = String.valueOf(info1.TotalDis);
+                leidaPointRecordInfo.distance = String.valueOf(info1.TotalDis/100);
                 TrackerDBManager.saveOrUpdate(info1);
                 TrackerDBManager.saveOrUpdate(leidaPointRecordInfo);
                 initPointList(TrackerDBManager.getrecordByleidaInfoId(info1.id));
                 binding.tv24.setText(String.valueOf(info1.PointCount));
-                binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
+                // binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis/100, 1));
+                binding.tv23.setText(String.format("%.1f", info1.TotalDis/100f));
             } else {
                 Toast.makeText(this, "项目测点文件不存在，无法打点测试！", Toast.LENGTH_LONG).show();
             }
@@ -498,6 +494,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
     private void step_1() {
         binding.ivStep1.setState(1);
     }
+
     private void RefreshStatus() {
         cache.GetDeviceStatus();
         if (cache.DeviceStatus != null) {
@@ -558,9 +555,12 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             if (info1 != null) {
                 try {
                     index = 0;
-                    binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
+                   // binding.tv23.setText(DecimalFormat1.getdecimalFormat(info1.TotalDis, 1));
+                    binding.tv23.setText(String.format("%.1f", info1.TotalDis/100f));
                     binding.tv24.setText(String.valueOf(info1.PointCount));
-                } catch (Exception ignored) {
+                }
+                catch (Exception ignored)
+                {
                 }
             }
         }
@@ -570,7 +570,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         try {
             binding.tvProjectName.setText(info1.projectId);
             binding.tvCreatTime.setText(info1.creatTime);
-            binding.tvPointDistance.setText(String.valueOf(info1.drillPipeLength));
+            binding.tvPointDistance.setText(String.valueOf(info1.drillPipeLength/100));
             binding.tvPointNumber.setText(String.valueOf(info1.sampleLength));
             binding.tvOverLayNumber.setText(String.valueOf(info1.overlaynumbe));
             binding.tvDelay.setText(String.valueOf(info1.Delay1));
@@ -630,7 +630,6 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
     }
 
     private void StopWork() {
-
         RefreshStatus();
         if (cache.DeviceStatus != null) {
             if (cache.DeviceStatus.status == 0) {

@@ -43,7 +43,7 @@ public class ReceiveBean {
             {
                 if(!Status)
                 {
-                    condition.await(6000,TimeUnit.MILLISECONDS);
+                    condition.await(1000,TimeUnit.MILLISECONDS);
                 }
             }
             catch (Exception ex)
@@ -75,7 +75,6 @@ public class ReceiveBean {
         {
             lock.unlock();
         }
-
     }
 
 }

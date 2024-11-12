@@ -1,6 +1,7 @@
 package com.zeus.tec.device.tracker;
 
 import com.blankj.utilcode.util.ConvertUtils;
+import com.zeus.tec.ui.tracker.util.ProjectInfoManager;
 import com.zeus.tec.ui.tracker.util.TimeUtil;
 
 import java.nio.ByteBuffer;
@@ -26,6 +27,7 @@ public class TrackerCollectData {
     //short类型
     public short slantAngle;
 
+
     public static TrackerCollectData fromFrame(byte[] frame) {
         // 一帧数据总字节数为19
         if (frame == null || frame.length != 0x13) return null;
@@ -47,7 +49,13 @@ public class TrackerCollectData {
         start += 2;
         result.omega = bytes2short(Arrays.copyOfRange(frame, start, start+2));
         start += 2;
-        result.directionAngle = bytes2int(Arrays.copyOfRange(frame, start, start+2));
+        result.directionAngle = bytes2int(Arrays.copyOfRange(frame, start, start+2))+ProjectInfoManager.getInstance().magnetic_value;
+        if (result.directionAngle>36000){
+            result.directionAngle = result.directionAngle-36000;
+        }
+        if (result.directionAngle<0){
+            result.directionAngle = result.directionAngle+36000;
+        }
         start += 2;
         result.slantAngle = bytes2short(Arrays.copyOfRange(frame, start, start+2));
         start += 2;

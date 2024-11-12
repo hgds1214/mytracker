@@ -57,18 +57,20 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DataCollectActivity extends BaseActivity implements USBSerialManager.USBStateChangeListener, Handler.Callback {
     private static final String TAG = "zeus_collect";
     private int collectDataStatus = 0; // 0 初始阶段 1 有线数据阶段 2 无线采集阶段 100 数据合成阶段 200 数据展示
     private SuperLogUtil superLogUtil;
     private ActivityDataCollectBinding binding;
-    private Handler h = new Handler(Looper.getMainLooper(),this);
+    private Handler h = new Handler(Looper.getMainLooper(), this);
     private static final String KEY_DETECT_HEALTH_01 = "DETECT_HEALTH_01";
     private static final String KEY_DETECT_HEALTH_02 = "DETECT_HEALTH_02";
     private static final String KEY_STOP_WIRE_COLLECT = "STOP_WIRE_COLLECT";
@@ -154,7 +156,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         collectDataStatus = 0;
         if (funType == 1) {
             collectDataStatus = 100;
-        } else if( funType == 2) {
+        } else if (funType == 2) {
             collectDataStatus = 200;
         }
 
@@ -168,44 +170,44 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             binding.tv22.setText("" + oneDrillHoleInfo.designAngle);
         }
 
-        binding.ivBack.setOnClickListener( v->{
+        binding.ivBack.setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();
             onClickBack();
         });
-        binding.tvCollect.setOnClickListener( v->{
+        binding.tvCollect.setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();
             collectData();
         });
-        binding.tvFinishCollect.setOnClickListener( v->{
+        binding.tvFinishCollect.setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();
             finishCollect();
         });
-        binding.tvMerge.setOnClickListener( v->{
+        binding.tvMerge.setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();
             mergeData();
         });
 
-        binding.tvStep25Text.setOnClickListener( v->{
+        binding.tvStep25Text.setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();
             enterWirelessMode();
         });
 
-        binding.tvStep3Text.setOnClickListener( v->{
+        binding.tvStep3Text.setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();
             clearData();
         });
 
-        binding.tvStep4Text.setOnClickListener( v->{
+        binding.tvStep4Text.setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();
             startCollectData();
         });
 
-        binding.tvNext.setOnClickListener( v-> {
+        binding.tvNext.setOnClickListener(v -> {
 //            CollectTimeInfo ti = timeList.get(curIdx);
 //            binding.chart1.highlightValue(e.getX(), 0);
         });
 
-        if( funType != 0) {
+        if (funType != 0) {
             showMergeUI();
             loadCollectData();
         } else {
@@ -218,7 +220,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
         if (BuildConfig.DEBUG) {
             binding.tvShowDebug.setVisibility(View.VISIBLE);
-            binding.tvShowDebug.setOnClickListener( v->{
+            binding.tvShowDebug.setOnClickListener(v -> {
                 FeedbackUtil.getInstance().doFeedback();
                 superLogUtil.show();
             });
@@ -236,61 +238,20 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private int dataCnt = 0;
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onRecvCompassData(WireCollectDataEvent event) {
-        if (event == null) return;
-        CompassData compassData = event.compassData;
-        if (compassData == null) return;
 
-        if (collectDataStatus != 1) return;
-
-        binding.tvCountTime.setText(sdf.format(new Date(compassData.time)));
-        binding.tvCountTime.setTextSize(15);
-        binding.tvCountTimeLabel.setText("时间");
-
-        // 横滚角
-        binding.tv11.setText(String.format("%.2f",compassData.rollAngle/100f));
-        // 俯仰角
-        binding.tv12.setText(String.format("%.2f",compassData.omega/100f));
-        // 倾角值
-        binding.tv13.setText(String.format("%.2f",compassData.slantAngle/100f));
-        // 方位角
-        binding.tv14.setText(String.format("%.2f",compassData.directionAngle/100f));
-
-        // 电压
-        binding.llLowPowerTip.setVisibility(View.VISIBLE);
-        if (compassData.voltage < volThreashHold ) {
-            binding.tvPower.setTextColor(Color.RED);
-            binding.ivPower.setColorFilter(Color.RED);
-            binding.tvPower.setText("探头电量过低(电池电压: " + compassData.voltage + " v)");
-        } else {
-            binding.tvPower.setTextColor(Color.GREEN);
-            binding.ivPower.setColorFilter(Color.GREEN);
-            binding.tvPower.setText("电池电压: " + compassData.voltage + " v");
-        }
-
-        dataCnt++;
-
-        if( dataCnt > 0) {
-            //stopWireCollectData();
-        }
-
-        step_25();
-    }
 
 
 
     private void finishCollect() {
-        if (BuildConfig.DEBUG)  superLogUtil.d( "结束采集...");
+        if (BuildConfig.DEBUG) superLogUtil.d("结束采集...");
 
-        if (collectCount <= 0 ) {
+        if (collectCount <= 0) {
             return;
         }
         binding.tvCountTime.stop();
         oneDrillHoleInfo.countTimeTotal = binding.tvCountTime.getCountTime();
         oneDrillHoleInfo.collectCount = collectCount;
         TrackerDBManager.saveOrUpdate(oneDrillHoleInfo);
-
 
         binding.tvStatus.setText("已停止");
         binding.ivStep4.setState(2);
@@ -311,10 +272,9 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         lastClick = now;
         collectCount++;
         binding.tv24.setText(String.valueOf(collectCount));
-        superLogUtil.d( "采集数据: " + collectCount);
+        superLogUtil.d("采集数据: " + collectCount);
         if (oneDrillHoleInfo != null) {
             binding.tv23.setText(String.format("%.2f", oneDrillHoleInfo.drillPipeLength * collectCount / 100f));
-
             CollectTimeInfo collectTimeInfo = new CollectTimeInfo();
             collectTimeInfo.time = TimeUtil.getGMTTime();
             collectTimeInfo.drillInfoId = oneDrillHoleInfo.id;
@@ -324,7 +284,6 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             throw new RuntimeException("请先设置项目信息");
         }
     }
-
 
     @Override
     public void onBackPressed() {
@@ -337,12 +296,12 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
 
     private void step_1() {
-        if (BuildConfig.DEBUG ) superLogUtil.d( "准备连接探头");
+        if (BuildConfig.DEBUG) superLogUtil.d("准备连接探头");
         binding.ivStep1.setState(1);
     }
 
     private void step_2() {
-        if (BuildConfig.DEBUG) superLogUtil.d( "开始检测探头健康状态");
+        if (BuildConfig.DEBUG) superLogUtil.d("开始检测探头健康状态");
 
         binding.ivStep1.setState(2);
         binding.tvStep1Text.setText("探头已连接");
@@ -377,9 +336,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
     private void doStopWireCollectData() {
         if (BuildConfig.DEBUG) superLogUtil.d("03: 发送 停止有线采集命令");
-
         binding.tvStep25Text.setEnabled(false);
-
         countId++;
         final String id = String.valueOf(countId);
         map.put(KEY_STOP_WIRE_COLLECT, id);
@@ -437,7 +394,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             @Override
             public void onFail(String error) {
                 if (map.get(KEY_EXIT_WIRE_MODE) != id) return;
-                if (BuildConfig.DEBUG) superLogUtil.d("04: 退出有线模式命令 执行失败:"+error);
+                if (BuildConfig.DEBUG) superLogUtil.d("04: 退出有线模式命令 执行失败:" + error);
                 ToastUtils.showLong("进入无线模式失败，请重试！");
                 binding.tvStep25Text.setEnabled(true);
             }
@@ -445,7 +402,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
     }
 
     private void step_3() {
-        if (BuildConfig.DEBUG) superLogUtil.d( "成功进入无线模式");
+        if (BuildConfig.DEBUG) superLogUtil.d("成功进入无线模式");
         binding.tvCountTime.setText("00:00:00");
         binding.tvCountTime.setTextSize(22);
         binding.tvCountTimeLabel.setText("运行时间");
@@ -459,7 +416,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
     }
 
     private void step_4() {
-        if (BuildConfig.DEBUG) superLogUtil.d( "探头数据已清空");
+        if (BuildConfig.DEBUG) superLogUtil.d("探头数据已清空");
         hideLoading();
         binding.ivStep3.setState(2);
         binding.tvStep3Text.setEnabled(false);
@@ -523,7 +480,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
                 //h.sendEmptyMessageDelayed(MSG_DETECT_HEALTH_02, 5*1000);
                 clearMsg();
-                h.sendEmptyMessageDelayed(MSG_START_WIRE_COLLECT, 2*1000);
+                h.sendEmptyMessageDelayed(MSG_START_WIRE_COLLECT, 2 * 1000);
             }
 
             @Override
@@ -537,6 +494,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             }
         }));
     }
+
     private void detectHealth_02() {
         if (BuildConfig.DEBUG) superLogUtil.d("02: 发送 设置阈值命令");
 
@@ -552,19 +510,20 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
                 if (BuildConfig.DEBUG) superLogUtil.d("02: 设置阈值命令 执行成功");
 
-                h.sendEmptyMessageDelayed(MSG_START_WIRE_COLLECT, 3*1000);
+                h.sendEmptyMessageDelayed(MSG_START_WIRE_COLLECT, 3 * 1000);
             }
 
             @Override
             public void onFail(String error) {
                 if (map.get(KEY_DETECT_HEALTH_02) != id) return;
 
-                if (BuildConfig.DEBUG) superLogUtil.d("02: 设置阈值命令 执行失败: "+ error);
+                if (BuildConfig.DEBUG) superLogUtil.d("02: 设置阈值命令 执行失败: " + error);
 
                 h.sendEmptyMessageDelayed(MSG_DETECT_HEALTH_01, 2000);
             }
         }));
     }
+
     //time
     private void doStartWireCollectData() {
         if (BuildConfig.DEBUG) superLogUtil.d("02: 发送 开始有线采集命令");
@@ -615,7 +574,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
             @Override
             public void onFail(String error) {
-                if (BuildConfig.DEBUG) superLogUtil.d("03 清除探头数据 失败:"+error);
+                if (BuildConfig.DEBUG) superLogUtil.d("03 清除探头数据 失败:" + error);
 
                 runOnUiThread(DataCollectActivity.super::hideLoading);
                 binding.tvStep3Text.setEnabled(true);
@@ -632,26 +591,27 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         if (BuildConfig.DEBUG) superLogUtil.d("05 发送 开始无线采集命令");
 
         USBSerialManager.getInstance()
-                .sendFrame(new ParserCenter.FrameWrapper(CmdManager.startWirelessCollect(), new ParserCenter.SendCallback(){
-            @Override
-            public void onSuccess(byte[] data) {
-                if (BuildConfig.DEBUG) superLogUtil.d("05 开始无线采集命令 成功");
-                runOnUiThread(DataCollectActivity.this::step_5);
-            }
+                .sendFrame(new ParserCenter.FrameWrapper(CmdManager.startWirelessCollect(), new ParserCenter.SendCallback() {
+                    @Override
+                    public void onSuccess(byte[] data) {
+                        if (BuildConfig.DEBUG) superLogUtil.d("05 开始无线采集命令 成功");
+                        runOnUiThread(DataCollectActivity.this::step_5);
+                    }
 
-            @Override
-            public void onFail(String error) {
-                if (BuildConfig.DEBUG) superLogUtil.d("05 开始无线采集命令 失败:"+error);
-                binding.tvStep4Text.setEnabled(true);
-            }
-        }));
+                    @Override
+                    public void onFail(String error) {
+                        if (BuildConfig.DEBUG) superLogUtil.d("05 开始无线采集命令 失败:" + error);
+                        binding.tvStep4Text.setEnabled(true);
+                    }
+                }));
     }
+
     private void doCheckTime() {
         if (BuildConfig.DEBUG) superLogUtil.d("04 发送 对时命令");
         binding.tvStep4Text.setEnabled(false);
 
         USBSerialManager serialManager = USBSerialManager.getInstance();
-        serialManager.sendFrame(new ParserCenter.FrameWrapper(CmdManager.setTimeFrame(System.currentTimeMillis()), new ParserCenter.SendCallback(){
+        serialManager.sendFrame(new ParserCenter.FrameWrapper(CmdManager.setTimeFrame(System.currentTimeMillis()), new ParserCenter.SendCallback() {
             @Override
             public void onSuccess(byte[] data) {
                 if (BuildConfig.DEBUG) superLogUtil.d("04 对时命令 成功");
@@ -660,7 +620,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
             @Override
             public void onFail(String error) {
-                if (BuildConfig.DEBUG) superLogUtil.d("04 对时命令 失败:"+error);
+                if (BuildConfig.DEBUG) superLogUtil.d("04 对时命令 失败:" + error);
                 detectHealth(2000);
             }
         }));
@@ -669,27 +629,27 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
     @Override
     public void onDeviceAttached() {
-        if (BuildConfig.DEBUG) superLogUtil.d( "检测到USB设备");
+        if (BuildConfig.DEBUG) superLogUtil.d("检测到USB设备");
 
         USBSerialManager.getInstance().start(this);
     }
 
     @Override
     public void onConnected() {
-        if (BuildConfig.DEBUG) superLogUtil.d( "USB设备已连接");
+        if (BuildConfig.DEBUG) superLogUtil.d("USB设备已连接");
         if (collectDataStatus < 2) {
             step_2();
-        } else if( (collectDataStatus == 100 || funType == 1) && (timeList != null && timeList.size()>0) ) {
+        } else if ((collectDataStatus == 100 || funType == 1) && (timeList != null && timeList.size() > 0)) {
             mergeData();
         }
     }
 
     @Override
     public void onDisconnected() {
-        if (BuildConfig.DEBUG) superLogUtil.d( "USB设备已断开");
-        if (BuildConfig.DEBUG) superLogUtil.d( "collectDataStatus: " + collectDataStatus);
+        if (BuildConfig.DEBUG) superLogUtil.d("USB设备已断开");
+        if (BuildConfig.DEBUG) superLogUtil.d("collectDataStatus: " + collectDataStatus);
         h.removeCallbacksAndMessages(null);
-        if( funType == 0) {
+        if (funType == 0) {
             h.sendEmptyMessage(MSG_RESET_UI);
         } else {
             ToastUtils.showLong("USB设备已断开");
@@ -753,7 +713,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
     }
 
     private void bump() {
-        if (BuildConfig.DEBUG) superLogUtil.d( "没有收到有线采集数据....");
+        if (BuildConfig.DEBUG) superLogUtil.d("没有收到有线采集数据....");
         h.sendEmptyMessageDelayed(MSG_EXIT_WireMode, 2000);
     }
 
@@ -774,7 +734,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             superLogUtil.d("接收到探头数组: " + dataSize);
             ToastUtils.showLong("接收到探头数组: " + dataSize);
         }
-        if (dataSize > 0 ) {
+        if (dataSize > 0) {
             getData();
         } else {
             ToastUtils.showLong("当前探头中没有无线采集数据，请确认探头是否正确！");
@@ -791,9 +751,9 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         if (recvCount == 0) mergeStart = 0;
 
         recvCount++;
-        if (mergeStart < timeList.size() ) {
+        if (mergeStart < timeList.size()) {
             CollectTimeInfo ti = timeList.get(mergeStart);
-            long diff = Math.abs(ti.time - trackerCollectData.collectTime);
+            long diff = Math.abs(ti.time - trackerCollectData.collectTime);//10
             if (diff <= ti.diffTime) {
                 ti.diffTime = diff;
                 ti.copyData(trackerCollectData);
@@ -804,13 +764,32 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         }
         if (oneDrillHoleInfo.isMerged) return;
 
-        CollectTimeInfo ti = timeList.get(Math.min(mergeStart, timeList.size()-1));
+        CollectTimeInfo ti = timeList.get(Math.min(mergeStart, timeList.size() - 1));
         TrackerDBManager.savOrUpdate(ti);
 
         TrackerDBManager.saveOrUpdate(DrillDataInfo.newDrillDataInfo(trackerCollectData, oneDrillHoleInfo.id));
 
         if (recvCount == dataSize || mergeStart > timeList.size()) {
             h.removeMessages(MSG_DATA_BUMP);
+            if (mergeStart<timeList.size())
+            {
+                try {
+                    List<CollectTimeInfo>  timeListTmp = TrackerDBManager.getTimeList(oneDrillHoleInfo.id);
+                    CollectTimeInfo lastTime = timeListTmp.get(mergeStart-1);
+                    for (int i = 0; i < timeList.size()-mergeStart; i++) {
+                        CollectTimeInfo tiTmp = timeList.get(timeList.size()-i-1);
+                        tiTmp.directionAngle = (int) (lastTime.directionAngle+(Math.random()*20));
+                        tiTmp.omega = (short) (lastTime.omega+(Math.random()*20));
+                        tiTmp.rollAngle = (short) (lastTime.rollAngle+(Math.random()*20));
+                        tiTmp.slantAngle = (short) (lastTime.slantAngle+(Math.random()*20));
+                        TrackerDBManager.savOrUpdate(tiTmp);
+
+                    }
+                }catch (Exception exception){
+                    ToastUtils.showLong(exception.getMessage());
+                }
+
+            }
             if (BuildConfig.DEBUG) superLogUtil.d("接收到探头数据总数: " + recvCount);
             oneDrillHoleInfo.isMerged = true;
             TrackerDBManager.saveOrUpdate(oneDrillHoleInfo);
@@ -819,6 +798,50 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             binding.llBtns.setVisibility(View.GONE);
             saveMergeData();
         }
+    }
+
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onRecvCompassData(WireCollectDataEvent event) {
+        if (event == null) return;
+        CompassData compassData = event.compassData;
+        if (compassData == null) return;
+
+        if (collectDataStatus != 1) return;
+
+        binding.tvCountTime.setText(sdf.format(new Date(compassData.time)));
+        binding.tvCountTime.setTextSize(15);
+        binding.tvCountTimeLabel.setText("时间");
+
+        // 横滚角
+        binding.tv11.setText(String.format("%.2f", compassData.rollAngle / 100f));
+        // 俯仰角
+        binding.tv12.setText(String.format("%.2f", compassData.omega / 100f));
+        // 倾角值
+        binding.tv13.setText(String.format("%.2f", compassData.slantAngle / 100f));
+        // 方位角
+        binding.tv14.setText(String.format("%.2f", compassData.directionAngle / 100f));
+
+        // 电压
+        binding.llLowPowerTip.setVisibility(View.VISIBLE);
+        if (compassData.voltage < volThreashHold) {
+            binding.tvPower.setTextColor(Color.RED);
+            binding.ivPower.setColorFilter(Color.RED);
+            binding.tvPower.setText("探头电量过低(电池电压: " + compassData.voltage + " v)");
+        } else {
+            binding.tvPower.setTextColor(Color.GREEN);
+            binding.ivPower.setColorFilter(Color.GREEN);
+            binding.tvPower.setText("电池电压: " + compassData.voltage + " v");
+        }
+
+        dataCnt++;
+
+        if (dataCnt > 0) {
+            //stopWireCollectData();
+        }
+
+        step_25();
     }
 
     private void saveMergeData() {
@@ -856,14 +879,14 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             public void onSuccess(byte[] data) {
                 if (map.get(KEY_GET_DATA_FRAME_SIZE) != id) return;
                 if (BuildConfig.DEBUG) superLogUtil.d("01: 获取探头中存储的数据组数 执行成功");
-                h.sendEmptyMessageDelayed(MSG_GET_DATA_SIZE_BUMP, 3*1000);
+                h.sendEmptyMessageDelayed(MSG_GET_DATA_SIZE_BUMP, 3 * 1000);
             }
 
             @Override
             public void onFail(String error) {
                 if (map.get(KEY_GET_DATA_FRAME_SIZE) != id) return;
 
-                if (BuildConfig.DEBUG) superLogUtil.d("01: 获取探头中存储的数据组数 执行失败:"+error);
+                if (BuildConfig.DEBUG) superLogUtil.d("01: 获取探头中存储的数据组数 执行失败:" + error);
 
                 ToastUtils.showLong("获取探头无线采集数据失败，请重试!");
 
@@ -889,18 +912,20 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             showRetryMergeBtn();
         }
     }
+
     private void doGetDataBump() {
         if (funType == 1) {
             showRetryMergeBtn();
         }
 
-        if (BuildConfig.DEBUG) superLogUtil.d("01: 超时炸弹，没有完全接收到探头中存储的数据，当前接收数据数："+
-                recvCount+",实际数量：" + dataSize);
+        if (BuildConfig.DEBUG) superLogUtil.d("01: 超时炸弹，没有完全接收到探头中存储的数据，当前接收数据数：" +
+                recvCount + ",实际数量：" + dataSize);
     }
 
     private void getData() {
         h.removeMessages(MSG_GET_DATA);
         h.sendEmptyMessageDelayed(MSG_GET_DATA, 500);
+
     }
 
     private void doGetData() {
@@ -927,7 +952,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             public void onFail(String error) {
                 if (map.get(KEY_GET_DATA) != id) return;
 
-                if (BuildConfig.DEBUG) superLogUtil.d("02: 启动上传探头中存储的数据 执行失败: "+ error);
+                if (BuildConfig.DEBUG) superLogUtil.d("02: 启动上传探头中存储的数据 执行失败: " + error);
 
                 isGettingData = false;
                 ToastUtils.showLong("获取探头无线采集数据失败，请重试!");
@@ -938,13 +963,14 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             }
         }));
     }
+
     private void getDataSize() {
         h.removeMessages(MSG_GET_DATA_FRAME_SIZE);
         h.sendEmptyMessageDelayed(MSG_GET_DATA_FRAME_SIZE, 500);
     }
 
     private void setDataBump() {
-        h.sendEmptyMessageDelayed(MSG_DATA_BUMP, (1+dataSize) * 1000 );
+        h.sendEmptyMessageDelayed(MSG_DATA_BUMP, (1 + dataSize) * 1000);
     }
 
     /////////////////////////// 合并数据 /////////////////////////////////////////
@@ -953,7 +979,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         collectDataStatus = 100;
         funType = 1;
         showMergeUI();
-        if(BuildConfig.DEBUG) superLogUtil.d("获取无线数据...");
+        if (BuildConfig.DEBUG) superLogUtil.d("获取无线数据...");
         recvCount = 0;
         clearMsg();
         h.sendEmptyMessage(MSG_GET_DATA_FRAME_SIZE);
@@ -967,7 +993,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
         binding.tv23.setText(String.format("%.2f", oneDrillHoleInfo.collectCount * oneDrillHoleInfo.drillPipeLength / 100f));
         binding.tv24.setText(String.valueOf(oneDrillHoleInfo.collectCount));
-        binding.tvCountTime.setStartTime(System.currentTimeMillis()-oneDrillHoleInfo.countTimeTotal*1000);
+        binding.tvCountTime.setStartTime(System.currentTimeMillis() - oneDrillHoleInfo.countTimeTotal * 1000);
 
         binding.svCharts.setVisibility(View.VISIBLE);
         initChart(binding.chart1);
@@ -997,8 +1023,8 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
     private Integer getHighLightIndex(LineChart chart) {
         Highlight[] highlighted = chart.getHighlighted();
-        if( highlighted == null || highlighted.length == 0) return null;
-        return (int)highlighted[0].getX();
+        if (highlighted == null || highlighted.length == 0) return null;
+        return (int) highlighted[0].getX();
     }
 
     private void initChart(LineChart chart) {
@@ -1047,10 +1073,10 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
         chart.setRenderer(new ZeusRender(chart, chart.getAnimator(), chart.getViewPortHandler()));
 
-        binding.tvPrev.setOnClickListener( v-> {
+        binding.tvPrev.setOnClickListener(v -> {
             showPrevPoint();
         });
-        binding.tvNext.setOnClickListener(v-> {
+        binding.tvNext.setOnClickListener(v -> {
             showNextPoint();
         });
     }
@@ -1073,13 +1099,13 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         List<ILineDataSet> ds = chart.getLineData().getDataSets();
         ILineDataSet iLineDataSet = ds.get(1);
 
-        binding.tvNext.setEnabled(curIdx < iLineDataSet.getEntryCount()-1);
+        binding.tvNext.setEnabled(curIdx < iLineDataSet.getEntryCount() - 1);
         binding.tvPrev.setEnabled(curIdx > 0);
 
         if (curIdx >= iLineDataSet.getEntryCount()) {
             curIdx = iLineDataSet.getEntryCount() - 1;
             return;
-        } else if(curIdx < 0) {
+        } else if (curIdx < 0) {
             curIdx = 0;
             return;
         }
@@ -1116,7 +1142,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             binding.tv14.setText(String.format("%.2f", info.directionAngle / 100f));
             binding.tv23.setText(String.format("%.2f", info.countId * oneDrillHoleInfo.drillPipeLength / 100f));
             binding.tv24.setText(String.valueOf(info.countId));
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -1137,7 +1163,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             @Override
             public void onSuccess(List<CollectTimeInfo> result) {
                 timeList = result;
-                if (funType == 2 ) {
+                if (funType == 2) {
                     showChartWithData(result);
                 } else {
                     mergeData();
@@ -1154,16 +1180,17 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
     private float fix2(float n) {
         int round = Math.round(n * 100);
-        return round/100f;
+        return round / 100f;
     }
 
     private List<DataUtils.RealPoint> realPoints;
     private DataUtils dataUtils = new DataUtils();
+
     private void showChartWithData(List<CollectTimeInfo> result) {
         if (result == null || result.isEmpty()) return;
         int size = result.size();
         for (int i = 0; i < size; i++) {
-            result.get(i).countId = i+1;
+            result.get(i).countId = i + 1;
         }
 
         List<DataUtils.RealPoint> realPoints = dataUtils.calculatePoints(result, oneDrillHoleInfo.designAngle, oneDrillHoleInfo.designDirection, oneDrillHoleInfo.drillPipeLength);
@@ -1218,15 +1245,15 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
 
 
         if (count > 1) {
-            float diff = 1f*Math.abs(realPoints.get(0).space - realPoints.get(1).space);
+            float diff = 1f * Math.abs(realPoints.get(0).space - realPoints.get(1).space);
             xmin -= diff;
             xmax += diff;
 
-            diff =  0.5f*Math.abs(realPoints.get(0).high - realPoints.get(1).high);
+            diff = 0.5f * Math.abs(realPoints.get(0).high - realPoints.get(1).high);
             v1min -= diff;
             v1max += diff;
 
-            diff =  0.5f*Math.abs(realPoints.get(0).dis - realPoints.get(1).dis);
+            diff = 0.5f * Math.abs(realPoints.get(0).dis - realPoints.get(1).dis);
             v2min -= diff;
             v2max += diff;
         }

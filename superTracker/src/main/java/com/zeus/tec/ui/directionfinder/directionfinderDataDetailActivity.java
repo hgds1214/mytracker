@@ -40,8 +40,6 @@ public class directionfinderDataDetailActivity extends AppCompatActivity {
             FeedbackUtil.getInstance().doFeedback();
             finish();
         });
-
-
     }
 
     private  void  initView (){

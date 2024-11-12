@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/list_item_background_selector2"
+    android:id="@+id/point_info_ly"
+    android:orientation="horizontal">
+
+    <TextView
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:id="@+id/serial_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="序号"
+        android:textSize="15dp"
+        android:textColor="#000000"
+        android:background="@drawable/list_item_bg"
+        android:gravity="center"
+        />
+    <TextView
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
+        android:id="@+id/begin_time_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:text="采集时间"
+        android:textSize="15dp"
+        android:textColor="#000000"
+        android:background="@drawable/list_item_bg"
+        />
+</LinearLayout>

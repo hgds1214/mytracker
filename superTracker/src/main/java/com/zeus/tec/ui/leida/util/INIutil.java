@@ -41,7 +41,7 @@ public class INIutil {
     public static void writeproperties (Properties properties,String path)  {
 
         try {
-            FileOutputStream outputStream = new FileOutputStream(path );
+            FileOutputStream outputStream = new FileOutputStream(path);
             properties.store(outputStream,"whcs");
             outputStream.close();
             return;
@@ -53,8 +53,22 @@ public class INIutil {
             e.printStackTrace();
             return;
         }
-
-
-
     }
+
+    public static void writeproperties (Properties properties,String path,String commentStr)  {
+        try {
+            FileOutputStream outputStream = new FileOutputStream(path);
+            properties.store(outputStream,commentStr);
+            outputStream.close();
+            return;
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+
 }

@@ -25,6 +25,7 @@ import com.zeus.tec.event.TrackerDataSizeEvent;
 import com.zeus.tec.event.WireCollectDataEvent;
 import com.zeus.tec.model.utils.log.SuperLogUtil;
 
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Arrays;
@@ -177,7 +178,7 @@ public class ParserCenter implements Handler.Callback, OnParseOneFrameCallback {
             return;
         } else if (Arrays.equals(frame, CmdManager.FAILED_FRAME)) {
             if(BuildConfig.DEBUG){
-                ToastUtils.showLong("解析到 操作失败 数据");
+              //  ToastUtils.showLong("解析到 操作失败 数据");
                 SuperLogUtil.sd("解析到 操作失败 数据");
             }
             if (peek != null) {

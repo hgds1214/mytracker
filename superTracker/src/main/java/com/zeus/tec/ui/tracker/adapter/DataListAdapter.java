@@ -31,7 +31,7 @@ public class DataListAdapter extends BaseQuickAdapter<DrillHoleInfo, BaseViewHol
         baseViewHolder.setText(R.id.tv_time, sdf.format(drillHoleInfo.collectionDateTime));
 
 
-        baseViewHolder.setGone(R.id.tv_export, !drillHoleInfo.isMerged);
+        baseViewHolder.setGone(R.id.tv_export, false);
         baseViewHolder.setGone(R.id.tv_share, !drillHoleInfo.isMerged);
         baseViewHolder.setGone(R.id.tv_view, !drillHoleInfo.isMerged);
         baseViewHolder.setGone(R.id.tv_merge, drillHoleInfo.isMerged || drillHoleInfo.collectCount == 0);

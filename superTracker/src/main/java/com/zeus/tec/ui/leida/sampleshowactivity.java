@@ -195,9 +195,6 @@ public class sampleshowactivity extends Fragment {
         xAxis.setGridDashedLine(dashPathEffect );
         xAxis.setAxisLineWidth(2);
 
-
-
-
         xAxis.setLabelCount(8);
         YAxis leftYAxis = chart.getAxisLeft();
         YAxis rightYaxis = chart.getAxisRight();
@@ -224,7 +221,6 @@ public class sampleshowactivity extends Fragment {
         oneSample.Min = 0;
         drawFirstSampleChart( oneSample,chart);
         // leftYAxis.setEnabled(false);
-
     }
 
     public  void  drawFirstSampleChart (DataCache.SampleBean lastSample,LineChart chart){
@@ -356,13 +352,8 @@ public class sampleshowactivity extends Fragment {
             }
         }
         lineChart.setData(lineData);
-       // lineChart.setScaleEnabled(false);
-        // lineChart.setBackgroundColor(Color.BLACK);
-
-
         lineChart.invalidate();
     }
-
 
     public DataCache.SampleBean ReadData(InputStream inputStream) {
         DataCache.SampleBean sampleBean = new DataCache.SampleBean();

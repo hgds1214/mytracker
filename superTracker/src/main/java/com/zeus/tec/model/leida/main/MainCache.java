@@ -118,7 +118,6 @@ public class MainCache {
     public static MainCache GetInstance() {
         if (_instance == null) {
             _instance = new MainCache();
-
         }
         if (_instance.pointList.isEmpty()) {
             _instance.pointList.add(new PointParamter("序号", "时间", "距离"));
@@ -129,10 +128,6 @@ public class MainCache {
     public void CreatSendSocket() {
         try {
             if (sendSocket != null) {
-//            sendSocket.close();
-//            sendSocket = null;
-//            sendSocket = new DatagramSocket(local_port);
-//            SendMethod1 = new sendMethod(outtime,datasize,(byte) 0x00);
             } else {
                 sendSocket = new DatagramSocket(local_port);
                 SendMethod1 = new sendMethod(outtime, datasize, (byte) 0x00);

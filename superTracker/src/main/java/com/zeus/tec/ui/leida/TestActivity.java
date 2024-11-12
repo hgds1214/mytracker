@@ -235,7 +235,7 @@ public class TestActivity extends Fragment {
         if (cache1.SettingStatus != null) {
             if (cache1.SettingStatus.SettingStatus == 1) {
                 cache1.sampleintervel = timeSpace;
-                //cache2.test_setting = new TestSetting();
+               // cache2.test_setting = new TestSetting();
                 cache2.test_setting.Amplify = edtAmp;
                 cache2.test_setting.TimeInterval = timeSpace;
                 cache2.test_setting.SampleCount = SampleCount;

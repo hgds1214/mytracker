@@ -24,27 +24,17 @@ public class sendMessage1 {
     // int Local_port;
 
     public sendMessage1(String server_ip, int server_port, int local_port) throws SocketException {
-
-
-        //ServiceAddress = new IPEndPoint(IPAddress.Parse(server_ip), server_port);
         datagramSocket = new DatagramSocket(null);
         datagramSocket.setReuseAddress(true);
         datagramSocket.bind(new InetSocketAddress(2223));
         this.Server_port = server_port;
         this.Server_ip = server_ip;
-       // this.Local_port = 4399;
-        // SendSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-        //SendSocket.Bind(new IPEndPoint(IPAddress.Any, local_port));
     }
 
     public int Send(byte[] Message) throws IOException {
         int result = 0;
         datagramPacket = new DatagramPacket(Message, Message.length, InetAddress.getByName(Server_ip), Server_port);
         datagramSocket.send(datagramPacket);
-
         return result;
-
     }
-
-
 }

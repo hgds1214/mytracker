@@ -32,7 +32,6 @@ public class leidaHelpActivity extends AppCompatActivity implements View.OnClick
     private GestureDetector gestureDetector;
     private MyGestureDetector myGestureDetector;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,8 +59,6 @@ public class leidaHelpActivity extends AppCompatActivity implements View.OnClick
         binding.btSoftInfo.setOnClickListener(this);
         binding.ivBack.setOnClickListener(this);
       //  this.setLongClickable(true);
-
-
     }
 
     public class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {

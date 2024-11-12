@@ -41,10 +41,10 @@ public class leida_info implements Serializable {
     // 打点距离（钻杆长度）
     public float drillPipeLength = 100.0f;
     // 时间间隔
-    public float timeSpace = 100;
+    public float timeSpace = 50;
 
     //陀螺阈值
-    public float GYROThreshold = 70;
+    public float GYROThreshold = 40;
 
     //下载地址
     public String dataDownload = "";

@@ -130,8 +130,6 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
         refreshData();
     }
 
-
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void bindingData (leida_info info){
         if (info.dataPath==null){
@@ -219,9 +217,7 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
     }
 
    // private List<ProbePoint> probePointList = new ArrayList<>();
-
     private List<LocalDateTime> pointRecordList;
-
   //  private List<DrillPipe> DrillPipeList = new ArrayList<>();
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -249,9 +245,9 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
                         time[4], // minute
                         time[5]  // second
                 );
-                item.Roll =readSingle(bis,angle);
+                item.Roll = readSingle(bis,angle);
                 item.Pitch = readSingle(bis,angle);
-                item.Heading = readSingle(bis,angle);
+                item.Heading = readSingle(bis,angle)+180.0f;
               //  bis.read(buffer);
                 byte [] tmpbuffer = new byte[4];
                 long twoTimeMillis = System.currentTimeMillis();
