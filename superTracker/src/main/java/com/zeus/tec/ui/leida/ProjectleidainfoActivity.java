@@ -54,8 +54,8 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
       setContentView(binding.getRoot());
       Spinner sp_frequency = findViewById(R.id.sp_Frequency);
       Spinner sp_startAdapter = findViewById(R.id.sp_sampleLength);
-        ArrayAdapter <String> startAdapter = new ArrayAdapter<String>(this, R.layout.item_select,starArray);
-     ArrayAdapter <String> frequencyAdapter = new ArrayAdapter<String>(this, R.layout.item_select,frequencyArray);
+      ArrayAdapter <String> startAdapter = new ArrayAdapter<String>(this, R.layout.item_select,starArray);
+      ArrayAdapter <String> frequencyAdapter = new ArrayAdapter<String>(this, R.layout.item_select,frequencyArray);
         binding.ivBack.setOnClickListener( v->{
             FeedbackUtil.getInstance().doFeedback();
             finish();
@@ -145,7 +145,7 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
             return;
         }
         float drillPipeLength = Float.parseFloat(pipeLengthStr);
-        if (drillPipeLength < 1 || drillPipeLength > 1000) {
+        if (drillPipeLength < 1|| drillPipeLength > 1000) {
             ToastUtils.showLong("打点距离只能是1到"+1000+"之间");
             return;
         }
@@ -200,11 +200,6 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
 
     private void CreatProject_Click()
     {
-       // DialogResult result = MessageBox.Show("是否放弃当前项目创建新项目", "是否创建新项目", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-       // if (result == DialogResult.Yes)
-        //MesseagWindows mw = new MesseagWindows("是否放弃当前项目创建新项目");
-      //  Dialog dialog = mw.onCreateDialog(tmp);
-       // dialog.show();
         String content = "";
         content = String.valueOf(info.drillPipeLength);
        String  CreatTime = "";
@@ -328,12 +323,7 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
             public leida_info doInBackground() throws Throwable {
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
-//                                    String rootPath = PathUtils.getExternalAppFilesPath()+ File.separator + "leidaData";
-//                                    if (!FileUtils.createOrExistsDir(rootPath)) {
-//                                        LogUtils.e("创建文件失败：" + rootPath);
-//                                        ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
-//                                        return null;
-//                                    }
+
                     String projectRoot = rootPath + File.separator + sdf.format(new Date(System.currentTimeMillis()));
                     if (!FileUtils.createOrExistsDir(projectRoot)) {
                         LogUtils.e("创建文件失败：" + projectRoot);
@@ -349,21 +339,6 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
                     INIutil.writeproperties(cache.properties,filePath);
 
                     cache.RefreshInitFile();
-                    //  String filePath = projectRoot + File.separator + "scene.png";
-//                                    if (!ImageUtils.save(shotPicture, filePath, Bitmap.CompressFormat.PNG)) {
-//                                        LogUtils.e("保存图片失败：" + filePath);
-//                                        ToastUtils.showLong("保存图片失败，请重试!");
-//                                        return null;
-//                                    }
-                    //info.holeX = x;
-                    // info.holeY = y;
-                    // info.holeZ = z;
-                    //  info.jacketLength = jacketLength;
-                    //  info.designDirection = designDirection;
-                    //  info.designAngle = designAngle;
-                    //   info.adjustMode = adjustMode;
-                    //   info.livePhotos = filePath;
-                    //   info.livePhotosMd5 = ConvertUtils.bytes2HexString(EncryptUtils.encryptMD5File(filePath));
                     info.projectRoot = projectRoot;
                     info.dataPath = dataPath;
                     String SharePath = PathUtils.getExternalAppFilesPath()+ File.separator + "leidaShareData";
@@ -376,11 +351,6 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
                         }
                     }
                     info.zipPath = SharePath+File.separator+info.projectId+".zip";
-                    //  info.collectionDateTime = time;/*System.currentTimeMillis();*/
-                    //固定的保存路径，之后的打点文件会按照该路径保存，
-                    //   info.dataPath = projectRoot+File.separator+info.projectName+"data.csv";
-                    //  info.zipPath = projectRoot +File.separator+info.projectName+"zip.zip";
-                    //进行数据和数据文件的保存
                     info.id = 0;
                     info.id = TrackerDBManager.saveOrUpdate(info);
                     cache.newProject +=1;
@@ -411,6 +381,7 @@ public class ProjectleidainfoActivity extends BaseActivity implements DialogCall
         result = (int)(amp * 2.0);
         return result;
     }
+
     @Override
     public void onPositiveButtonClick() {
 

@@ -87,13 +87,10 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            ((Activity) context).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    progressBar.setVisibility(View.GONE);
-                    stepview.setText("下载完成");
-                    fastToast.showToast("数据文件下载成功");
-                }
+            ((Activity) context).runOnUiThread(() -> {
+                progressBar.setVisibility(View.GONE);
+                stepview.setText("下载完成");
+                fastToast.showToast("数据文件下载成功");
             });
         }
         else {
@@ -117,11 +114,9 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
     }
 
     private boolean DownloadFile(String dataName)  {
-       // String FileName = data;
         Boolean complete = false;
         String save_file ;
         String tmp_file ;
-       // String SavePath = cache.FileSavePath + "/Data";
         if (this.Who == 1) {
             try {
                 IOtool.createFileIfNotExists(leidaInfo.projectRoot);
@@ -148,7 +143,6 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
             }
         }
         else {
-           // IOtool.createFileIfNotExists(PathUtils.getAppDataPathExternalFirst()+File.separator+"tmpData");
             String tmpPath = PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData";
             File tmpfile = new File(tmpPath);
             if (!tmpfile.exists()) {
@@ -161,35 +155,25 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
             save_file =PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData"+File.separator+dataName+".dat";
             tmp_file = PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData"+File.separator+dataName+".tmp";
         }
-
         final int[] exit = {0};
         try {
             if (IOtool.isFileExists(save_file)) {
                 condition = lock.newCondition();
                 lock.lock();
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        androidx.appcompat.app.AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                        builder.setTitle("是否覆盖原文件")
-                                .setMessage("该文件已存在，是否覆盖原文件")
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        lock.lock();
-                                        condition.signalAll();
-                                        lock.unlock();
-                                    }
-                                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        exit[0] =1;
-                                        lock.lock();
-                                        condition.signalAll();
-                                        lock.unlock();
-                                    }
-                                }).show();
-                    }
+                ((Activity) context).runOnUiThread(() -> {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    builder.setTitle("是否覆盖原文件")
+                            .setMessage("该文件已存在，是否覆盖原文件")
+                            .setPositiveButton("OK", (dialog, which) -> {
+                                lock.lock();
+                                condition.signalAll();
+                                lock.unlock();
+                            }).setNegativeButton("取消", (dialog, which) -> {
+                                exit[0] =1;
+                                lock.lock();
+                                condition.signalAll();
+                                lock.unlock();
+                            }).show();
                 });
                 condition.await();
                 lock.unlock();
@@ -205,23 +189,10 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
             while (true) {
                 CurrentLength = cache.DownLoadFile(dataName, CurrentLength,tmp_file);
                 if (CurrentLength == 0) {
-                    int a =12;
-                    // Toast.makeText(context, "文件不存在无法下载", Toast.LENGTH_LONG).show();
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "文件不存在无法下载", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    ((Activity) context).runOnUiThread(() -> Toast.makeText(context, "文件不存在无法下载", Toast.LENGTH_SHORT).show());
                     break;
                 } else if (CurrentLength == -1) {
-                    int a =12;
-                    ((Activity) context).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(context, "网络异常无法下载", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    ((Activity) context).runOnUiThread(() -> Toast.makeText(context, "网络异常无法下载", Toast.LENGTH_SHORT).show());
                     break;
                 } else {
                     if (isFrist) {
@@ -237,13 +208,11 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
                         break;
                     } else {
                         double tmp = ((CurrentLength*100.0)/ TotalLength);
-
                         publishProgress((int) tmp);
                     }
                 }
             }
             if (isError) {
-                // MessageBox.Show("出错文件长度！");
                 ((Activity) context).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -252,7 +221,6 @@ public class MyTask extends AsyncTask<Void, Integer, Void> {
                 });
             }
         } catch (Exception ex) {
-            //  Toast.makeText(context, "文件下载失败!", Toast.LENGTH_LONG).show();
             ((Activity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

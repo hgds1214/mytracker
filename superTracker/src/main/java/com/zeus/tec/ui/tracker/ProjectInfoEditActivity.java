@@ -1,11 +1,13 @@
 package com.zeus.tec.ui.tracker;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.zeus.tec.databinding.ActivityProjectInfoEditBinding;
+import com.zeus.tec.device.tracker.TrackerCollectData;
 import com.zeus.tec.model.tracker.DrillHoleInfo;
 import com.zeus.tec.ui.base.BaseActivity;
 import com.zeus.tec.ui.tracker.util.ProjectInfoManager;
@@ -45,6 +47,9 @@ public class ProjectInfoEditActivity extends BaseActivity {
         binding.edtDyThreshold.setText(TextHelper.safeString(""+info.dynamicThreshold));
         binding.edtPipeLength.setText(TextHelper.safeString(""+info.drillPipeLength));
         binding.edtHoleLength.setText(TextHelper.safeString(""+info.drillHoleLength));
+        SharedPreferences sharedPreferences = getSharedPreferences("user",MODE_PRIVATE);
+        float magnetic_value = sharedPreferences.getFloat("magnetic_value",0f);
+        binding.edtMagneticDeclination.setText(String.valueOf(magnetic_value));
     }
 
     private void clickNext() {
@@ -99,6 +104,19 @@ public class ProjectInfoEditActivity extends BaseActivity {
             ToastUtils.showLong("钻孔深度只能是1到"+0xffffffffL+"之间");
             return;
         }
+        int magnetic = (int)Float.parseFloat(binding.edtMagneticDeclination.getText().toString()) ;
+
+        if (magnetic>360||magnetic<-360){
+            ToastUtils.showLong("磁偏角只能在-360到360之间");
+            return;
+        }
+        SharedPreferences sharedPreferences = getSharedPreferences("user",MODE_PRIVATE);
+        //获取Editor对象的引用
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //将获取过来的值放入文件
+        editor.putFloat("magnetic_value", magnetic);
+        editor.commit();
+        ProjectInfoManager.getInstance().magnetic_value = magnetic*100;
 
         info.companyId = company;
         info.miningAreaId = miningArea;

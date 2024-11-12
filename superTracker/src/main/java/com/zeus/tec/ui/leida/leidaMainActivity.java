@@ -70,12 +70,8 @@ public class leidaMainActivity extends AppCompatActivity {
     public void xupdataDef (){
         XUpdate.newBuild(this)
                 .updateUrl(testClassurl)
-                //.isAutoMode(true) //如果需要完全无人干预，自动更新，需要root权限【静默安装需要】
                 .updateParser(new CustomUpdateParser())
                 .supportBackgroundUpdate(true)
-                //.promptThemeColor(R.color.teal_200)
-                //.promptButtonTextColor(Color.RED)
-               // .promptTopResId(R.mipmap.bg_update_top3)
                 .promptHeightRatio(1.2f)
                 .update();
     }
@@ -96,7 +92,6 @@ public class leidaMainActivity extends AppCompatActivity {
             }
             if (CustomResult != null) {
                 CustomResult[13] = CustomResult[13].replace("/r/n", "\n");
-
                 return new UpdateEntity()
                         .setHasUpdate(true)
                         .setIsIgnorable(IsIgnorable)

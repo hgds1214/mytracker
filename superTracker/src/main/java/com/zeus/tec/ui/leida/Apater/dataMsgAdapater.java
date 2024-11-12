@@ -67,7 +67,6 @@ public class dataMsgAdapater extends BaseAdapter implements AdapterView.OnItemCl
         } else {
             distance.setText(String.valueOf(probePoint.Distance));
         }
-
         return view;
     }
 

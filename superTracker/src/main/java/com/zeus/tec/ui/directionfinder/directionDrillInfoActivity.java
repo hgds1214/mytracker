@@ -73,8 +73,12 @@ public class directionDrillInfoActivity extends BaseActivity {
             FeedbackUtil.getInstance().doFeedback();
             clickOK();
         });
-
-
+        File file = new File(PathUtils.getExternalAppFilesPath()+ File.separator+ "picData" + File.separator + "tmp.png");
+        if (!FileUtils.createOrExistsFile(file)){
+            LogUtils.e("创建文件失败：");
+            ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
+            return ;
+        }
         resultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() != RESULT_OK) return;
             onGetPicture(loadBmpChangeSize(picfile,4));
@@ -96,7 +100,6 @@ public class directionDrillInfoActivity extends BaseActivity {
         options.inSampleSize= 4;
         return BitmapFactory.decodeFile(picfile.getAbsolutePath(), options);
     }
-
     //
     private Intent takePhoto(String cameraPhotoPath) {
         File cameraPhoto = new File(cameraPhotoPath);
@@ -110,13 +113,8 @@ public class directionDrillInfoActivity extends BaseActivity {
         return takePhotoIntent;
       //  startActivityForResult(takePhotoIntent, REQUEST_TAKE_PHOTO);
     }
-
-
-
-
     //private dirctionfinderDrillHoleInfo info = ProjectInfoManager.getInstance().dirctionfinderDrillHoleInfo;
     private void initUI() {
-
         binding.edtHoleX.setText(TextHelper.safeString(info.holeX + ""));
         binding.edtHoleY.setText(TextHelper.safeString(info.holeY + ""));
         binding.edtHoleZ.setText(TextHelper.safeString(info.holeZ + ""));
@@ -124,7 +122,6 @@ public class directionDrillInfoActivity extends BaseActivity {
         binding.edtDesignDirection.setText(TextHelper.safeString(info.designDirection + ""));
         binding.edtDesignAngle.setText(TextHelper.safeString(""+info.designAngle));
         binding.edtAdjustMode.setText(TextHelper.safeString(""+info.adjustMode));
-
     }
 
     private void clickOK() {
@@ -173,18 +170,8 @@ public class directionDrillInfoActivity extends BaseActivity {
         }
         short designAngle = (short) tmp;
 
-        //String adjustModeStr = binding.edtAdjustMode.getText().toString();
-        /*if (adjustModeStr.isEmpty()) {
-            ToastUtils.showLong("校准模式不能为空");
-            return;
-        }*/
         String adjustMode = "";//adjustModeStr;
-
-        if (uri == null) {
-            ToastUtils.showLong("现场照片不能为空");
-            return;
-        }
-
+        time = System.currentTimeMillis();
         if (isShowLoading()) return;
         showLoading();
         ThreadUtils.executeByCached(new ThreadUtils.SimpleTask<dirctionfinderDrillHoleInfo>() {
@@ -199,7 +186,7 @@ public class directionDrillInfoActivity extends BaseActivity {
                         return null;
                     }
                     String projectRoot = rootPath + File.separator + sdf.format(new Date(System.currentTimeMillis()));
-                    if (!FileUtils.createOrExistsDir(rootPath)) {
+                    if (!FileUtils.createOrExistsDir(projectRoot)) {
                         LogUtils.e("创建文件失败：" + projectRoot);
                         ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
                         return null;
@@ -207,10 +194,9 @@ public class directionDrillInfoActivity extends BaseActivity {
                     String filePath = projectRoot + File.separator + "scene.png";
                     if (!ImageUtils.save(shotPicture, filePath, Bitmap.CompressFormat.PNG)) {
                         LogUtils.e("保存图片失败：" + filePath);
-                        ToastUtils.showLong("保存图片失败，请重试!");
-                        return null;
+                     //   ToastUtils.showLong("保存图片失败，请重试!");
+                      //  return null;
                     }
-
                     info.holeX = x;
                     info.holeY = y;
                     info.holeZ = z;
@@ -245,6 +231,7 @@ public class directionDrillInfoActivity extends BaseActivity {
             }
         });
     }
+
     private void showPhotoView() {
         if (View.GONE == binding.ivSpot.getVisibility()) {
             binding.ivSpot.setVisibility(View.VISIBLE);
@@ -258,9 +245,7 @@ public class directionDrillInfoActivity extends BaseActivity {
     //给照片添加标签
     private void onGetPicture(Bitmap pic) {
         showPhotoView();
-
         time = System.currentTimeMillis();
-
         StringBuilder sb = new StringBuilder();
         sb.append("企业编号:").append(info.projectName);
         pic = ImageUtils.addTextWatermark(pic, sb.toString(), 40, Color.WHITE, 0, 30, true);
@@ -277,8 +262,14 @@ public class directionDrillInfoActivity extends BaseActivity {
         binding.ivSpot.setImageBitmap(pic);
 
         shotPicture = pic;
+        File filePic = new File(PathUtils.getExternalAppFilesPath()+File.separator+"picData");
 
         File file = new File(PathUtils.getExternalAppFilesPath()+ File.separator+ "picData" + File.separator + "tmp.png");
+        if (!FileUtils.createOrExistsFile(file)){
+            LogUtils.e("创建文件失败：");
+            ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
+            return ;
+        }
         /*if (Build.VERSION.SDK_INT >= 24) {
             uri = FileProvider.getUriForFile(this, getPackageName()+".fileprovider", file).toString();
         } else {

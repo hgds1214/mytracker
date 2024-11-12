@@ -8,6 +8,7 @@ public class ProjectInfoManager {
     private static ProjectInfoManager instance = new ProjectInfoManager();
     private DrillHoleInfo drillHoleInfo;
     public dirctionfinderDrillHoleInfo dirctionfinderDrillHoleInfo;
+    public int magnetic_value = 0;
 
     public static ProjectInfoManager getInstance() {
         return instance;

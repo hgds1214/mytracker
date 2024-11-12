@@ -28,8 +28,17 @@ import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityDataViewBinding;
 import com.zeus.tec.db.ObjectBox;
 import com.zeus.tec.event.MergeEvent;
+import com.zeus.tec.model.leida.leidaPointRecordInfo;
+import com.zeus.tec.model.leida.leidaPointRecordInfo_;
+import com.zeus.tec.model.leida.leida_info;
+import com.zeus.tec.model.tracker.CollectTimeInfo;
+import com.zeus.tec.model.tracker.CollectTimeInfo_;
+import com.zeus.tec.model.tracker.DrillDataInfo;
+import com.zeus.tec.model.tracker.DrillDataInfo_;
 import com.zeus.tec.model.tracker.DrillHoleInfo;
 import com.zeus.tec.model.tracker.DrillHoleInfo_;
+import com.zeus.tec.ui.leida.interfaceUtil.DialogCallback;
+import com.zeus.tec.ui.leida.util.MesseagWindows;
 import com.zeus.tec.ui.tracker.adapter.DataListAdapter;
 import com.zeus.tec.model.utils.FeedbackUtil;
 
@@ -60,7 +69,6 @@ public class DataViewActivity extends AppCompatActivity {
         if (event == null || event.info == null) return;
         List<DrillHoleInfo> data = dataListAdapter.getData();
         if (data == null) return;
-
         int size = data.size();
         for (int i = 0; i < size; i++) {
             DrillHoleInfo info = data.get(i);
@@ -112,7 +120,8 @@ public class DataViewActivity extends AppCompatActivity {
                         doMerge(dataListAdapter.getItem(position));
                         break;
                     case R.id.tv_export:
-                        doExport(dataListAdapter.getItem(position));
+                        doDelect(dataListAdapter.getItem(position));
+
                         break;
                     case R.id.tv_continue:
                         doContinue(dataListAdapter.getItem(position));
@@ -133,6 +142,37 @@ public class DataViewActivity extends AppCompatActivity {
             }
         });
         refreshData();
+    }
+    private void doDelect(DrillHoleInfo info){
+        if (info == null)
+        {
+            return;
+        }
+        MesseagWindows.showMessageBox(this, "删除记录", "是否删除当前记录", new DialogCallback()
+        {
+            @Override
+            public void onPositiveButtonClick() {
+                File fileData = new File(info.projectRoot);
+                boolean result ;
+                if (fileData.exists()) {
+                    result = FileUtils.delete(fileData);
+                } else {
+                    result = true;
+                }
+                if (result) {
+                    ObjectBox.get().boxFor(DrillHoleInfo.class).remove(info.id);
+                    ObjectBox.get().boxFor(CollectTimeInfo.class).query().equal(CollectTimeInfo_.drillInfoId,info.id).build().remove();
+                    ObjectBox.get().boxFor(DrillDataInfo.class).query().equal(DrillDataInfo_.drillInfoId,info.id).build().remove();
+                    dataListAdapter.notifyDataSetChanged();
+                    refreshData();
+                } else {
+                    ToastUtils.showLong("文件删除失败");
+                }
+            }
+            @Override
+            public void onNegativeButtonClick() {
+            }
+        });
     }
 
     private void doExport(DrillHoleInfo info) {
@@ -213,13 +253,6 @@ public class DataViewActivity extends AppCompatActivity {
 
         startActivity(Intent.createChooser(intent, "分享到"));
 
-        /*Intent chooser = Intent.createChooser(intent, "Share File");
-        List<ResolveInfo> resInfoList = this.getPackageManager().queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo resolveInfo : resInfoList) {
-            String packageName = resolveInfo.activityInfo.packageName;
-            this.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        }
-        startActivity(chooser);*/
     }
 
     private void doShowData(DrillHoleInfo info) {

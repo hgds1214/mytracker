@@ -53,17 +53,7 @@ public class mainReceiveThread {
         while (!stop)
         {
             Acception();
-           // stop =true;
         }
-//        if (client != null)
-//        {
-//            client.close();
-//            client = null;
-//            Message message = new Message();
-//            message.what = 1;
-//            message.obj = "传输成功";
-//            handler.sendMessage(message);
-//        }
     }
 
     @SuppressLint("HandlerLeak")
@@ -101,7 +91,6 @@ public class mainReceiveThread {
                     if (tmp == (byte)0x7E)
                     {
                         property.Newly();
-
                     }
                     else if (!property.is_head)
                     {
@@ -136,7 +125,6 @@ public class mainReceiveThread {
                                     c_short[1] = property.msb[1];
                                     try
                                     {
-                                       // length = ConvertCode.getint16(c_short[0],c_short[1]);
                                         length = ConvertCode.getint16(c_short,ByteOrder.BIG_ENDIAN);
                                     }
                                     catch (Exception ex)
@@ -233,21 +221,12 @@ public class mainReceiveThread {
                             }
                             else
                             {
-//                                TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-//                                long time = Convert.ToInt64(ts.TotalMilliseconds);
-//                                Debug.WriteLine("接受整包时间：" + time);
                                 long time = System.currentTimeMillis();
-
                                 ExplainMessage(property);
-
-//                                ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-//                                time = Convert.ToInt64(ts.TotalMilliseconds);
-//                                Debug.WriteLine("解析包时间：" + time);
                                 time = System.currentTimeMillis();
 
                             }
                         }
-
                     }
                 }
             }
@@ -274,7 +253,6 @@ public class mainReceiveThread {
             int t = property.data[j] & 0xFF;
             sum += t;
         }
-
         try
         {
             //  int check = property.check & 0xff;
@@ -344,22 +322,16 @@ public class mainReceiveThread {
 
                                 if (FileName.equals(cache.DeviceOper.FileName) )
                                 {
-
-                                    // int TotalLength = BitConverter.ToInt32(property.data,index);
                                     int TotalLength = ConvertCode.getint(property.data,index);
                                     index += 4;
-
                                     if (cache.DeviceOper.TotalLength == 0)
                                     {
                                         cache.DeviceOper.TotalLength = TotalLength;
                                     }
-
                                     if (cache.DeviceOper.TotalLength == TotalLength)
                                     {
-
                                         int CurrentLength = ConvertCode.getint(property.data,index);
                                         index += 4;
-
                                         if (cache.DeviceOper.CurrentLength == CurrentLength)
                                         {
                                             int DataLength = 0;
@@ -371,7 +343,6 @@ public class mainReceiveThread {
                                             {
                                                 byte[] data = new byte[DataLength];
                                                 System.arraycopy(property.data, begin, data, 0, DataLength);
-                                               // Buffer.BlockCopy(property.data, begin, data, 0, DataLength);
                                                 cache.DeviceOper.Set(data);
                                             }
                                         }
@@ -380,27 +351,21 @@ public class mainReceiveThread {
                             }
                             else if (Sign == (byte)0x64)
                             {
-
                                 int TotalLength = ConvertCode.getint(property.data,index);
                                 index += 4;
-
                                 if (cache.DeviceOper.TotalLength == 0)
                                 {
                                     cache.DeviceOper.TotalLength = TotalLength;
                                 }
-
                                 if (cache.DeviceOper.TotalLength == TotalLength)
                                 {
-
                                     int  CurrentLength = ConvertCode.getint(property.data,index);
                                     index += 4;
-
                                     if (cache.DeviceOper.CurrentLength == CurrentLength)
                                     {
                                         int DataLength = 0;
                                         DataLength = ConvertCode.getushort(property.data,index);
                                         index += 2;
-
                                         int begin = 1 + 1 + 4 + 4 + 2;
                                         int length = property.data_length - begin;
                                         if (length == DataLength)
@@ -418,12 +383,10 @@ public class mainReceiveThread {
                                 int DataLength = 2;
                                 int begin = 2;
                                 int length = property.data_length - begin;
-
                                 if (length == DataLength)
                                 {
                                     byte[] data = new byte[DataLength];
                                     System.arraycopy(property.data, begin, data, 0, DataLength);
-                                   // Buffer.BlockCopy(property.data, begin, data, 0, DataLength);
                                     cache.DeviceOper.Set(data);
                                 }
                             }
@@ -432,16 +395,13 @@ public class mainReceiveThread {
                                 int DataLength = 2;
                                 int begin = 2;
                                 int length = property.data_length - begin;
-
                                 if (length == DataLength)
                                 {
                                     byte[] data = new byte[DataLength];
                                     System.arraycopy(property.data, begin, data, 0, DataLength);
-                                    //Buffer.BlockCopy(property.data, begin, data, 0, DataLength);
                                     cache.DeviceOper.Set(data);
                                 }
                             }
-
                             else if (Sign == (byte)0x67)
                             {
                                 int DataLength = 6+4;
@@ -461,12 +421,10 @@ public class mainReceiveThread {
                                 int DataLength = 34;
                                 int begin = 2;
                                 int length = property.data_length - begin;
-
                                 if (length == DataLength)
                                 {
                                     byte[] data = new byte[DataLength];
                                     System.arraycopy(property.data, begin, data, 0, DataLength);
-                                   // Buffer.BlockCopy(property.data, begin, data, 0, DataLength);
                                     cache.DeviceOper.Set(data);
                                 }
                             }

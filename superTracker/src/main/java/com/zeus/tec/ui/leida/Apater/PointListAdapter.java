@@ -51,13 +51,7 @@ public class PointListAdapter extends BaseAdapter {
         TextView number = view.findViewById(R.id.tv_pointNumber);
         TextView Time = view.findViewById(R.id.tv_point_time);
         TextView distance = view.findViewById(R.id.tv_point_distance);
-//        if (position==0){
-//            PointParamter title = new PointParamter("序号","时间","深度");
-//            number.setText(title.number);
-//            Time.setText(title.time);
-//            distance.setText(title.distance);
-//        }
-       // else {
+
             leidaPointRecordInfo pointParamter = pointParamters.get(position);
             number.setText(pointParamter.PointNumber);
             Time.setText(pointParamter.recordTime);

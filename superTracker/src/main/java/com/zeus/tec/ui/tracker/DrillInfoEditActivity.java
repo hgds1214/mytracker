@@ -60,6 +60,11 @@ public class DrillInfoEditActivity extends BaseActivity {
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         builder.detectFileUriExposure();
+        if (!FileUtils.createOrExistsFile(picfile)){
+            LogUtils.e("创建文件失败：");
+            ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
+            return ;
+        }
         binding.ivBack.setOnClickListener( v->{
             FeedbackUtil.getInstance().doFeedback();
             finish();
@@ -70,15 +75,12 @@ public class DrillInfoEditActivity extends BaseActivity {
         });
         binding.tvCapture.setOnClickListener( v-> {
             FeedbackUtil.getInstance().doFeedback();
-
             try {
-
                resultLauncher.launch(takePhoto(picfile.getAbsolutePath()));
                // resultLauncher.launch(new Intent(MediaStore.ACTION_IMAGE_CAPTURE).putExtra(MediaStore.EXTRA_OUTPUT,Uri.fromFile(picfile)));
             }
             catch (Exception ex){
                 Log.e("TGA",ex.getLocalizedMessage());
-
             }
         });
         binding.ivSpot.setOnClickListener( v -> {
@@ -89,6 +91,7 @@ public class DrillInfoEditActivity extends BaseActivity {
             FeedbackUtil.getInstance().doFeedback();
             clickOK();
         });
+
 
         resultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() != RESULT_OK) return;
@@ -257,8 +260,8 @@ public class DrillInfoEditActivity extends BaseActivity {
                     String filePath = projectRoot + File.separator + "scene.png";
                     if (!ImageUtils.save(shotPicture, filePath, Bitmap.CompressFormat.PNG)) {
                         LogUtils.e("保存图片失败：" + filePath);
-                        ToastUtils.showLong("保存图片失败，请重试!");
-                        return null;
+                       // ToastUtils.showLong("保存图片失败，请重试!");
+                       // return null;
                     }
                     info.holeX = x;
                     info.holeY = y;

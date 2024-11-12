@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:background="@drawable/top_bluebg_for_edit"
+    tools:context=".ui.leida.ProjectleidainfoActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="0dp"
+        >
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/white_arrow_left"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="编辑项目"
+            android:textColor="#ffffffff"
+            android:textSize="17sp" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:layout_marginTop="10dp">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_toRightOf="@+id/iv_left"
+            android:layout_toLeftOf="@+id/iv_right"
+            android:layout_marginLeft="-10dp"
+            android:layout_marginRight="-10dp"
+            android:layout_marginTop="20dp"
+            android:background="#ffffff"/>
+        <View
+            android:id="@+id/v_left_line"
+            android:layout_width="66dp"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/left_line_white" />
+        <LinearLayout
+            android:id="@+id/iv_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/v_left_line"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="-10dp"
+            android:orientation="vertical"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@mipmap/active_edit"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:paddingTop="6dp"
+                android:text="项目信息"
+                android:textColor="#ffffffff"
+                android:textSize="13sp"
+                />
+        </LinearLayout>
+        <View
+            android:id="@+id/v_right_line"
+            android:layout_width="66dp"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="20dp"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/right_line_white"/>
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/iv_right"
+            android:layout_marginRight="-10dp"
+            android:layout_toLeftOf="@+id/v_right_line"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@mipmap/disable_info"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:paddingTop="6dp"
+                android:text="数据采集"
+                android:textColor="#bbffffff"
+                android:textSize="13sp"
+                />
+        </LinearLayout>
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_white_top"
+        >
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="项目编号"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_project"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:inputType="text"
+                        android:maxLength="32"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="打点距离(cm)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_point_distance"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="接收面积X(m²)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_rec_area_x"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:inputType="number"
+                        android:maxLength="12"
+                        android:text="1"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="接收面积Y(m²)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_rec_area_y"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:inputType="number"
+                        android:maxLength="12"
+                        android:text="1"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="接收面积Z(m²)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_rec_area_z"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:inputType="number"
+                        android:maxLength="24"
+                        android:text="1"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="发射面积(m³)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_send_area"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="（1-1000）"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:text="1"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="标记间隔"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_mark_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:text="5"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="叠加次数(1-32000)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_overlay_number"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="（1-32000）"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:text="32"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="1dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="发射能量"
+                        android:layout_weight="1"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <org.angmarch.views.NiceSpinner
+                        android:id="@+id/nice_spinner_sendEnergy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:gravity="left"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        app:textTint="#000000"
+                        tools:ignore="SpeakableTextPresentCheck" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingEnd="1dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="时间序列(ms)"
+                        android:layout_weight="1"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <org.angmarch.views.NiceSpinner
+                        android:id="@+id/nice_spinner_sampleTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#000000"
+                        android:textSize="14sp"
+                        app:textTint="#000000"
+                        tools:ignore="SpeakableTextPresentCheck" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="陀螺阈值(>=50)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/edt_gyro"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="（>50）"
+                        android:inputType="numberDecimal"
+                        android:maxLength="5"
+                        android:text="50"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:background="#dddddd"
+                    android:paddingRight="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="采样点数"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:enabled="false"
+                        android:id="@+id/tv_sample_length"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:text="6400"
+                        android:inputType="number"
+                        android:maxLength="24"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:background="#dddddd"
+
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="采样间隔(us)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/tv_sample_intervel"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:text="2"
+                        android:inputType="number"
+                        android:maxLength="24"
+                        android:paddingLeft="10dp"
+                        android:textColor="#333333"
+                        android:enabled="false"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="#E5E5E5" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="16dp"
+                    android:background="#dddddd"
+                    android:paddingRight="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="发射频率(hz)"
+                        android:textColor="#ff606060"
+                        android:textSize="14sp" />
+
+                    <EditText
+                        android:id="@+id/tv_send_frequency"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="right|center_vertical"
+                        android:hint="请输入"
+                        android:text="12.5"
+                        android:inputType="number"
+                        android:maxLength="24"
+                        android:paddingLeft="10dp"
+                        android:enabled="false"
+                        android:textColor="#333333"
+                        android:textColorHint="#bbbbbb" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+        <TextView
+            android:id="@+id/tv_next"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:gravity="center"
+            android:text="创建项目"
+            android:textColor="#ffffffff"
+            android:textSize="16sp"
+            android:background="@drawable/bg_0e65ee"/>
+
+    </LinearLayout>
+
+</LinearLayout>

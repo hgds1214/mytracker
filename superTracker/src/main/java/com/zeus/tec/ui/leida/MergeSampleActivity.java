@@ -467,8 +467,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         DepthScale.drawScale(canvas, 0, 0, scaleHeight, canvas.getHeight());
 
         photoView.setImageBitmap(oneSampleBmp);
-
-
     }
 
     private void drawGrayMapBmp() {
@@ -538,7 +536,6 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void initColorMap() {
-
         MergeCache.currentColorMap.add(new double[]{0, 0, 0, 0, 0, 0, 0});
         MergeCache.currentColorMap.add(new double[]{100, 255, 255, 255, 0, 0, 0});
         for (int i = 1; i < MergeCache.currentColorMap.size(); i++) {
