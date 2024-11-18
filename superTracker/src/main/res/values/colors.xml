@@ -3,7 +3,7 @@
     <color name="colorPrimary">#0e65ee</color>
     <color name="colorPrimaryDark">#1F70EF</color>
     <color name="colorAccent">#2274F4</color>
-
+    <color name="colorwiter">#ffffff</color>
     <color name="colorRecieveText">#00FF00</color>
     <color name="colorSendText">#82CAFF</color>
     <color name="colorStatusText">#FFDB58</color>

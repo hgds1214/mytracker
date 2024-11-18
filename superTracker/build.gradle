@@ -9,15 +9,22 @@ android {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
-
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\tsp\\Desktop\\Android\\1keystore\\whcs_key.jks') // 密钥路径
+            storePassword '7296596tao'      // 密钥库密码
+            keyAlias 'whcs_key'                  // 密钥别名
+            keyPassword '7296596tao'            // 密钥密码
+        }
+    }
     defaultConfig {
         applicationId "com.zeus.tec"
         minSdkVersion 21
         targetSdkVersion 32
         vectorDrawables.useSupportLibrary = true
 
-        versionCode 300
-        versionName "V3.0.0(whcs)"
+        versionCode 310
+        versionName "V3.1.0(whcs)"
 
         missingDimensionStrategy 'device', 'anyDevice'
 

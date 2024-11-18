@@ -62,8 +62,6 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         setContentView(binding.getRoot());
         context1 = MyApplicationContext.getInstance().getAppContext();
         cache = YcsMainCache.GetInstance();
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);//这两句设置禁止所有检查
         try {
             loadLastProject();
         } catch (IOException e) {

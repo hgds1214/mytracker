@@ -37,7 +37,6 @@ import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
 
-
     //region  全局变量
 
     //endregion

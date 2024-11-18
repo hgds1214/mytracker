@@ -246,7 +246,7 @@
                 android:layout_height="80dp"
                 android:layout_gravity="center"
                 android:scaleType="fitXY"
-                android:src="@mipmap/ic_launcher" />
+                android:src="@mipmap/maogan_device" />
         </FrameLayout>
 
         <TextView

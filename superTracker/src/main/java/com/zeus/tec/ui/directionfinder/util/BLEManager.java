@@ -10,6 +10,10 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -129,22 +133,43 @@ public class BLEManager {
         this.onDeviceSearchListener = onDeviceSearchListener;
 
         Log.d(TAG, "开始扫描设备");
-//        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-//            // TODO: Consider calling
-//            //    ActivityCompat#requestPermissions
-//            // here to request the missing permissions, and then overriding
-//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-//            //                                          int[] grantResults)
-//            // to handle the case where the user grants the permission. See the documentation
-//            // for ActivityCompat#requestPermissions for more details.
-//            return;
-//        }
+        BluetoothLeScanner bluetoothLeScanner = bluetooth4Adapter.getBluetoothLeScanner();
+        ScanSettings settings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+                .build();
+        bluetoothLeScanner.startScan(null, settings,scanCallback);
 
-        bluetooth4Adapter.startLeScan(leScanCallback);
-
+        //bluetooth4Adapter.startLeScan(leScanCallback);
         //设定最长扫描时间
         mHandler.postDelayed(stopScanRunnable, scanTime);
     }
+
+    private  ScanCallback scanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            if (result == null)
+                return;
+            BluetoothDevice bluetoothDevice = result.getDevice();
+            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                if (bluetoothDevice.getName() != null) {
+                    Log.d(TAG, bluetoothDevice.getName() + "-->" + bluetoothDevice.getAddress());
+                } else {
+                    Log.d(TAG, "null" + "-->" + bluetoothDevice.getAddress());
+                }
+                ParcelUuid [] uuidList = bluetoothDevice.getUuids();
+                if (uuidList!=null){
+                    ParcelUuid [] tem = uuidList;
+                    Log.d(TAG,tem.toString());
+                }
+                BLEDevice bleDevice = new BLEDevice(bluetoothDevice,  result.getRssi());
+                if (onDeviceSearchListener != null) {
+                    onDeviceSearchListener.onDeviceFound(bleDevice);  //扫描到设备回调
+                }
+                return;
+            }
+        }
+    };
 
     private Runnable stopScanRunnable = new Runnable() {
         @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
@@ -203,7 +228,6 @@ public class BLEManager {
             switch (status) {
                 case BluetoothGatt.GATT_SUCCESS:
                     Log.w(TAG, "BluetoothGatt.GATT_SUCCESS");
-
                     break;
                 case BluetoothGatt.GATT_FAILURE:
                     Log.w(TAG, "BluetoothGatt.GATT_FAILURE");

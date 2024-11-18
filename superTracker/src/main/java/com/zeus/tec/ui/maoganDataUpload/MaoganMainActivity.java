@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -23,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,13 +41,16 @@ import android.widget.Toast;
 
 import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.FileUtils;
+import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.Utils;
 import com.github.mikephil.charting.charts.Chart;
+import com.zeus.tec.BuildConfig;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityMaoganMainBinding;
 import com.zeus.tec.model.utils.FeedbackUtil;
+import com.zeus.tec.model.utils.log.SuperLogUtil;
 import com.zeus.tec.ui.directionfinder.directionfinderDataCollectActivity;
 import com.zeus.tec.ui.directionfinder.util.BLEDevice;
 import com.zeus.tec.ui.directionfinder.util.BLEManager;
@@ -62,6 +67,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -82,6 +88,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -94,6 +102,7 @@ import okhttp3.Response;
 public class MaoganMainActivity extends AppCompatActivity implements View.OnClickListener {
 
     ActivityMaoganMainBinding binding;
+    private SuperLogUtil superLogUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +115,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         initView();
         //initProjectParam();
         initBLE();
+        superLogUtil = new SuperLogUtil(this);
         initListener();
         initBLEBroadcastReceiver();
     }
@@ -124,6 +134,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     private static final int SEND_FAILURE = 0x05;
     private static final int RECEIVE_SUCCESS = 0x06;
     private static final int RECEIVE_FAILURE = 0x07;
+
     private static final int START_DISCOVERY = 0x08;
     private static final int STOP_DISCOVERY = 0x09;
     private static final int DISCOVERY_DEVICE = 0x0A;
@@ -152,6 +163,20 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     private String maogan_login_expireDate;
 
     String requestBodyStr;
+
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+    private final String Url_Get_Setting = "https://iqt.yxgswater.com:8000/insp/xczy/api/login";
+    private final String Url_Updata_MaoganData = "https://iqt.yxgswater.com:8000/insp/xczy/api/maoganData";
+    private final OkHttpClient client = new OkHttpClient();
+
+    boolean isReceiveDataPackeage = false;
+    byte[] buf;
+    int dataFramePosition = 0;
+    int dataPackeageCount = 0;
+    long checkSum = 0;
+    int dataPackeagelength = 0;
+    List<byte[]> bufList = new ArrayList<>();
+    int BLE_Maxsize_Packeage = 205;
     //endregion
 
     public class UpdataParam {
@@ -234,100 +259,96 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         byte sampleType;
         byte sampleModel;
         String remarks;
-
-
     }
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-    private final String Url_Get_Setting = "https://iqt.yxgswater.com:8000/insp/xczy/api/login";
-    private final String Url_Updata_MaoganData = "https://iqt.yxgswater.com:8000/insp/xczy/api/maoganData";
-    private final OkHttpClient client = new OkHttpClient();
-
-    boolean isReceiveDataPackeage = false;
-    byte[] buf;
-    int dataFramePosition = 0;
-    int dataPackeageCount = 0;
-    long checkSum = 0;
-    int dataPackeagelength = 0;
-    List<byte[]> bufList = new ArrayList<>();
-    int BLE_Maxsize_Packeage = 205;
-
     Map<Integer, Boolean> isCheck = new HashMap<>();
+
+    private void updataOneData (String dataPath){
+        try {
+            FileInputStream fileInputStream = new FileInputStream(dataPath);
+            BufferedInputStream fis = new BufferedInputStream(fileInputStream);
+            UpdataParam updataParam = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                updataParam = new UpdataParam();
+            }
+            byte[] fileHeadbuf = new byte[48];
+            byte[] tmpBuff2 = new byte[2];
+//            fis.read(fileHeadbuf);
+//            assert updataParam != null;
+//            updataParam.fileName = new String(fileHeadbuf, StandardCharsets.UTF_8).trim();
+//            fis.read(new byte[8]);
+//            fis.read(tmpBuff2);
+//            fis.read(new byte[6]);
+            //updataParam.passwayCount = (byte) (ByteBuffer.wrap(tmpBuff2).order(ByteOrder.LITTLE_ENDIAN).getShort() & 0XFF);
+            byte[] dataHeadbuf = new byte[512];
+            fis.read(dataHeadbuf);
+            MaoganFileHead maoganFileHead = parseFileHead(dataHeadbuf);
+            updataParam.passwayCount = 6;
+            updataParam.fileName = maoganFileHead.prj_name+"-"+maoganFileHead.serial_num;
+            updataParam.machineId = String.valueOf(maoganFileHead.fileSysId);
+            updataParam.pileNo = updataParam.fileName.split("-")[updataParam.fileName.split("-").length - 1];
+            updataParam.projectName = updataParam.fileName;
+            updataParam.siteName = updataParam.fileName.split("-")[0];
+            updataParam.position = "2";
+            updataParam.pourTime = maoganFileHead.test_data.trim();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                updataParam.pourTime = sdf.format(new Date(System.currentTimeMillis()));
+            }
+            updataParam.startTime = updataParam.pourTime;
+            updataParam.sampleInterval = maoganFileHead.samp_interval;
+            updataParam.prePileLen = maoganFileHead.peg_length;
+            updataParam.rodSpeed = maoganFileHead.waveSpeed;
+            updataParam.lowFilter = maoganFileHead.lp_freg * 1000;
+            updataParam.highFilter = maoganFileHead.hp_freq;
+            requestBodyStr = getRequestBodyObj(updataParam, fis).toString();
+            if (BuildConfig.DEBUG) superLogUtil.d("正在上传:"+updataParam.fileName);
+            httpPostrequest("https://iqt.yxgswater.com:8000/insp/xczy/api/maoganData");
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
     private IMaoganDataUpdata iMaoganDataUpdata = new IMaoganDataUpdata() {
         @Override
-        public void updataData(File dataPath) {
+        public void updataData(List <File> updataFileList) {
             FeedbackUtil.getInstance().doFeedback();
-            MesseagWindows.showMessageBox(mContext, "上传文件", "是否上传文件", new DialogCallback() {
+            if (updataFileList.size()==0){
+                ToastUtils.showShort("请先选中需要上传的数据！");
+                return;
+            }
+            MesseagWindows.showMessageBox(mContext, "上传文件", "是否上传选中文件", new DialogCallback() {
                 @Override
                 public void onPositiveButtonClick() {
-                    try {
-                        FileInputStream fileInputStream = new FileInputStream(dataPath);
-                        BufferedInputStream fis = new BufferedInputStream(fileInputStream);
-                        // fis = new FileInputStream(dataPath);
-                        UpdataParam updataParam = null;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            updataParam = new UpdataParam();
-                        }
-                        byte[] fileHeadbuf = new byte[48];
-                        byte[] tmpBuff2 = new byte[2];
-                        fis.read(fileHeadbuf);
-                        assert updataParam != null;
-                        updataParam.fileName = new String(fileHeadbuf, StandardCharsets.UTF_8).trim();
-                        fis.read(new byte[8]);
-                        fis.read(tmpBuff2);
-                        fis.read(new byte[6]);
-                        updataParam.passwayCount = (byte) (ByteBuffer.wrap(tmpBuff2).order(ByteOrder.LITTLE_ENDIAN).getShort() & 0XFF);
-                        byte[] dataHeadbuf = new byte[512];
-                        fis.read(dataHeadbuf);
-                        MaoganFileHead maoganFileHead = parseFileHead(dataHeadbuf);
-                        updataParam.machineId = String.valueOf(maoganFileHead.fileSysId);
-                        updataParam.pileNo = updataParam.fileName.split("-")[updataParam.fileName.split("-").length - 1];
-                        updataParam.projectName = updataParam.fileName;
-                        updataParam.siteName = updataParam.fileName.split("-")[0];
-                        // updataParam.position = maoganFileHead.peg_pos.trim();
-                        updataParam.position = "2";
-                        updataParam.pourTime = maoganFileHead.test_data.trim();
-                        // if (updataParam.pourTime.equals("")){
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            updataParam.pourTime = sdf.format(new Date(System.currentTimeMillis()));
-                        }
-
-                        updataParam.startTime = updataParam.pourTime;
-                        // updataParam.samplePoints = maoganFileHead.SampleNum;
-                        updataParam.sampleInterval = maoganFileHead.samp_interval;
-                        updataParam.prePileLen = maoganFileHead.peg_length;
-                        updataParam.rodSpeed = maoganFileHead.waveSpeed;
-                        updataParam.lowFilter = maoganFileHead.lp_freg * 1000;
-                        updataParam.highFilter = maoganFileHead.hp_freq;
-
-                        requestBodyStr = getRequestBodyObj(updataParam, fis).toString();
-                        httpPostrequest("https://iqt.yxgswater.com:8000/insp/xczy/api/maoganData");
-
-
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
+                    for (int i = 0; i < updataFileList.size(); i++) {
+                        updataOneData(updataFileList.get(i).getPath());
                     }
+                    ToastUtils.showShort("上传结束!");
                 }
+
                 @Override
                 public void onNegativeButtonClick() {
                 }
             });
-
         }
 
         @Override
-        public void deleteData(File dataPath) {
-            FeedbackUtil.getInstance().doFeedback();
+        public void deleteData(List<File> deleteFileList) {
             MesseagWindows.showMessageBox(mContext, "删除文件", "是否删除文件", new DialogCallback() {
                 @Override
                 public void onPositiveButtonClick() {
-                    if (FileUtils.delete(dataPath)) {
-                        refreshDataList();
-                    } else {
-                        ToastUtils.showLong("文件删除失败！");
+                    if (deleteFileList.size()==0){
+                        ToastUtils.showShort("请先选中需要删除的数据!");
                     }
+                    try {
+                        for (int i = 0; i < deleteFileList.size(); i++) {
+                            FileUtils.delete(deleteFileList.get(i).getPath());
+                        }
+                    }catch (Exception e){
+                        ToastUtils.showShort("文件删除失败!");
+                    }
+                    ToastUtils.showShort(deleteFileList.size()+"个数据删除成功!");
+                    refreshDataList(currentFilePath);
                 }
-
                 @Override
                 public void onNegativeButtonClick() {
 
@@ -339,7 +360,80 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         public void clickCheckBox(int position, boolean IsCheck) {
             isCheck.put(position, IsCheck);
         }
+
+        @Override
+        public void refreshList(File currentFile) {
+            refreshDataList(currentFile.getPath());
+        }
+
+        @Override
+        public void shareData(List<File> shareDataList) {
+            if (shareDataList.size()==0){
+                ToastUtils.showLong("请先选中需要分享的数据！");
+                return;
+            }
+           String shareFolderPath =  PathUtils.getExternalAppFilesPath() + File.separator + "shareData";
+            if (!FileUtils.isFileExists(shareFolderPath)){
+                FileUtils.createOrExistsDir(shareFolderPath);
+            }
+            String shareZipPath = shareFolderPath +File.separator +shareDataList.get(0).getName().replace(".mrt",".zip");
+            if (FileUtils.isFileExists(shareZipPath)){
+                FileUtils.delete(shareZipPath);
+            }
+            FileUtils.createOrExistsFile(shareZipPath);
+            zipFiles1(shareZipPath,shareDataList);
+            if (shareZipPath == null || shareZipPath.isEmpty()) {
+                ToastUtils.showLong("数据分享错误，压缩文件不存在");
+                return;
+            }
+            if (!FileUtils.isFileExists(shareZipPath)) {
+                ToastUtils.showLong("数据分享错误，压缩文件不存在");
+                return;
+            }
+            File shareFile = new File(shareZipPath);
+            try {
+                Uri uri;
+                if (Build.VERSION.SDK_INT >= 24) {
+
+                    uri = FileProvider.getUriForFile(mContext, "com.zeus.tec.fileprovider", shareFile);
+                    grantUriPermission(getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    LogUtils.e(uri);
+
+                } else {
+                    uri = Uri.fromFile(shareFile);
+                }
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                intent.setType("application/octet-stream");
+                startActivity(Intent.createChooser(intent, "分享到"));
+            } catch (Exception ex) {
+                ToastUtils.showLong(ex.getLocalizedMessage());
+            }
+
+        }
     };
+
+    public static void zipFiles1(String zipFilePath, List<File> shareDataList) {
+        try (FileOutputStream fos = new FileOutputStream(zipFilePath);
+             ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(fos))) {
+            byte[] buffer = new byte[1024];
+            for (int i = 0; i < shareDataList.size(); i++) {
+                try (FileInputStream fis = new FileInputStream(shareDataList.get(i));
+                     BufferedInputStream bis = new BufferedInputStream(fis)) {
+                    zipOut.putNextEntry(new ZipEntry(shareDataList.get(i).getName()));
+                    int bytesRead;
+                    while ((bytesRead = bis.read(buffer)) != -1) {
+                        zipOut.write(buffer, 0, bytesRead);
+                    }
+                    zipOut.closeEntry();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private JSONObject getRequestBodyObj(UpdataParam updataParam, BufferedInputStream bis) throws JSONException, IOException {
         JSONObject requestBodyObj = new JSONObject();
@@ -389,7 +483,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     }
 
     private JSONArray gettestDataJsonAry(BufferedInputStream fis, UpdataParam updataParam) throws JSONException, IOException {
-
         byte[] tmpBuff = new byte[4];
         JSONArray testDataJsonAry = new JSONArray();
         for (int i = 0; i < 6; i++) {
@@ -417,7 +510,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             }
             testDataJsonObj.put("waveData", waveDataJsonAry);
             testDataJsonAry.put(testDataJsonObj);
-            //fis.read(dataSegBuf);
         }
         return testDataJsonAry;
     }
@@ -429,7 +521,8 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     public final Callback callHttp3 = new Callback() {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
+            ToastUtils.showShort("上传失败！");
+            if (BuildConfig.DEBUG) superLogUtil.d("failure: 锚杆数据上传失败");
         }
 
         @Override
@@ -463,7 +556,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                             // 提交数据
                             editor.commit();
                         } else {
-                            ToastUtils.showLong(code + ":" + msg);
+                            if (BuildConfig.DEBUG) superLogUtil.d(code+":"+msg);
                         }
 
                     } catch (JSONException e) {
@@ -476,9 +569,11 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                         int code = jsonObject.getInt("code");
                         String msg = jsonObject.getString("msg");
                         if (code == 0) {
-                            ToastUtils.showLong("上传成功");
-                        } else {
-                            ToastUtils.showLong(code + ":" + msg);
+                            if (BuildConfig.DEBUG) superLogUtil.d("success: 上传成功");
+                        }
+                        else
+                        {
+                            if (BuildConfig.DEBUG) superLogUtil.d(code+":"+msg);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -536,10 +631,8 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     private void initView() {
         lvDevices = binding.lvDevices;
         lldevice = binding.llDevices;
-        layprogramparamter = binding.layProgramParamter;
         binding.ivStep1.setState(3);
         listdata = binding.listData;
-        //  listpoint.setAdapter(directionfinderPointRecordApater);
         binding.tvStep1Text.setText("设备未连接,请先连接设备");
         refreshDataList();
         initLoginStatus();
@@ -579,12 +672,42 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
 
     }
 
+    public class fileItemInfo {
+        File file;
+        boolean checkStatus;
+
+        public fileItemInfo(File file, boolean checkStatus) {
+            this.file = file;
+            this.checkStatus = checkStatus;
+        }
+    }
+
+    List<fileItemInfo> fileItemInfoList = new ArrayList<>();
+    private String currentFilePath =  PathUtils.getExternalAppFilesPath() + File.separator + "MaoGanData";
+   // private String currentFilePath =  "";
+    MaoganLoaclDataListAdapater maoganLoaclDataListAdapater;
+
     private void refreshDataList() {
         String localFilePath = PathUtils.getExternalAppFilesPath() + File.separator + "MaoGanData";
+        currentFilePath = localFilePath;
+        fileItemInfoList.clear();
         List<File> fileList = FileUtils.listFilesInDir(localFilePath);
-        MaoganLoaclDataListAdapater maoganLoaclDataListAdapater = new MaoganLoaclDataListAdapater(this, fileList, iMaoganDataUpdata);
+        for (int i = 0; i < fileList.size(); i++) {
+            fileItemInfoList.add(new fileItemInfo(fileList.get(i), false));
+        }
+        maoganLoaclDataListAdapater = new MaoganLoaclDataListAdapater(this, fileItemInfoList, iMaoganDataUpdata);
         listdata.setAdapter(maoganLoaclDataListAdapater);
-        // listdata.getCheckedItemCount();
+    }
+
+    private void refreshDataList(String filePath) {
+        List<File> fileList = FileUtils.listFilesInDir(filePath);
+        currentFilePath = filePath;
+        fileItemInfoList.clear();
+        for (int i = 0; i < fileList.size(); i++) {
+            fileItemInfoList.add(new fileItemInfo(fileList.get(i), false));
+        }
+        maoganLoaclDataListAdapater = new MaoganLoaclDataListAdapater(this, fileItemInfoList, iMaoganDataUpdata);
+        listdata.setAdapter(maoganLoaclDataListAdapater);
     }
 
     @Override
@@ -593,25 +716,56 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         switch (v.getId()) {
             case R.id.tv_Data_Download:
                 if (binding.tvDataDownload.getText().toString().equals("连接设备")) {
-                    layprogramparamter.setVisibility(View.GONE);
                     binding.layoutPointRecord.setVisibility(View.GONE);
-                    binding.tvPointRecord.setVisibility(View.GONE);
+
                     binding.tvProgramParamter.setVisibility(View.GONE);
                     lldevice.setVisibility(View.VISIBLE);
                     binding.tvNotDevice.setVisibility(View.VISIBLE);
                     binding.tvDataDownload.setText("关闭连接");
                     searchBtDevice();
-                } else if (binding.tvDataDownload.getText().toString().equals("关闭连接")) {
+                }
+                else if (binding.tvDataDownload.getText().toString().equals("关闭连接")) {
                     layprogramparamter.setVisibility(View.GONE);
                     binding.layoutPointRecord.setVisibility(View.VISIBLE);
                     lldevice.setVisibility(View.GONE);
-                    binding.tvPointRecord.setVisibility(View.VISIBLE);
+
                     binding.tvProgramParamter.setVisibility(View.VISIBLE);
                     binding.tvDataDownload.setText("连接设备");
                 }
                 break;
             case R.id.btn_login: {
                 httpPostrequest(Url_Get_Setting);
+                break;
+            }case R.id.mul_updata_btn:{
+                maoganLoaclDataListAdapater.upDataFile();
+                break;
+            }case R.id.tv_show_debug:{
+                superLogUtil.show();
+                break;
+            }
+            case R.id.all_chech_btn:{
+                maoganLoaclDataListAdapater.allCheck();
+                break;
+            }
+            case R.id.tv_share:{
+                maoganLoaclDataListAdapater.shareData();
+                break;
+            }
+            case R.id.data_delete_btn:{
+                maoganLoaclDataListAdapater.deleteData();
+                break;
+            }
+            case R.id.iv_back:{
+                finish();
+                break;
+            }
+            case R.id.back_btn:{
+                refreshDataList();
+                break;
+            }
+            case R.id.refresh_button:{
+                refreshDataList(currentFilePath);
+                ToastUtils.showShort("刷新成功!");
             }
         }
     }
@@ -637,7 +791,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     BLEDevice bleDevice = (BLEDevice) msg.obj;
                     String bleDeviceName = bleDevice.getBluetoothDevice().getName();
                     if (bleDeviceName != null) {
-                        if (bleDeviceName.contains("YHZ") || bleDeviceName.contains("HLK") || bleDeviceName.contains("Maogan")) {
+                        if (bleDeviceName.contains("YHZ") || bleDeviceName.contains("HLK") || bleDeviceName.contains("Maogan") || bleDeviceName.contains("MaoGan")) {
 
                             lvDevicesAdapter.addDevice(bleDevice);
                             if (binding.tvNotDevice.getVisibility() == View.VISIBLE) {
@@ -672,7 +826,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     binding.llDevices.setVisibility(View.GONE);
                     binding.layoutPointRecord.setVisibility(View.VISIBLE);
                     // binding.layProgramParamter.setVisibility(View.VISIBLE);
-                    binding.tvPointRecord.setVisibility(View.VISIBLE);
+
                     binding.tvProgramParamter.setVisibility(View.VISIBLE);
                     break;
 
@@ -704,7 +858,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     //long t1 = System.currentTimeMillis();
                     receiveMessage(recBufSuc);
                     //long t2 = System.currentTimeMillis();
-                  //  Log.w(TAG, String.valueOf(t2 - t1));
+                    //  Log.w(TAG, String.valueOf(t2 - t1));
 
                     //  String receiveResult = TypeConversion.bytes2HexString(recBufSuc, recBufSuc.length);
                     // tvReceive.setText("接收数据成功，长度" + recBufSuc.length + "--> " + receiveResult);
@@ -721,83 +875,8 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         }
     };
 
-    private int status = 0;//
-    private int tmpPosition = 0;
-    private void receiveMessage(byte[] recBufSuc, boolean isReceiveDataPackeage) {
-        if ((recBufSuc[0] & 0xFF) == 0xeb && (recBufSuc[1] & 0xFF) == 0x90 &&  (recBufSuc[2] & 0xFF) == 0x80 &&  (recBufSuc[3] & 0xFF) == 0x7F) {
-            status = 1;
-            tmpPosition=0;
-            dataFramePosition = 0;
-            dataPackeageCount =0;
-            bleManager.sendMessage("55");
-        }
-        switch (status){
-            case 1:{
-                if ((recBufSuc[0] & 0xFF) == 0xeb && (recBufSuc[1] & 0xFF) == 0x90 &&  (recBufSuc[2] & 0xFF) == 0x01 &&  (recBufSuc[3] & 0xFF) == 0xFE) {
-                    status = 2;
-                    System.arraycopy(recBufSuc, 6, cacheBuff, dataFramePosition, 64);
-                    dataFramePosition += 64;
-                    bleManager.sendMessage("55");
-                }
-                break;
-            }
-            case 2:{
-                if ((recBufSuc[0] & 0xFF) == 0xeb && (recBufSuc[1] & 0xFF) == 0x90 &&  (recBufSuc[4] & 0xFF) == 0x00 &&  (recBufSuc[5] & 0xFF) == 0x02) {
-                    status = 3;
-                    System.arraycopy(recBufSuc, 6, cacheBuff, dataFramePosition, recBufSuc.length-6);
-                    dataFramePosition += recBufSuc.length-6;
-                    tmpPosition +=recBufSuc.length-6;
-                }
-                break;
-            }
-            case 3:{
-                System.arraycopy(recBufSuc, 0, cacheBuff, dataFramePosition, recBufSuc.length);
-                dataFramePosition += recBufSuc.length;
-                tmpPosition +=recBufSuc.length;
-                if (tmpPosition>=512){
-                    status = 4;
-                    tmpPosition=0;
-                    bleManager.sendMessage("55");
-                }
-                break;
-            }
-            case 4:{
-                if ((recBufSuc[0] & 0xFF) == 0xeb && (recBufSuc[1] & 0xFF) == 0x90 &&  (recBufSuc[4] & 0xFF) == 0x00 &&  (recBufSuc[5] & 0xFF) == 0x10) {
-                    status = 5;
-                    System.arraycopy(recBufSuc, 6, cacheBuff, dataFramePosition, recBufSuc.length-6);
-                    dataFramePosition += recBufSuc.length-6;
-                    tmpPosition +=recBufSuc.length-6;
-                }
-                break;
-            }
-            case 5:{
-                System.arraycopy(recBufSuc, 0, cacheBuff, dataFramePosition, recBufSuc.length);
-                dataFramePosition += recBufSuc.length;
-                tmpPosition +=recBufSuc.length;
-                if (tmpPosition==4098){
-                    status = 4;
-                    tmpPosition=0;
-                    dataPackeageCount ++;
-                    if (dataPackeageCount==6){
-                        dataPackeageCount=0;
-                        ToastUtils.showLong("传输成功！");
-                    }
-
-                    bleManager.sendMessage("55");
-                }
-                break;
-            }
-
-        }
-
-    }
-
-    private byte [] cacheBuff = new byte[1024*40];
-
     private void receiveMessage(byte[] recBufSuc) {
-
         if ((recBufSuc[0] & 0xFF) == 0xeb && (recBufSuc[1] & 0xFF) == 0x90 && ((recBufSuc[2] & 0xFF) + (recBufSuc[3] & 0xFF)) == 255) {
-
             int num1 = Byte.toUnsignedInt(recBufSuc[4]);
             int num2 = Byte.toUnsignedInt(recBufSuc[5]) * 256;
             int length = num1 + num2;
@@ -840,6 +919,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
 
                         if (dataPackeagelength == 512) {
                             try {
+                                System.arraycopy(MG51FHbuf, 0, buf, 0, MG51FHbuf.length);//前84字节替换
                                 fos.write(buf);
                                 fos.flush();
                             } catch (Exception ex) {
@@ -869,8 +949,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                         checkSum = 0;
                         isReceiveDataPackeage = false;
                         bleManager.sendMessage("55");
-
-
                     } else {
                         System.arraycopy(recBufSuc, 0, buf, dataFramePosition, recBufSuc.length);
                         dataFramePosition += recBufSuc.length;
@@ -908,8 +986,40 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         saveDataFile(maoganFileInfo.fileName, buff);
     }
 
+    byte[] MG51FHbuf = new byte[84];
+
+    private void initMG51FHbuf() {
+        MG51FHbuf[0] = 0x4d;
+        MG51FHbuf[1] = 0x47;
+        MG51FHbuf[2] = 0x35;
+        MG51FHbuf[3] = 0x31;
+        MG51FHbuf[4] = 0x01;
+        MG51FHbuf[5] = 0x00;
+        MG51FHbuf[6] = 0x00;
+        MG51FHbuf[7] = 0x00;
+        MG51FHbuf[8] = 0x06;
+        MG51FHbuf[9] = 0x00;
+        MG51FHbuf[10] = 0x00;
+        MG51FHbuf[11] = 0x00;
+    }
+
     private void saveDataFile(String fileName, byte[] buff) {
-        String localFilePath = PathUtils.getExternalAppFilesPath() + File.separator + "MaoGanData";
+        String[] tmpStrs = fileName.split("-");
+        if (tmpStrs.length != 2) {
+            ToastUtils.showShort("文件名称错误");
+        }
+        MG51FHbuf = new byte[84];
+        initMG51FHbuf();
+        char[] prj_name = tmpStrs[0].toCharArray();
+        char[] serial_num = tmpStrs[1].toCharArray();
+        for (int i = 0; i < prj_name.length; i++) {
+            MG51FHbuf[12 + i] = (byte) prj_name[i];
+        }
+        for (int i = 0; i < serial_num.length; i++) {
+            MG51FHbuf[36 + i] = (byte) serial_num[i];
+        }
+        String [] strAry = fileName.split("-");
+        String localFilePath = PathUtils.getExternalAppFilesPath() + File.separator + "MaoGanData"+File.separator +strAry[0];
         if (FileUtils.isFileExists(localFilePath)) {
 
         } else {
@@ -918,7 +1028,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         try {
             fileName = fileName.trim();
             List<File> fileList = FileUtils.listFilesInDir(localFilePath);
-            String dataPath = localFilePath + File.separator + fileName + ".dat";
+            String dataPath = localFilePath + File.separator + fileName + ".mrt";
             if (FileUtils.isFileExists(dataPath)) {
                 if (fos != null) {
                     fos.close();
@@ -930,8 +1040,8 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                 }
             }
             fos = new FileOutputStream(dataPath);
-            fos.write(buff);
-            fos.flush();
+            // fos.write(buff);
+            // fos.flush();
         } catch (Exception ex) {
             ToastUtils.showLong(ex.getMessage());
         }
@@ -974,20 +1084,18 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             int start = 0;
             byte[] tmpBuff = new byte[4];
             System.arraycopy(buff, start, tmpBuff, 0, 4);
-            maoganFileHead.fileSysId = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFF;
+            maoganFileHead.fileSysId = 51;
             start += 4;
             System.arraycopy(buff, start, tmpBuff, 0, 4);
-            maoganFileHead.fileSysVer = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFF;
+            maoganFileHead.fileSysVer =51;
             start += 4;
             System.arraycopy(buff, start, tmpBuff, 0, 4);
-            maoganFileHead.SampleNum = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFF;
+            maoganFileHead.SampleNum = 6;
             start += 4;
-
             /////256字节
+
             byte[] tmpBuff2 = new byte[24];
             System.arraycopy(buff, start, tmpBuff2, 0, 24);
-            char[] tmpChar = ConvertUtils.bytes2Chars(tmpBuff2);
-
             maoganFileHead.prj_name = new String(tmpBuff2, StandardCharsets.UTF_8);
             start += 24;
             System.arraycopy(buff, start, tmpBuff2, 0, 24);
@@ -1143,11 +1251,17 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
 
     private void initListener() {
         binding.tvDataDownload.setOnClickListener(this);
-        binding.tvPointRecord.setOnClickListener(this);
         binding.tvProgramParamter.setOnClickListener(this);
-        binding.startButton.setOnClickListener(this);
+        binding.refreshButton.setOnClickListener(this);
         binding.ivBack.setOnClickListener(this);
         binding.btnLogin.setOnClickListener(this);
+        binding.mulUpdataBtn.setOnClickListener(this);
+        binding.allChechBtn.setOnClickListener(this);
+        binding.dataDeleteBtn.setOnClickListener(this);
+        binding.backBtn.setOnClickListener(this);
+        binding.tvShowDebug.setOnClickListener(this);
+        binding.tvShare.setOnClickListener(this);
+        binding.ivBack.setOnClickListener(this);
         lvDevices.setOnItemClickListener((adapterView, view, i, l) -> {
             BLEDevice bleDevice = (BLEDevice) lvDevicesAdapter.getItem(i);
             BluetoothDevice bluetoothDevice = bleDevice.getBluetoothDevice();
@@ -1253,7 +1367,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
 
         }
     };
-
     /**
      * 注册广播
      */
@@ -1266,7 +1379,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);//手机蓝牙状态监听
         registerReceiver(bleBroadcastReceiver, intentFilter);
     }
-
     /**
      * 蓝牙广播接收器
      */
@@ -1324,7 +1436,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                     .build();
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-
                 return;
             }
             bluetoothLeScanner.startScan(null, settings, scanCallback);
@@ -1332,7 +1443,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             bleManager.startDiscoveryDevice(onDeviceSearchListener, 15000);
         }
         //开始搜索
-
     }
 
     ScanCallback scanCallback = new ScanCallback() {
@@ -1342,8 +1452,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             BluetoothDevice device1 = result.getDevice();
             @SuppressLint("MissingPermission") String bleDeviceName = device1.getName();
             if (bleDeviceName != null) {
-                if (bleDeviceName.contains("YHZ") || bleDeviceName.contains("HLK") || bleDeviceName.contains("Maogan")) {
-
+                if (bleDeviceName.contains("YHZ") || bleDeviceName.contains("HLK") || bleDeviceName.contains("Maogan")|| bleDeviceName.contains("MaoGan")) {
                     lvDevicesAdapter.addDevice(new BLEDevice(device1, 100));
                     if (binding.tvNotDevice.getVisibility() == View.VISIBLE) {
                         binding.tvNotDevice.setVisibility(View.GONE);
@@ -1397,16 +1506,5 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
     }
-
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        try {
-//            bleManager.disConnectDevice();
-//        } catch (Exception ex) {
-//            ToastUtils.showLong(ex.getLocalizedMessage());
-//        }
-//    }
-
 
 }

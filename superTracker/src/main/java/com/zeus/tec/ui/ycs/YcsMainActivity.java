@@ -1,13 +1,18 @@
 package com.zeus.tec.ui.ycs;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.widget.Toast;
 
 import com.blankj.utilcode.util.BarUtils;
@@ -30,6 +35,7 @@ import java.util.List;
 public class YcsMainActivity extends AppCompatActivity {
 
     ActivityYcsMainBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +46,8 @@ public class YcsMainActivity extends AppCompatActivity {
             FeedbackUtil.getInstance().doFeedback();
             finish();
         });
-
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);//这两句设置禁止所有检查
         RecyclerView recyclerView = binding.ycsList;
         recyclerView.setLayoutManager((new LinearLayoutManager(this)));
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
@@ -48,25 +55,23 @@ public class YcsMainActivity extends AppCompatActivity {
         recyclerView.addItemDecoration(dividerItemDecoration);
         List<FunctionItem> data = new ArrayList<>();
         data.add(new FunctionItem("采集运行", R.mipmap.collect, YcsDataCollectActivity.class));
-        data.add(new FunctionItem("数据浏览",R.mipmap.view_data,YcsDataViewActivity.class));
-       // data.add(new FunctionItem("设备调试", R.mipmap.test_device, sampleTestActivity.class));
-      //  data.add(new FunctionItem("数据浏览", R.mipmap.view_data, LeidaDataveiewActivity.class));
-      //  data.add(new FunctionItem("操作说明", R.mipmap.merge_data, leidaHelpActivity.class));
+        data.add(new FunctionItem("数据浏览", R.mipmap.view_data, YcsDataViewActivity.class));
+        //  data.add(new FunctionItem("设备调试", R.mipmap.test_device, sampleTestActivity.class));
+        //  data.add(new FunctionItem("数据浏览", R.mipmap.view_data, LeidaDataveiewActivity.class));
+        //  data.add(new FunctionItem("操作说明", R.mipmap.merge_data, leidaHelpActivity.class));
         data.add(new FunctionItem("系统设置", R.mipmap.ic_setting, YcsSettingActivity.class));
         MainListAdapter mainListAdapter = MainListAdapter.setInstance(data);
-       // leidaListAdapter leidaadapter = leidaListAdapter.newInstance();
-        mainListAdapter.setOnItemClickListener((adapter,view,position)->{
+        mainListAdapter.setOnItemClickListener((adapter, view, position) -> {
             FeedbackUtil.getInstance().doFeedback();
             FunctionItem item = (FunctionItem) adapter.getItem(position);
-            Intent intent  = new Intent(YcsMainActivity.this,item.targetCls);
-            if ("数据合成".equals(item.label)){
-                Toast.makeText(this,"没有连接仪器", Toast.LENGTH_SHORT);
+            Intent intent = new Intent(YcsMainActivity.this, item.targetCls);
+            if ("数据合成".equals(item.label)) {
+                Toast.makeText(this, "没有连接仪器", Toast.LENGTH_SHORT);
             }
             try {
                 startActivity(intent);
-            }
-            catch (Exception exception){
-                int a =0;
+            } catch (Exception exception) {
+                int a = 0;
             }
 
         });
@@ -75,12 +80,10 @@ public class YcsMainActivity extends AppCompatActivity {
             FeedbackUtil.getInstance().doFeedback();
             xupdataDef();
         });
-
-
     }
 
     @SuppressLint("ResourceAsColor")
-    public void xupdataDef (){
+    public void xupdataDef() {
         XUpdate.newBuild(this)
                 .updateUrl(testClassurl)
                 .updateParser(new CustomUpdateParser())
@@ -88,7 +91,9 @@ public class YcsMainActivity extends AppCompatActivity {
                 .promptHeightRatio(1.2f)
                 .update();
     }
-    String testClassurl ="https://whcsma.oss-cn-wuhan-lr.aliyuncs.com/leidaApp/leidaApp.csv";
+
+    String testClassurl = "https://whcsma.oss-cn-wuhan-lr.aliyuncs.com/leidaApp/leidaApp.csv";
+
     public class CustomUpdateParser implements IUpdateParser {
         @Override
         public UpdateEntity parseJson(String json) throws Exception {

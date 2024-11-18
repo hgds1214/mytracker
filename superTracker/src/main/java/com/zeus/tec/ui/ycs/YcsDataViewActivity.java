@@ -510,15 +510,13 @@ public class YcsDataViewActivity extends AppCompatActivity {
         }
     }
 
-    private void doView() {
-    }
-
     private void doDelete(YcsDataFileInfo info) {
         MesseagWindows.showMessageBox(this, "删除数据", "数据删除后不可恢复", new DialogCallback() {
             @Override
             public void onPositiveButtonClick() {
                 if (FileUtils.isFileExists(info.filePath)){
                    FileUtils.delete(info.filePath);
+                   refreshDataList();
                 }
             }
 
@@ -594,8 +592,9 @@ public class YcsDataViewActivity extends AppCompatActivity {
 
     List<DataBean> DataList = new ArrayList<>();
 
-    public  List<DataBean> readDataFIle(String FilePath) throws FileNotFoundException {
+    public  void readDataFIle(String FilePath) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(FilePath);
+        DataList.clear();
         BufferedInputStream binaryReader = new BufferedInputStream(inputStream);
         byte[] shortBuf = new byte[2];
         byte[] intBuf = new byte[4];
@@ -738,7 +737,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 }
             }
         }
-        return DataList;
+
     }
 
     public class PointBean {
@@ -1102,6 +1101,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
 
     private void loadData(int pageNum) {
         // List<leida_info> leidaInfoList = query.find(pageNum * pageSize, pageSize);
+        ycsDataFileInfoList.clear();
         List<File> ycsList = FileUtils.listFilesInDir(ycsMainCache.rootFilePath);
         for (int i = 0; i < ycsList.size(); i++) {
             List<File> tmplist = FileUtils.listFilesInDir(ycsList.get(i).getPath(), false);
@@ -1172,10 +1172,11 @@ public class YcsDataViewActivity extends AppCompatActivity {
 //                }
             }
             ycsDataFileInfoList.add(ycsDataFileInfo);
+           // ycsDataFileInfo.y_ycs_file = String.valueOf(0);
         }
         //  ycsDataFileInfoList = ycsDataFileInfoList.subList(pageNum*pageSize,pageNum*pageSize+pageSize);
         if (pageNum == 0) {
-            ycsDataListAdapter.setNewInstance(new ArrayList<YcsDataFileInfo>());
+            ycsDataListAdapter.setNewInstance(new ArrayList<>());
         }
         if (ycsDataFileInfoList == null || ycsDataFileInfoList.isEmpty()) {
             // hasMore = false;
