@@ -16,6 +16,7 @@ import com.zeus.tec.model.leida.main.sendMethod;
 import com.zeus.tec.ui.leida.util.INIutil;
 import com.zeus.tec.ui.leida.util.IOtool;
 import com.zeus.tec.ui.leida.util.TryParse;
+import com.zeus.tec.ui.ycs.YcsDataFileInfo;
 
 import java.io.File;
 import java.net.DatagramSocket;
@@ -39,7 +40,7 @@ public class YcsMainCache {
 
     public String creatTime;
 
-
+    public YcsDataFileInfo ycsDataFileInfo ;
 
     public int DelayNumber;
     public int amp;

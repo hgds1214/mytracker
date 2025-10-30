@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.blankj.utilcode.util.ZipUtils;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityLeidaDataCollectBinding;
 import com.zeus.tec.db.TrackerDBManager;
@@ -91,13 +92,10 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         cache.FileSavePath = privatePath;
         LoadLastProject();
         cache.CreatReceiveThread(LeidaDataCollectActivity.this);
-
         cache.CreatSendSocket();
         Thread th = new Thread(this::RefreshStatus);
         th.start();
-        //cache.GetDeviceStatus();
         initListener();
-        //gethotspotDevice();
     }
 
     public AlarmCallback alarmCallback = new AlarmCallback() {
@@ -195,6 +193,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
             binding.tvPointRecord.setTextColor(Color.WHITE);
             programParamterButton.setBackgroundResource(R.drawable.btn_finish_bg);
             programParamterButton.setTextColor(Color.BLACK);
+
         }
     }
 
@@ -288,10 +287,8 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
                             task.execute();
                         }
                     }
-
                     @Override
                     public void onNegativeButtonClick() {
-
                     }
                 });
             }
@@ -702,6 +699,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         try {
             cache.closeSendSocket();
             finish();

@@ -40,6 +40,7 @@ public class CountTimeTextView extends TextView {
 
     private long startTime;
     private boolean start = false;
+    private int countTimeValue = 0;
     public void start() {
         start = true;
         startTime = System.currentTimeMillis();

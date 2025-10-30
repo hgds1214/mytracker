@@ -29,37 +29,29 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.ContactsContract;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.blankj.utilcode.util.ConvertUtils;
 import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.blankj.utilcode.util.Utils;
-import com.github.mikephil.charting.charts.Chart;
 import com.zeus.tec.BuildConfig;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityMaoganMainBinding;
 import com.zeus.tec.model.utils.FeedbackUtil;
 import com.zeus.tec.model.utils.log.SuperLogUtil;
-import com.zeus.tec.ui.directionfinder.directionfinderDataCollectActivity;
-import com.zeus.tec.ui.directionfinder.util.BLEDevice;
-import com.zeus.tec.ui.directionfinder.util.BLEManager;
-import com.zeus.tec.ui.directionfinder.util.LVDevicesAdapter;
-import com.zeus.tec.ui.directionfinder.util.OnBleConnectListener;
-import com.zeus.tec.ui.directionfinder.util.OnDeviceSearchListener;
+import com.zeus.tec.device.ble.BLEDevice;
+import com.zeus.tec.device.ble.BLEManager;
+import com.zeus.tec.device.ble.LVDevicesAdapter;
+import com.zeus.tec.device.ble.OnBleConnectListener;
+import com.zeus.tec.device.ble.OnDeviceSearchListener;
 import com.zeus.tec.ui.directionfinder.util.TypeConversion;
 import com.zeus.tec.ui.leida.interfaceUtil.DialogCallback;
-import com.zeus.tec.ui.leida.util.ConvertCode;
 import com.zeus.tec.ui.leida.util.MesseagWindows;
 
 import org.json.JSONArray;
@@ -74,14 +66,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -98,6 +86,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
 
 public class MaoganMainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -120,6 +109,8 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         initBLEBroadcastReceiver();
     }
 
+
+
     //region /****全局变量*****/
     public static final String SERVICE_UUID = "49535343-fe7d-4ae5-8fa9-9fafd205e455";  //蓝牙通讯服务
     public static final String READ_UUID = "49535343-1e4d-4bd9-ba61-23c647249616";  //读特征
@@ -127,21 +118,23 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     public static final String KEY_DRILL_INFO_ID = "DRILL_INFO_ID";
     public static final String KEY_TYPE_MERGE = "TYPE_MERGE";
 
-    private static final int CONNECT_SUCCESS = 0x01;
-    private static final int CONNECT_FAILURE = 0x02;
-    private static final int DISCONNECT_SUCCESS = 0x03;
-    private static final int SEND_SUCCESS = 0x04;
-    private static final int SEND_FAILURE = 0x05;
-    private static final int RECEIVE_SUCCESS = 0x06;
-    private static final int RECEIVE_FAILURE = 0x07;
-
-    private static final int START_DISCOVERY = 0x08;
-    private static final int STOP_DISCOVERY = 0x09;
-    private static final int DISCOVERY_DEVICE = 0x0A;
-    private static final int DISCOVERY_OUT_TIME = 0x0B;
-    private static final int SELECT_DEVICE = 0x0C;
-    private static final int BT_OPENED = 0x0D;
-    private static final int BT_CLOSED = 0x0E;
+//    public class BleOrder {
+//        private static final int CONNECT_SUCCESS = 0x01;
+//        private static final int CONNECT_FAILURE = 0x02;
+//        private static final int DISCONNECT_SUCCESS = 0x03;
+//        private static final int SEND_SUCCESS = 0x04;
+//        private static final int SEND_FAILURE = 0x05;
+//        private static final int RECEIVE_SUCCESS = 0x06;
+//        private static final int RECEIVE_FAILURE = 0x07;
+//
+//        private static final int START_DISCOVERY = 0x08;
+//        private static final int STOP_DISCOVERY = 0x09;
+//        private static final int DISCOVERY_DEVICE = 0x0A;
+//        private static final int DISCOVERY_OUT_TIME = 0x0B;
+//        private static final int SELECT_DEVICE = 0x0C;
+//        private static final int BT_OPENED = 0x0D;
+//        private static final int BT_CLOSED = 0x0E;
+//    }
 
     private ListView lvDevices;
     private LinearLayout lldevice;
@@ -192,7 +185,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             position = "";
             pourTime = "2019-09-19 03:10:52";
             startTime = "2019-09-19 03:10:52";
-            gpsValid = 0;
+            gpsValid = 1;
             gpsLongitude = 0;
             gpsLatitude = 0;
             passwayCount = 6;
@@ -263,7 +256,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
 
     Map<Integer, Boolean> isCheck = new HashMap<>();
 
-    private void updataOneData (String dataPath){
+    private void updataOneData (String dataPath,String serialNo){
         try {
             FileInputStream fileInputStream = new FileInputStream(dataPath);
             BufferedInputStream fis = new BufferedInputStream(fileInputStream);
@@ -300,7 +293,9 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             updataParam.rodSpeed = maoganFileHead.waveSpeed;
             updataParam.lowFilter = maoganFileHead.lp_freg * 1000;
             updataParam.highFilter = maoganFileHead.hp_freq;
-            requestBodyStr = getRequestBodyObj(updataParam, fis).toString();
+            //updataParam.serialNo = "WHCS"+updataParam.startTime.split(" ")[0];
+            updataParam.serialNo = serialNo;
+            requestBodyStr = getRequestBodyObj(updataParam, fis).toString().replace("\\u0000","");
             if (BuildConfig.DEBUG) superLogUtil.d("正在上传:"+updataParam.fileName);
             httpPostrequest("https://iqt.yxgswater.com:8000/insp/xczy/api/maoganData");
         } catch (Exception exception) {
@@ -316,13 +311,21 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                 ToastUtils.showShort("请先选中需要上传的数据！");
                 return;
             }
-            MesseagWindows.showMessageBox(mContext, "上传文件", "是否上传选中文件", new DialogCallback() {
+            MesseagWindows.showMaoganMessageBox(mContext, "上传文件", "是否上传选中文件", new DialogCallback() {
                 @Override
                 public void onPositiveButtonClick() {
-                    for (int i = 0; i < updataFileList.size(); i++) {
-                        updataOneData(updataFileList.get(i).getPath());
+
+                    String serialNo =  String.valueOf(MesseagWindows.input.getText());
+                    if (serialNo.equals("")){
+                        ToastUtils.showLong("流水号不能为空");
                     }
-                    ToastUtils.showShort("上传结束!");
+                    else {
+                        for (int i = 0; i < updataFileList.size(); i++) {
+                            updataOneData(updataFileList.get(i).getPath(),serialNo);
+                        }
+                        ToastUtils.showShort("上传结束!");
+                    }
+
                 }
 
                 @Override
@@ -438,11 +441,9 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     private JSONObject getRequestBodyObj(UpdataParam updataParam, BufferedInputStream bis) throws JSONException, IOException {
         JSONObject requestBodyObj = new JSONObject();
         requestBodyObj.put("vendorId", updataParam.vendorId);
-        requestBodyObj.put("serialNo", "WHCS");
-        requestBodyObj.put("vendorId", updataParam.vendorId);
         requestBodyObj.put("serialNo", updataParam.serialNo);
         requestBodyObj.put("pileNo", updataParam.pileNo);
-        requestBodyObj.put("projectName", updataParam.projectName);
+        requestBodyObj.put("projectName", updataParam.projectName.replace("\\u0000",""));
         requestBodyObj.put("fileName", updataParam.fileName);
         requestBodyObj.put("machineId", updataParam.machineId);
         requestBodyObj.put("siteName", updataParam.siteName);
@@ -621,7 +622,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                         ex.printStackTrace();
                     }
                 }
-
                 break;
             }
         }
@@ -777,17 +777,17 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             switch (msg.what) {
-                case START_DISCOVERY:
+                case  BLEManager.BleOrder.START_DISCOVERY:
                     Toast.makeText(mContext, "开始搜索设备。。。", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "开始搜索设备...");
                     break;
 
-                case STOP_DISCOVERY:
+                case  BLEManager.BleOrder.STOP_DISCOVERY:
                     Toast.makeText(mContext, "停止搜索设备。。。", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "停止搜索设备...");
                     break;
 
-                case DISCOVERY_DEVICE:  //扫描到设备
+                case  BLEManager.BleOrder.DISCOVERY_DEVICE:  //扫描到设备
                     BLEDevice bleDevice = (BLEDevice) msg.obj;
                     String bleDeviceName = bleDevice.getBluetoothDevice().getName();
                     if (bleDeviceName != null) {
@@ -801,7 +801,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     }
                     break;
 
-                case SELECT_DEVICE:
+                case  BLEManager.BleOrder.SELECT_DEVICE:
                     curBluetoothDevice = (BluetoothDevice) msg.obj;
                     binding.ivStep1.setState(1);
                     binding.tvStep1Text.setText("正在连接设备：" + curBluetoothDevice.getName());
@@ -809,13 +809,13 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     bleManager.connectBleDevice(mContext, curBluetoothDevice, 15000, SERVICE_UUID, READ_UUID, WRITE_UUID, onBleConnectListener);
                     break;
 
-                case CONNECT_FAILURE: //连接失败
+                case  BLEManager.BleOrder.CONNECT_FAILURE: //连接失败
                     binding.ivStep1.setState(3);
                     binding.tvStep1Text.setText("连接设备失败：" + curBluetoothDevice.getName());
                     Log.d(TAG, "连接失败");
                     break;
 
-                case CONNECT_SUCCESS:  //连接成功
+                case  BLEManager.BleOrder.CONNECT_SUCCESS:  //连接成功
                     Log.d(TAG, "连接成功");
                     // tvCurConState.setText("连接成功");
                     curConnState = true;
@@ -830,30 +830,30 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     binding.tvProgramParamter.setVisibility(View.VISIBLE);
                     break;
 
-                case DISCONNECT_SUCCESS:
+                case  BLEManager.BleOrder.DISCONNECT_SUCCESS:
                     Log.d(TAG, "断开成功");
                     // tvCurConState.setText("断开成功");
                     curConnState = false;
                     break;
 
-                case SEND_FAILURE: //发送失败
+                case  BLEManager.BleOrder.SEND_FAILURE: //发送失败
                     byte[] sendBufFail = (byte[]) msg.obj;
                     String sendFail = TypeConversion.bytes2HexString(sendBufFail, sendBufFail.length);
                     //  tvSendResult.setText("发送数据失败，长度" + sendBufFail.length + "--> " + sendFail);
                     break;
 
-                case SEND_SUCCESS:  //发送成功
+                case  BLEManager.BleOrder.SEND_SUCCESS:  //发送成功
                     byte[] sendBufSuc = (byte[]) msg.obj;
                     String sendResult = TypeConversion.bytes2HexString(sendBufSuc, sendBufSuc.length);
                     // tvSendResult.setText("发送数据成功，长度" + sendBufSuc.length + "--> " + sendResult);
                     break;
 
-                case RECEIVE_FAILURE: //接收失败
+                case  BLEManager.BleOrder.RECEIVE_FAILURE: //接收失败
                     String receiveError = (String) msg.obj;
                     // tvReceive.setText(receiveError);
                     break;
 
-                case RECEIVE_SUCCESS:  //接收成功
+                case  BLEManager.BleOrder.RECEIVE_SUCCESS:  //接收成功
                     byte[] recBufSuc = (byte[]) msg.obj;
                     //long t1 = System.currentTimeMillis();
                     receiveMessage(recBufSuc);
@@ -864,11 +864,11 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     // tvReceive.setText("接收数据成功，长度" + recBufSuc.length + "--> " + receiveResult);
                     break;
 
-                case BT_CLOSED:
+                case  BLEManager.BleOrder.BT_CLOSED:
                     Log.d(TAG, "系统蓝牙已关闭");
                     break;
 
-                case BT_OPENED:
+                case  BLEManager.BleOrder.BT_OPENED:
                     Log.d(TAG, "系统蓝牙已打开");
                     break;
             }
@@ -876,7 +876,8 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     };
 
     private void receiveMessage(byte[] recBufSuc) {
-        if ((recBufSuc[0] & 0xFF) == 0xeb && (recBufSuc[1] & 0xFF) == 0x90 && ((recBufSuc[2] & 0xFF) + (recBufSuc[3] & 0xFF)) == 255) {
+        if ((recBufSuc[0] & 0xFF) == 0xeb && (recBufSuc[1] & 0xFF) == 0x90 && ((recBufSuc[2] & 0xFF) + (recBufSuc[3] & 0xFF)) == 255)
+        {
             int num1 = Byte.toUnsignedInt(recBufSuc[4]);
             int num2 = Byte.toUnsignedInt(recBufSuc[5]) * 256;
             int length = num1 + num2;
@@ -970,12 +971,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         int fileSegNum;
     }
 
-    private class MaoganData {
-        public MaoganFileHead maoganFileHead;
-        public MaoganFileInfo maoganFileInfo;
-        public List<MaoganFileseg> maoganFilesegList;
-    }
-
     private void parseFileInfo(byte[] buff) {
         int start = 0;
         MaoganFileInfo maoganFileInfo = new MaoganFileInfo();
@@ -1006,20 +1001,24 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
     private void saveDataFile(String fileName, byte[] buff) {
         String[] tmpStrs = fileName.split("-");
         if (tmpStrs.length != 2) {
-            ToastUtils.showShort("文件名称错误");
+          //  ToastUtils.showShort("文件夹名称请不要带-");
         }
         MG51FHbuf = new byte[84];
         initMG51FHbuf();
-        char[] prj_name = tmpStrs[0].toCharArray();
-        char[] serial_num = tmpStrs[1].toCharArray();
+        StringBuilder str1 = new StringBuilder(tmpStrs[0]);
+        for (int i = 1; i < tmpStrs.length-1; i++) {
+            str1.append("-").append(tmpStrs[i]);
+        }
+        char[] prj_name = str1.toString().toCharArray();
+        char[] serial_num = tmpStrs[tmpStrs.length-1].toCharArray();
         for (int i = 0; i < prj_name.length; i++) {
             MG51FHbuf[12 + i] = (byte) prj_name[i];
         }
         for (int i = 0; i < serial_num.length; i++) {
             MG51FHbuf[36 + i] = (byte) serial_num[i];
         }
-        String [] strAry = fileName.split("-");
-        String localFilePath = PathUtils.getExternalAppFilesPath() + File.separator + "MaoGanData"+File.separator +strAry[0];
+        //String [] strAry = fileName.split("-");
+        String localFilePath = PathUtils.getExternalAppFilesPath() + File.separator + "MaoGanData"+File.separator + str1;
         if (FileUtils.isFileExists(localFilePath)) {
 
         } else {
@@ -1027,7 +1026,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         }
         try {
             fileName = fileName.trim();
-            List<File> fileList = FileUtils.listFilesInDir(localFilePath);
             String dataPath = localFilePath + File.separator + fileName + ".mrt";
             if (FileUtils.isFileExists(dataPath)) {
                 if (fos != null) {
@@ -1040,8 +1038,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                 }
             }
             fos = new FileOutputStream(dataPath);
-            // fos.write(buff);
-            // fos.flush();
         } catch (Exception ex) {
             ToastUtils.showLong(ex.getMessage());
         }
@@ -1096,10 +1092,10 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
 
             byte[] tmpBuff2 = new byte[24];
             System.arraycopy(buff, start, tmpBuff2, 0, 24);
-            maoganFileHead.prj_name = new String(tmpBuff2, StandardCharsets.UTF_8);
+            maoganFileHead.prj_name = (new String(tmpBuff2, StandardCharsets.UTF_8));
             start += 24;
             System.arraycopy(buff, start, tmpBuff2, 0, 24);
-            maoganFileHead.serial_num = new String(tmpBuff2, StandardCharsets.UTF_8);
+            maoganFileHead.serial_num = (new String(tmpBuff2, StandardCharsets.UTF_8)).trim();
             start += 24;
             System.arraycopy(buff, start, tmpBuff2, 0, 24);
             maoganFileHead.peg_pos = new String(tmpBuff2, StandardCharsets.UTF_8);
@@ -1179,62 +1175,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         return maoganFileHead;
     }
 
-    private List<MaoganFileseg> maoganFilesegList = new ArrayList<>();
 
-    public class MaoganFileseg {
-        int max;
-        int max_x;
-        int bConfirm;
-        int sampRate;
-        int length;
-        int[] cursor;
-        int[] data;
-    }
-
-    private void parseFileSeg(byte[] buf) {
-        if (buf.length == 4096) {
-            MaoganFileseg maoganFileseg = new MaoganFileseg();
-            int start = 0;
-            byte[] tmpBuff = new byte[4];
-            System.arraycopy(buf, start, tmpBuff, 0, 4);
-            maoganFileseg.max = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            start += 4;
-            System.arraycopy(buf, start, tmpBuff, 0, 4);
-            maoganFileseg.max_x = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            start += 4;
-            System.arraycopy(buf, start, tmpBuff, 0, 4);
-            maoganFileseg.bConfirm = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            start += 4;
-            System.arraycopy(buf, start, tmpBuff, 0, 4);
-            maoganFileseg.sampRate = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            start += 4;
-            maoganFileseg.cursor = new int[2];
-            System.arraycopy(buf, start, tmpBuff, 0, 4);
-            maoganFileseg.cursor[0] = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            start += 4;
-            System.arraycopy(buf, start, tmpBuff, 0, 4);
-            maoganFileseg.cursor[1] = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            start += 4;
-            System.arraycopy(buf, start, tmpBuff, 0, 4);
-            maoganFileseg.length = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            start += 4;
-            maoganFileseg.data = new int[1017];
-            for (int i = 0; i < 1017; i++) {
-                System.arraycopy(buf, start, tmpBuff, 0, 4);
-                maoganFileseg.data[i] = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt();
-                start += 4;
-            }
-            maoganFilesegList.add(maoganFileseg);
-            try {
-                fos.write(buf);
-                fos.flush();
-            } catch (Exception ex) {
-                ToastUtils.showLong(ex.getMessage());
-            }
-        } else {
-            ToastUtils.showLong("数据片段长度错误,长度为:" + buf.length);
-        }
-    }
 
     private void initBLE() {
         //列表适配器
@@ -1269,7 +1210,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                 bleManager.stopDiscoveryDevice();
             }
             Message message = new Message();
-            message.what = SELECT_DEVICE;
+            message.what =  BLEManager.BleOrder.SELECT_DEVICE;
             message.obj = bluetoothDevice;
             mHandler.sendMessage(message);
         });
@@ -1289,7 +1230,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onConnectFailure(BluetoothGatt bluetoothGatt, BluetoothDevice bluetoothDevice, String exception, int status) {
             Message message = new Message();
-            message.what = CONNECT_FAILURE;
+            message.what =  BLEManager.BleOrder.CONNECT_FAILURE;
             mHandler.sendMessage(message);
         }
 
@@ -1301,7 +1242,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onDisConnectSuccess(BluetoothGatt bluetoothGatt, BluetoothDevice bluetoothDevice, int status) {
             Message message = new Message();
-            message.what = DISCONNECT_SUCCESS;
+            message.what =  BLEManager.BleOrder.DISCONNECT_SUCCESS;
             message.obj = status;
             mHandler.sendMessage(message);
         }
@@ -1310,21 +1251,21 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         public void onServiceDiscoverySucceed(BluetoothGatt bluetoothGatt, BluetoothDevice bluetoothDevice, int status) {
             //因为服务发现成功之后，才能通讯，所以在成功发现服务的地方表示连接成功
             Message message = new Message();
-            message.what = CONNECT_SUCCESS;
+            message.what = BLEManager.BleOrder.CONNECT_SUCCESS;
             mHandler.sendMessage(message);
         }
 
         @Override
         public void onServiceDiscoveryFailed(BluetoothGatt bluetoothGatt, BluetoothDevice bluetoothDevice, String failMsg) {
             Message message = new Message();
-            message.what = CONNECT_FAILURE;
+            message.what =  BLEManager.BleOrder.CONNECT_FAILURE;
             mHandler.sendMessage(message);
         }
 
         @Override
         public void onReceiveMessage(BluetoothGatt bluetoothGatt, BluetoothDevice bluetoothDevice, BluetoothGattCharacteristic characteristic, byte[] msg) {
             Message message = new Message();
-            message.what = RECEIVE_SUCCESS;
+            message.what =  BLEManager.BleOrder.RECEIVE_SUCCESS;
             message.obj = msg;
             mHandler.sendMessage(message);
         }
@@ -1332,14 +1273,14 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onReceiveError(String errorMsg) {
             Message message = new Message();
-            message.what = RECEIVE_FAILURE;
+            message.what =  BLEManager.BleOrder.RECEIVE_FAILURE;
             mHandler.sendMessage(message);
         }
 
         @Override
         public void onWriteSuccess(BluetoothGatt bluetoothGatt, BluetoothDevice bluetoothDevice, byte[] msg) {
             Message message = new Message();
-            message.what = SEND_SUCCESS;
+            message.what =  BLEManager.BleOrder.SEND_SUCCESS;
             message.obj = msg;
             mHandler.sendMessage(message);
         }
@@ -1347,7 +1288,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onWriteFailure(BluetoothGatt bluetoothGatt, BluetoothDevice bluetoothDevice, byte[] msg, String errorMsg) {
             Message message = new Message();
-            message.what = SEND_FAILURE;
+            message.what =  BLEManager.BleOrder.SEND_FAILURE;
             message.obj = msg;
             mHandler.sendMessage(message);
         }
@@ -1389,12 +1330,12 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             String action = intent.getAction();
             if (TextUtils.equals(action, BluetoothAdapter.ACTION_DISCOVERY_STARTED)) { //开启搜索
                 Message message = new Message();
-                message.what = START_DISCOVERY;
+                message.what =  BLEManager.BleOrder.START_DISCOVERY;
                 mHandler.sendMessage(message);
 
             } else if (TextUtils.equals(action, BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {//完成搜素
                 Message message = new Message();
-                message.what = STOP_DISCOVERY;
+                message.what =  BLEManager.BleOrder.STOP_DISCOVERY;
                 mHandler.sendMessage(message);
 
             } else if (TextUtils.equals(action, BluetoothAdapter.ACTION_STATE_CHANGED)) {   //系统蓝牙状态监听
@@ -1402,12 +1343,12 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                 int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
                 if (state == BluetoothAdapter.STATE_OFF) {
                     Message message = new Message();
-                    message.what = BT_CLOSED;
+                    message.what =  BLEManager.BleOrder.BT_CLOSED;
                     mHandler.sendMessage(message);
 
                 } else if (state == BluetoothAdapter.STATE_ON) {
                     Message message = new Message();
-                    message.what = BT_OPENED;
+                    message.what =  BLEManager.BleOrder.BT_OPENED;
                     mHandler.sendMessage(message);
 
                 }
@@ -1470,7 +1411,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onDeviceFound(BLEDevice bleDevice) {
             Message message = new Message();
-            message.what = DISCOVERY_DEVICE;
+            message.what =  BLEManager.BleOrder.DISCOVERY_DEVICE;
             message.obj = bleDevice;
             mHandler.sendMessage(message);
         }
@@ -1478,7 +1419,7 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
         @Override
         public void onDiscoveryOutTime() {
             Message message = new Message();
-            message.what = DISCOVERY_OUT_TIME;
+            message.what =  BLEManager.BleOrder.DISCOVERY_OUT_TIME;
             if (binding.tvNotDevice.getVisibility() == View.VISIBLE) {
                 binding.ivStep1.setState(3);
                 binding.tvStep1Text.setText("扫描设备超时");

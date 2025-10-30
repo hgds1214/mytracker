@@ -40,6 +40,18 @@ public class FunctionListAdapter extends BaseQuickAdapter<FunctionItem, BaseView
         return new FunctionListAdapter(data);
     }
 
+    public static FunctionListAdapter newVirturlInstance() {
+        List<FunctionItem> data = new ArrayList<>();
+        data.add(new FunctionItem("采集运行", R.mipmap.collect, ProjectInfoEditActivity.class));
+        data.add(new FunctionItem("数据合成", R.mipmap.merge_data, DataCollectActivity.class));
+        data.add(new FunctionItem("数据浏览", R.mipmap.view_data, DataViewActivity.class));
+        data.add(new FunctionItem("罗盘校准", R.mipmap.ic_adjust, AdjustActivity.class));
+        data.add(new FunctionItem("系统设置", R.mipmap.ic_setting, SettingActivity.class));
+        data.add(new FunctionItem("虚拟采集", R.mipmap.virtualcollect, ProjectInfoEditActivity.class));
+
+        return new FunctionListAdapter(data);
+    }
+
 
 
     @Override

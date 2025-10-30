@@ -49,14 +49,17 @@ public class DrillInfoEditActivity extends BaseActivity {
     private ActivityResultLauncher<Intent> resultLauncher;
     private ActivityDrillInfoBinding binding;
     private String uri;
+    private boolean isVirtual;
     File picfile = new File(PathUtils.getExternalAppFilesPath()+ File.separator+ "picData" + File.separator + "tmp.png");
     String  mFilePath = Environment.getExternalStorageDirectory().getPath();
+    public static final String KEY_IS_VIRTUAL_COLLECT = "IS_VIRTUAL_COLLECT";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityDrillInfoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         getPermission();
+        isVirtual = getIntent().getBooleanExtra(KEY_IS_VIRTUAL_COLLECT, false);
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
         builder.detectFileUriExposure();
@@ -237,7 +240,6 @@ public class DrillInfoEditActivity extends BaseActivity {
             ToastUtils.showLong("现场照片不能为空");
             return;
         }
-
         if (isShowLoading()) return;
         showLoading();
         ThreadUtils.executeByCached(new ThreadUtils.SimpleTask<DrillHoleInfo>() {
@@ -273,7 +275,6 @@ public class DrillInfoEditActivity extends BaseActivity {
                     info.livePhotos = filePath;
                     info.livePhotosMd5 = ConvertUtils.bytes2HexString(EncryptUtils.encryptMD5File(filePath));
                     info.projectRoot = projectRoot;
-
                     info.collectionDateTime = time;/*System.currentTimeMillis();*/
                     info.id = TrackerDBManager.saveOrUpdate(info);
                     return info;
@@ -287,9 +288,18 @@ public class DrillInfoEditActivity extends BaseActivity {
             public void onSuccess(DrillHoleInfo result) {
                 hideLoading();
                 if (result != null) {
-                    DataCollectActivity.launch(DrillInfoEditActivity.this, result.id);
-                    ActivityUtils.finishActivity(ProjectInfoEditActivity.class);
-                    finish();
+                    //进入虚拟采集
+                    if (!isVirtual){
+                        DataCollectActivity.launch(DrillInfoEditActivity.this, result.id);
+                        ActivityUtils.finishActivity(ProjectInfoEditActivity.class);
+                        finish();
+                    }
+                    else {
+                       startActivity(new Intent(DrillInfoEditActivity.this,VirtualCollectActivity.class));
+                        ActivityUtils.finishActivity(ProjectInfoEditActivity.class);
+                        finish();
+                    }
+
                 }
             }
         });

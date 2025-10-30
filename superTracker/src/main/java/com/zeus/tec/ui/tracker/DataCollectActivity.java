@@ -1,17 +1,24 @@
 package com.zeus.tec.ui.tracker;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.blankj.utilcode.util.FileIOUtils;
+import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
+import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ThreadUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.blankj.utilcode.util.ZipUtils;
@@ -28,6 +35,8 @@ import com.zeus.tec.BuildConfig;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityDataCollectBinding;
 import com.zeus.tec.db.TrackerDBManager;
+import com.zeus.tec.device.ble.BLEManager;
+import com.zeus.tec.device.ble.LVDevicesAdapter;
 import com.zeus.tec.device.tracker.CmdManager;
 import com.zeus.tec.device.tracker.CompassData;
 import com.zeus.tec.device.tracker.TrackerCollectData;
@@ -42,6 +51,7 @@ import com.zeus.tec.model.tracker.CollectTimeInfo;
 import com.zeus.tec.model.tracker.DrillDataInfo;
 import com.zeus.tec.model.tracker.DrillHoleInfo;
 import com.zeus.tec.ui.base.BaseActivity;
+import com.zeus.tec.ui.maoganDataUpload.MaoganMainActivity;
 import com.zeus.tec.ui.tracker.config.SystemConfig;
 import com.zeus.tec.ui.tracker.util.TimeUtil;
 import com.zeus.tec.ui.widget.chart.MyMarkerView;
@@ -128,6 +138,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         context.startActivity(intent);
     }
 
+    BLEManager bleManager = new BLEManager();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -139,18 +150,54 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         if (BuildConfig.DEBUG) {
             LogUtils.d(drillId, oneDrillHoleInfo);
         }
-
         if (oneDrillHoleInfo == null) {
             ToastUtils.showLong("错误工程信息，请重试");
             finish();
             return;
         }
-
         superLogUtil = new SuperLogUtil(this);
         EventBus.getDefault().register(this);
+        mContext = this;
         initUI();
+        initBLE();
+        binding.tvStatus.setOnClickListener(v -> {
+            readMergeData(PathUtils.getExternalAppFilesPath()+File.separator+"privateData"+File.separator+"tmp.csv",
+                    PathUtils.getExternalAppFilesPath()+File.separator+"privateData"+File.separator+"tim.csv");
+        });
+    }
+    Context mContext ;
+    private void initBLE() {
+        bleManager = new BLEManager();
+        if (!bleManager.initBle(mContext,bHandler)) {//EB 90 80 7F 00 00
+            Log.d(TAG, "该设备不支持低功耗蓝牙");
+            Toast.makeText(mContext, "该设备不支持低功耗蓝牙", Toast.LENGTH_SHORT).show();
+        }
     }
 
+    @SuppressLint({"HandlerLeak"})
+    private Handler bHandler = new Handler() {
+        @SuppressLint({"SetTextI18n", "MissingPermission"})
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case BLEManager.BleOrder.START_DISCOVERY:{
+                    break;
+                }
+                case BLEManager.BleOrder.STOP_DISCOVERY:{
+                    break;
+                }
+                case BLEManager.BleOrder.CONNECT_SUCCESS:{
+                break;
+                }
+                case BLEManager.BleOrder.DISCONNECT_SUCCESS:{
+                    break;
+                }
+
+
+            }
+        }
+    };
 
     private void initUI() {
         collectDataStatus = 0;
@@ -268,7 +315,6 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
     private void collectData() {
         long now = System.currentTimeMillis();
         if (now - lastClick < 1000) return;
-
         lastClick = now;
         collectCount++;
         binding.tv24.setText(String.valueOf(collectCount));
@@ -285,10 +331,7 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        onClickBack();
-    }
+
 
     private void onClickBack() {
         finish();
@@ -742,14 +785,35 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
         h.removeMessages(MSG_GET_DATA_SIZE_BUMP);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onRecvCollectData(TrackerCollectDataEvent event) {
-        if (event == null) return;
-        TrackerCollectData trackerCollectData = event.data;
+    //用于检查数据合并过程中的逻辑
+    public  void  readMergeData (String tmpPath ,String trdPath){
+        List<String> tmps = com.blankj.utilcode.util.FileIOUtils.readFile2List(tmpPath);
+        List<String> trds = com.blankj.utilcode.util.FileIOUtils.readFile2List(trdPath);
+
+        for (int i = 0; i < trds.size(); i++) {
+            CollectTimeInfo tmpCollectTimeInfo = new CollectTimeInfo();
+            String [] strTmps = (trds.get(i).split(","));
+            tmpCollectTimeInfo.id =Long.parseLong(strTmps[0]) ;
+            tmpCollectTimeInfo.time = Long.parseLong(strTmps[1]);
+            timeList.add(tmpCollectTimeInfo);
+        }
+        for (int i = 1; i < tmps.size(); i++) {
+            TrackerCollectData trackerCollectData = new TrackerCollectData();
+            String [] strTmps = (tmps.get(i).split(","));
+            trackerCollectData.serialId = Long.parseLong(strTmps[0]);
+            trackerCollectData.collectTime = Long.parseLong(strTmps[1]);
+            trackerCollectData.rollAngle = (short) (Float.parseFloat(strTmps[2])*100);
+            trackerCollectData.omega = (short)(Float.parseFloat(strTmps[3])*100);
+            trackerCollectData.directionAngle = (short)(Float.parseFloat(strTmps[4])*100);
+            trackerCollectData.slantAngle =(short)(Float.parseFloat(strTmps[5])*100);
+            mergeDataTest(trackerCollectData);
+        }
+    }
+
+    public void  mergeDataTest (TrackerCollectData trackerCollectData){
+
         if (trackerCollectData == null) return;
-
         if (recvCount == 0) mergeStart = 0;
-
         recvCount++;
         if (mergeStart < timeList.size()) {
             CollectTimeInfo ti = timeList.get(mergeStart);
@@ -760,6 +824,77 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             } else {
                 TrackerDBManager.savOrUpdate(ti);
                 mergeStart++;
+                if (mergeStart<timeList.size()-1){
+                    CollectTimeInfo tiTmp = timeList.get(mergeStart);
+                    tiTmp.diffTime = Math.abs(tiTmp.time - trackerCollectData.collectTime);
+                    tiTmp.copyData(trackerCollectData);
+                }
+            }
+        }
+        if (oneDrillHoleInfo.isMerged) return;
+            CollectTimeInfo ti = timeList.get(Math.min(mergeStart, timeList.size() - 1));
+            TrackerDBManager.savOrUpdate(ti);
+        TrackerDBManager.saveOrUpdate(DrillDataInfo.newDrillDataInfo(trackerCollectData, oneDrillHoleInfo.id));
+        if (recvCount == 303 || mergeStart > timeList.size()) {
+            h.removeMessages(MSG_DATA_BUMP);
+//            if (mergeStart<timeList.size())
+//            {
+//                try {
+//                    List<CollectTimeInfo>  timeListTmp = TrackerDBManager.getTimeList(oneDrillHoleInfo.id);
+//                    CollectTimeInfo lastTime = timeListTmp.get(mergeStart-1);
+//                    for (int i = 0; i < timeList.size()-mergeStart; i++) {
+//                        CollectTimeInfo tiTmp = timeList.get(timeList.size()-i-1);
+//                        tiTmp.directionAngle = (int) (lastTime.directionAngle+(Math.random()*20));
+//                        tiTmp.omega = (short) (lastTime.omega+(Math.random()*20));
+//                        tiTmp.rollAngle = (short) (lastTime.rollAngle+(Math.random()*20));
+//                        tiTmp.slantAngle = (short) (lastTime.slantAngle+(Math.random()*20));
+//                        TrackerDBManager.savOrUpdate(tiTmp);
+//                    }
+//                }catch (Exception exception){
+//                    ToastUtils.showLong(exception.getMessage());
+//                }
+//            }
+            if (BuildConfig.DEBUG) superLogUtil.d("接收到探头数据总数: " + recvCount);
+            oneDrillHoleInfo.isMerged = true;
+            TrackerDBManager.saveOrUpdate(oneDrillHoleInfo);
+            EventBus.getDefault().post(new MergeEvent(oneDrillHoleInfo));
+            showChartWithData(timeList);
+            binding.llBtns.setVisibility(View.GONE);
+            saveMergeData();
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onRecvCollectData(TrackerCollectDataEvent event) {
+        if (event == null) return;
+        TrackerCollectData trackerCollectData = event.data;
+        if (trackerCollectData == null) return;
+
+        if (recvCount == 0) mergeStart = 0;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String tmpDataPath = PathUtils.getExternalAppFilesPath()+File.separator+oneDrillHoleInfo.companyId+"tmpData.csv";
+            if (!FileUtils.isFileExists(tmpDataPath))
+            {
+                FileUtils.createOrExistsFile(tmpDataPath);
+            }
+            FileIOUtils.writeFileFromString(tmpDataPath, trackerCollectData.collectTime +System.lineSeparator(),true);
+        }
+        recvCount++;
+        if (mergeStart < timeList.size()) {
+            CollectTimeInfo ti = timeList.get(mergeStart);
+            long diff = Math.abs(ti.time - trackerCollectData.collectTime);//10
+            if (diff <= ti.diffTime) {
+                ti.diffTime = diff;
+                ti.copyData(trackerCollectData);
+            } else {
+                TrackerDBManager.savOrUpdate(ti);
+                mergeStart++;
+                if(mergeStart<timeList.size()-1){
+                    CollectTimeInfo tiTmp = timeList.get(mergeStart);
+                    tiTmp.diffTime = Math.abs(tiTmp.time-trackerCollectData.collectTime);
+                    tiTmp.copyData(trackerCollectData);
+                }
             }
         }
         if (oneDrillHoleInfo.isMerged) return;
@@ -783,12 +918,10 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
                         tiTmp.rollAngle = (short) (lastTime.rollAngle+(Math.random()*20));
                         tiTmp.slantAngle = (short) (lastTime.slantAngle+(Math.random()*20));
                         TrackerDBManager.savOrUpdate(tiTmp);
-
                     }
                 }catch (Exception exception){
                     ToastUtils.showLong(exception.getMessage());
                 }
-
             }
             if (BuildConfig.DEBUG) superLogUtil.d("接收到探头数据总数: " + recvCount);
             oneDrillHoleInfo.isMerged = true;
@@ -799,8 +932,6 @@ public class DataCollectActivity extends BaseActivity implements USBSerialManage
             saveMergeData();
         }
     }
-
-
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onRecvCompassData(WireCollectDataEvent event) {

@@ -580,3 +580,64 @@ maogan
 
 1.修复ycs数据显示Bug
 2.修复maogan搜所不到问题
+
+### 2024-11-19 ### v3.1.0(whcs)
+
+1.增加获取权限工具
+在HomeActivity获取储存和网络权限
+如果获取失败finish;
+2.leida增加导出轨迹数据方法
+
+### 2024-11-20
+
+1.ycs 修复项目文件名使用ycs文件命名导致的bug
+2.ycs try-catch ycsTask下载，排查闪退问题
+
+### 2024-11-22
+
+1.ycs 增加读取合并后数据
+2.增加ycs数据 响应曲线显示和多测道曲线显示模块
+3.修改homeactivity 中锚杆仪设备图片尺寸过大和开孔定向仪设备图片过大导致android8不兼容问题
+
+### 2024-11-25
+
+1.leida导出轨迹增加按钮
+2.修改导出规则，导出点数间隔为设置的打点间距(钻杆长度)
+
+### 2024-11-26
+
+1.ycs 多测道显示模块增加一次场去除功能
+
+### 2024-12-03
+
+1.leida 陀螺阈值缺省值改为20,时间间隔默认为300
+
+### 2024-12-31
+
+1.ycs修改数据浏览，X方向和Z方向对调
+
+### 2025-1-02 v3.1.1 
+
+1.修改轨迹仪有线模式时间多两个月 CompassData.java 里month+1 变为-1
+
+### 2025-2-07
+
+1.ycs修改数据浏览模块，重新对调X方向和Z方向
+
+### 2025-02-15
+
+1.ycs 修改陀螺阈值最小为50变成最小为10
+
+### 2025-10-21
+
+1.将directionfinder.util包下的蓝牙通信模块移动到device.ble包下
+2.blemanager 添加BleOrder 将已用旧指令的模块都共用该order
+
+### 2025-10-29
+
+1.更新home 列表设备型号为最新的安标型号
+2.gradle添加 material库，更改targetSdkVersion,compileSdkVersion为34
+3.tracker 增加PointRecordInfo 用于虚拟采集点位
+4.tracker 增加虚拟采集模块 点击5次设备名，变为可视
+
+5.DataCollectActivity.java 788 用于检查数据合并过程中的逻辑

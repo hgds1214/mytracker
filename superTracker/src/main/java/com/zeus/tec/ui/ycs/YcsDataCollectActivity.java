@@ -303,6 +303,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
             }
         }
     }
+
     private boolean isignore = false;
 
     private void pointRecord() {
@@ -311,6 +312,10 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 String current_time = "";
                 String content;
                 LocalDateTime now;
+                long currentTime = System.currentTimeMillis();
+                binding.cttCountdown.setStartTime(currentTime);
+                binding.cttCountdown.start();
+
                 long timecode = System.currentTimeMillis()/1000;//精确到秒
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     now = LocalDateTime.now();
@@ -371,7 +376,6 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         binding.listPoint.setSelection(adapter.getCount() - 1);
     }
 
-
     public void startWork(String fileName) {
         Boolean complete = false;
         String save_file = cache.FileSavePath;
@@ -385,10 +389,8 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
     }
 
     public void tvDownload_click() {
-
         try {
             if (cache.selectFileName.equals("")) {
-                //MessageBox.Show("请选择需要下载的项目!");
                 Toast.makeText(this, "请选择需要下载的项目", Toast.LENGTH_LONG).show();
                 return;
             }
@@ -398,7 +400,6 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 progressBar.setVisibility(View.VISIBLE);
                 binding.tvStep1Text.setText("正在下载");
                 TextView steptext = binding.tvStep1Text;
-
                 YcsTask task = new YcsTask(progressBar, cache.selectFileName, steptext, 1, cache.trdFilePath.replace(".trd",".dat"));
                 task.execute();
             } else {
@@ -440,7 +441,6 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         } catch (Exception ex) {
             ToastUtils.showLong(ex.getLocalizedMessage());
         }
-
     }
 
     public void downLoadData() {
@@ -503,7 +503,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                         binding.tv22.setText(Gyro.substring(0, 3));
                         //往事不要再提，人生以多风雨，纵然记忆抹不去，爱与恨都还心底，真的要断了过去，让明天好好继续，你就不要再苦苦追问我的消息
                         //爱情他是个难题，让人目眩神迷，忘了痛或许可以，忘了你却太不容易，你不曾真的离去，你始终在我心里，我对你仍有爱意，我对自己无能为力
-                        //因为我人仍有梦，依然将你放在我心中，总是容易被往事打动，总是为了你心痛
+                        //因为我仍有梦，依然将你放在我心中，总是容易被往事打动，总是为了你心痛
                         //别留恋岁月中，我无意的柔情万种，不要问我是否再相逢，不要管我言不由衷
                         //为何你不懂(别说我不懂)，只要有爱就有痛，有一天你会知道，人生没有我并不会不同，
                         //人生已经太匆匆，我好害怕总是泪眼朦胧，忘了我就没有痛，将往事留在风中
@@ -532,7 +532,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         }
     }
 
-    private void StartWork() {
+    private void StartWork()  {
         RefreshStatus();
         if (cache.DeviceStatus != null) {
             if (cache.DeviceStatus.status == 1) {

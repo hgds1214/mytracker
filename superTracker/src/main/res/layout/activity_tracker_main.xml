@@ -22,14 +22,15 @@
             android:padding="5dp"
             android:layout_centerVertical="true"
             android:src="@mipmap/white_arrow_left"/>
+
         <TextView
+            android:id="@+id/title_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="YZG6.4 矿用钻孔轨迹测量仪"
+            android:text="YZG6.4(A)矿用钻孔轨迹测量仪"
             android:textColor="#ffffffff"
-            android:textSize="17sp"
-            />
+            android:textSize="17sp" />
 
     </RelativeLayout>
 

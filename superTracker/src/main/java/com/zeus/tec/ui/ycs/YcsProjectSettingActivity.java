@@ -137,8 +137,8 @@ public class YcsProjectSettingActivity extends AppCompatActivity {
             ToastUtils.showLong("陀螺阈值不能为空");
         }
         float edtGyro = Float.parseFloat(edtGyroStr);
-        if (edtGyro < 50) {
-            ToastUtils.showLong("陀螺阈值必须大于50！");
+        if (edtGyro < 1) {
+            ToastUtils.showLong("陀螺阈值必须大于1！");
             return;
         }
         //发射能量 10，20，40

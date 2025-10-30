@@ -17,13 +17,16 @@ import com.zeus.tec.model.utils.FeedbackUtil;
 public class ProjectInfoEditActivity extends BaseActivity {
     private ActivityProjectInfoEditBinding binding;
     private final static String [] sampleLength = {"518","1024","2048"};
+    public static final String KEY_IS_VIRTUAL_COLLECT = "IS_VIRTUAL_COLLECT";
 
+
+    boolean isVirtual = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityProjectInfoEditBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        isVirtual = getIntent().getBooleanExtra(KEY_IS_VIRTUAL_COLLECT, false);
         binding.ivBack.setOnClickListener( v->{
             FeedbackUtil.getInstance().doFeedback();
             finish();
@@ -127,6 +130,15 @@ public class ProjectInfoEditActivity extends BaseActivity {
         info.dynamicThreshold = dythreash;
         info.drillPipeLength = drillPipeLength;
         info.drillHoleLength = holeLength;
-        startActivity(new Intent(ProjectInfoEditActivity.this, DrillInfoEditActivity.class));
+        if (isVirtual){
+            Intent virtualIntent = new Intent(ProjectInfoEditActivity.this, DrillInfoEditActivity.class);
+            virtualIntent.putExtra(DrillInfoEditActivity.KEY_IS_VIRTUAL_COLLECT ,true);
+            startActivity(virtualIntent);
+
+        }
+        else {
+            startActivity(new Intent(ProjectInfoEditActivity.this, DrillInfoEditActivity.class));
+        }
+
     }
 }

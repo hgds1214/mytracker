@@ -5,65 +5,46 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
-import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 
-import com.blankj.utilcode.util.BarUtils;
+import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.blankj.utilcode.util.Utils;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.google.android.material.snackbar.Snackbar;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityMergeSampleBinding;
 import com.zeus.tec.model.leida.MergeCache;
 import com.zeus.tec.model.leida.ProbePoint;
-import com.zeus.tec.model.leida.sampleTest.DataCache;
 import com.zeus.tec.model.utils.FeedbackUtil;
 import com.zeus.tec.model.utils.FirFilter;
 import com.zeus.tec.model.utils.Scale;
-import com.zeus.tec.ui.directionfinder.util.BLEDevice;
-import com.zeus.tec.ui.directionfinder.util.TypeConversion;
 import com.zeus.tec.ui.leida.Apater.dataMsgAdapater;
 import com.zeus.tec.ui.leida.Apater.drillMsgAdapter;
 import com.zeus.tec.ui.leida.interfaceUtil.DialogCallback;
 import com.zeus.tec.ui.leida.util.MesseagWindows;
 
 import org.angmarch.views.NiceSpinner;
-import org.angmarch.views.OnSpinnerItemSelectedListener;
 
+import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -86,10 +67,9 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
             initListener();
             initUi();
             Intent intent = getIntent();
-            int tmpa = intent.getIntExtra("INT_KEY",3);
+            int tmpa = intent.getIntExtra("INT_KEY", 3);
             if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Success) {
-            }
-            else if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Fail) {
+            } else if (intent.getIntExtra("INT_KEY", 0) == MergeCache.Merge_Fail) {
             }
         } catch (Exception exception) {
             ToastUtils.showLong(exception.getMessage());
@@ -110,14 +90,12 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
     private static final int DrawSample_Success = 0x01;
     private static final int DrawGrayMap_Success = 0x02;
 
-
-
     private boolean isDrawing = false;
     private double[] maxList;
     private double[] minList;
     private double globalMax;
     private double globalMin;
-    private float scaleWidth=40;
+    private float scaleWidth = 40;
     private final float scaleHeight = 40;
 
     private final int[] lowfreq = {20, 30, 40, 50, 60};
@@ -161,7 +139,8 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         getGlobalMax();
         isSampleFill = true;
     }
-    int currentIndex =0;
+
+    int currentIndex = 0;
 
     private void initListener() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -170,51 +149,51 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
             binding.refreshBtv.setOnClickListener(this);
             binding.graymapshowBtn.setOnClickListener(this);
             binding.dataReductionBtn.setOnClickListener(this);
+            binding.trackerDataOutputBtn.setOnClickListener(this);
             binding.drillMsgListv.setOnItemClickListener((parent, view, position, id) -> {
                 view.setSelected(true);
                 FeedbackUtil.getInstance().doFeedback();
-                if (MergeCache.DrillPipeList.get(position).ValidCount!=0){
+                if (MergeCache.DrillPipeList.get(position).ValidCount != 0) {
                     List tmpList = MergeCache.probePointList.subList(MergeCache.DrillPipeList.get(position).IndexFrom, MergeCache.DrillPipeList.get(position).IndexTo);
                     tmpList.add(MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position).IndexTo));
                     dataMsgAdapater DataMsgAdapater = null;
                     DataMsgAdapater = new dataMsgAdapater(MergeSampleActivity.this, tmpList);
                     binding.drilldataMsgListTv.setAdapter(DataMsgAdapater);
                     currentIndex = MergeCache.DrillPipeList.get(position).IndexFrom;
-                }
-                else {
-                    if (position!=0){
+                } else {
+                    if (position != 0) {
                         MesseagWindows.showMessageBox(MergeSampleActivity.this, "缺少数据点", "该钻杆未采集到数据点，是否采用前一根钻杆的最后一个数据填充该钻杆", new DialogCallback() {
                             @Override
                             public void onPositiveButtonClick() {
-                                ProbePoint tmpPrpbePoint = MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position-1).IndexTo);
+                                ProbePoint tmpPrpbePoint = MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position - 1).IndexTo);
                                 List<ProbePoint> tmpList = new LinkedList<>();
                                 tmpList.add(tmpPrpbePoint);
                                 dataMsgAdapater DataMsgAdapater = null;
                                 DataMsgAdapater = new dataMsgAdapater(MergeSampleActivity.this, tmpList);
                                 binding.drilldataMsgListTv.setAdapter(DataMsgAdapater);
-                                currentIndex = MergeCache.DrillPipeList.get(position-1).IndexTo;
+                                currentIndex = MergeCache.DrillPipeList.get(position - 1).IndexTo;
                             }
+
                             @Override
                             public void onNegativeButtonClick() {
 
                             }
                         });
-                    }
-                    else {
+                    } else {
                         MesseagWindows.showMessageBox(MergeSampleActivity.this, "缺少数据点", "该钻杆未采集到数据点，是否采用后一根钻杆的第一个数据填充该钻杆", new DialogCallback() {
                             @Override
                             public void onPositiveButtonClick() {
-                                ProbePoint tmpPrpbePoint = MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position+1).IndexTo);
+                                ProbePoint tmpPrpbePoint = MergeCache.probePointList.get(MergeCache.DrillPipeList.get(position + 1).IndexTo);
                                 List<ProbePoint> tmpList = new LinkedList<>();
                                 tmpList.add(tmpPrpbePoint);
                                 dataMsgAdapater DataMsgAdapater = null;
                                 DataMsgAdapater = new dataMsgAdapater(MergeSampleActivity.this, tmpList);
                                 binding.drilldataMsgListTv.setAdapter(DataMsgAdapater);
-                                currentIndex = MergeCache.DrillPipeList.get(position+1).IndexTo;
+                                currentIndex = MergeCache.DrillPipeList.get(position + 1).IndexTo;
                             }
+
                             @Override
                             public void onNegativeButtonClick() {
-
                             }
                         });
                     }
@@ -223,8 +202,8 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
             binding.drilldataMsgListTv.setOnItemClickListener((parent, view, position, id) -> {
                 view.setSelected(true);
                 view.findViewById(R.id.serial_tv);
-                drawOneSample(MergeCache.probePointList.get(currentIndex+position),binding.onePointSamplePhoto,currentIndex+position+1);
-              //  drawOneSampleChart(MergeCache.probePointList.get(currentIndex+position));
+                drawOneSample(MergeCache.probePointList.get(currentIndex + position), binding.onePointSamplePhoto, currentIndex + position + 1);
+                //  drawOneSampleChart(MergeCache.probePointList.get(currentIndex+position));
             });
         }
     }
@@ -288,21 +267,17 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         if (MergeCache.lstPointsOrder.size() > 160) {
             binding.sampleCountSpinner.setSelectedIndex(4);
             // imageRatioSpinner.setSelectedIndex(2);
-        } else if (MergeCache.lstPointsOrder.size() >80 )   {
+        } else if (MergeCache.lstPointsOrder.size() > 80) {
             binding.sampleCountSpinner.setSelectedIndex(2);
             // imageRatioSpinner.setSelectedIndex(1);
-        }
-        else {
+        } else {
             binding.sampleCountSpinner.setSelectedIndex(1);
         }
         lowFreq.setOnSpinnerItemSelectedListener((parent, view, position, id) -> low1 = lowfreq[position]);
         highFreq.setOnSpinnerItemSelectedListener((parent, view, position, id) -> high1 = highfreq[position]);
-
         sampleFill.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isSampleFill = position == 0);
         spinner_isLoose.setOnSpinnerItemSelectedListener((parent, view, position, id) -> isLoose = position == 1);
-
     }
-
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -320,9 +295,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                             binding.sampleImg.setImageBitmap(sampleBitmap);
                         }
                         showStatus = ShowStatus_SampleMap;
-                    }
-                    else if (showStatus==ShowStatus_Datalist)
-                    {
+                    } else if (showStatus == ShowStatus_Datalist) {
                         binding.mainShowFrg.setVisibility(View.VISIBLE);
                         binding.DataListLl.setVisibility(View.GONE);
                         if (sampleBitmap == null) {
@@ -355,9 +328,7 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                             } else {
                                 binding.sampleImg.setImageBitmap(graybitmap);
                             }
-                        }
-                        else if (showStatus == ShowStatus_Datalist)
-                        {
+                        } else if (showStatus == ShowStatus_Datalist) {
                             binding.mainShowFrg.setVisibility(View.VISIBLE);
                             binding.DataListLl.setVisibility(View.GONE);
                             showStatus = Showstatus_GrayMap;
@@ -384,35 +355,35 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         drawGrayMapBmp();
                     }
-                }
-                else if (showStatus == ShowStatus_Datalist)
-                {
+                } else if (showStatus == ShowStatus_Datalist) {
                     binding.mainShowFrg.setVisibility(View.GONE);
-                   binding.DataListLl.setVisibility(View.VISIBLE);
+                    binding.DataListLl.setVisibility(View.VISIBLE);
                 }
                 break;
             }
-            case R.id.data_reduction_btn:{
-                if (showStatus ==ShowStatus_Datalist)
-                {
+            case R.id.data_reduction_btn: {
+                if (showStatus == ShowStatus_Datalist) {
 
-                }
-                else
-                {
+                } else {
                     binding.mainShowFrg.setVisibility(View.GONE);
                     binding.DataListLl.setVisibility(View.VISIBLE);
                 }
                 showStatus = ShowStatus_Datalist;
                 break;
             }
+            case R.id.tracker_data_output_btn: {
+                save_trackData(MergeCache.track_data_path);
+                break;
+            }
         }
     }
 
     DecimalFormat df = new DecimalFormat("00.##");//保留两位小数
-    private Bitmap oneSampleBmp ;
-    private void drawOneSample (ProbePoint probePoint, PhotoView photoView,int currentSerial){
+    private Bitmap oneSampleBmp;
+
+    private void drawOneSample(ProbePoint probePoint, PhotoView photoView, int currentSerial) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            oneSampleBmp = Bitmap.createBitmap(photoView.getWidth(),  photoView.getHeight(), Bitmap.Config.ARGB_8888);
+            oneSampleBmp = Bitmap.createBitmap(photoView.getWidth(), photoView.getHeight(), Bitmap.Config.ARGB_8888);
         }
         Canvas canvas = new Canvas(oneSampleBmp);
         canvas.drawColor(Color.WHITE);
@@ -422,36 +393,36 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
         paint.setStrokeWidth(1);
         paint.setTextSize(13f);
 
-        float sampleWidth = photoView.getWidth()-scaleWidth;
-        float spaceHeight = (float)photoView.getHeight()/(float) probePoint.Voltage.length;
+        float sampleWidth = photoView.getWidth() - scaleWidth;
+        float spaceHeight = (float) photoView.getHeight() / (float) probePoint.Voltage.length;
         double max = getArrayMax(probePoint.Voltage);
 
-        canvas.drawText("第"+currentSerial+"道",scaleWidth+10,20,paint);
-        canvas.drawText("max:"+df.format(max),scaleWidth+10,35,paint);
+        canvas.drawText("第" + currentSerial + "道", scaleWidth + 10, 20, paint);
+        canvas.drawText("max:" + df.format(max), scaleWidth + 10, 35, paint);
 
-        max = max*1.1;
+        max = max * 1.1;
         paint.setColor(Color.BLACK);
         float x1;
         float y1;
-        float y=0;
-        float x = scaleWidth+sampleWidth/2;
+        float y = 0;
+        float x = scaleWidth + sampleWidth / 2;
 //        if (!isSampleFill) {
-            for (int j = 0; j < probePoint.Voltage.length; j++) {
-                x1 = (float) (scaleWidth+(sampleWidth / 2+sampleWidth / 2 * (probePoint.Voltage[j] / max)));
-                y1 =  j* spaceHeight;
-                canvas.drawLine(x, y, x1, y1, paint);
-                y = y1;
-                x = x1;
-            }
+        for (int j = 0; j < probePoint.Voltage.length; j++) {
+            x1 = (float) (scaleWidth + (sampleWidth / 2 + sampleWidth / 2 * (probePoint.Voltage[j] / max)));
+            y1 = j * spaceHeight;
+            canvas.drawLine(x, y, x1, y1, paint);
+            y = y1;
+            x = x1;
+        }
 
-      //  depthScaleBmp = Bitmap.createBitmap(50, ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), Bitmap.Config.ARGB_8888);
+        //  depthScaleBmp = Bitmap.createBitmap(50, ((int) (photoViewHeight * bmpHeightRatios[binding.bmpHeightSpinner.getSelectedIndex()])), Bitmap.Config.ARGB_8888);
         //Canvas depthCanvas = new Canvas();
-       // canvas.setBitmap(depthScaleBmp);
+        // canvas.setBitmap(depthScaleBmp);
         float maxDepth = ((1.0f / MergeCache.dataHeader.SampleFrequency) * 512f * MergeCache.sampleSpeed) / 2;
-       // canvas.drawColor(Color.argb(0, 0, 0, 0));
+        // canvas.drawColor(Color.argb(0, 0, 0, 0));
         Scale DepthScale = new Scale(
                 canvas.getWidth(),
-                canvas.getHeight() ,
+                canvas.getHeight(),
                 Color.argb(50, 0, 0, 0),
                 true,
                 maxDepth,
@@ -730,6 +701,66 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
             }
         }
     };
+
+    private List<ProbePoint> pick_trackData(float distance) {
+        int num1 = (int) (distance / (MergeCache.lstPointsOrder.get(0).Distance * 100));
+        int num2 = MergeCache.lstPointsOrder.size() / num1;
+        List<ProbePoint> trackPointList = new ArrayList<>();
+        for (int i = 1; i <= num2; i++) {
+            trackPointList.add(MergeCache.lstPointsOrder.get(i * num1 - 1));
+        }
+        return trackPointList;
+    }
+
+    private void save_trackData(String savePath) {
+        FileOutputStream fos = null;
+        MergeCache.trackPointList = pick_trackData(MergeCache.pointDistance);
+        try {
+            if (FileUtils.isFileExists(savePath)) {
+                FileUtils.delete(savePath);
+            } else {
+                FileUtils.createOrExistsFile(savePath);
+            }
+
+            fos = new FileOutputStream(savePath);
+            fos.write(MergeCache.trackData_head);  //4 字节
+            fos.write(convertByte(MergeCache.trackPointList.size())); //u5i32
+            for (int i = 0; i < MergeCache.trackPointList.size(); i++) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    int pointTime = (int) MergeCache.trackPointList.get(i).SampleTime.toEpochSecond(ZoneOffset.UTC);
+                    fos.write(convertByte(pointTime));//u32 打点时间 时间戳
+                    fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Roll * 100)));
+                    fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Pitch * 100)));
+                    fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Heading * 100)));
+                }
+            }
+            // fos.write();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+                ToastUtils.showShort("导出轨迹数据成功!");
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    private byte[] convertByte(short num1) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+        byteBuffer.putShort(num1);
+        byte[] result = byteBuffer.array();
+        return result;
+    }
+
+    private byte[] convertByte(int num1) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+        byteBuffer.putInt(num1);
+        byte[] result = byteBuffer.array();
+        return result;
+    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private double getMax(double[] numbers) {

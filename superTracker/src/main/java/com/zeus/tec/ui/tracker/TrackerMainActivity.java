@@ -18,10 +18,14 @@ import com.zeus.tec.ui.tracker.adapter.FunctionListAdapter;
 import com.zeus.tec.ui.tracker.model.FunctionItem;
 import com.zeus.tec.model.utils.FeedbackUtil;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class TrackerMainActivity extends AppCompatActivity {
 
     private ActivityTrackerMainBinding binding;
 
+
+    public int clickNumb = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,6 +35,39 @@ public class TrackerMainActivity extends AppCompatActivity {
         binding.ivBack.setOnClickListener( v->{
             FeedbackUtil.getInstance().doFeedback();
             finish();
+        });
+
+        binding.titleName.setOnClickListener(v -> {
+            FeedbackUtil.getInstance().doFeedback();
+            clickNumb++;
+            if (clickNumb==5) {
+                RecyclerView rv = binding.rvList;
+                rv.setLayoutManager(new LinearLayoutManager(this));
+                DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+                dividerItemDecoration.setDrawable(getDrawable(R.drawable.function_list_divider));
+                rv.addItemDecoration(dividerItemDecoration);
+                FunctionListAdapter functionListAdapter = FunctionListAdapter.newVirturlInstance();
+                functionListAdapter.setOnItemClickListener( (adapter, view, position) -> {
+                            FeedbackUtil.getInstance().doFeedback();
+                            FunctionItem item = (FunctionItem) adapter.getItem(position);
+                            Intent intent = new Intent(TrackerMainActivity.this, item.targetCls);
+                            if( "数据合成".equals(item.label)) {
+                                DrillHoleInfo lastDrillHoleInfo = TrackerDBManager.getLastDrillHoleInfo();
+                                if (lastDrillHoleInfo == null || lastDrillHoleInfo.isMerged) {
+                                    ToastUtils.showLong("请先进行无线数据采集");
+                                    return;
+                                }
+                                intent.putExtra(DataCollectActivity.KEY_DRILL_INFO_ID, lastDrillHoleInfo!=null?lastDrillHoleInfo.id:0);
+                                intent.putExtra(DataCollectActivity.KEY_TYPE_MERGE, true);
+                            }
+                            if ("虚拟采集".equals(item.label)){
+                                intent.putExtra(ProjectInfoEditActivity.KEY_IS_VIRTUAL_COLLECT,true);
+                            }
+                            startActivity(intent);
+                        }
+                );
+                rv.setAdapter(functionListAdapter);
+            }
         });
         RecyclerView rv = binding.rvList;
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -54,8 +91,6 @@ public class TrackerMainActivity extends AppCompatActivity {
             startActivity(intent);
             }
         );
-
         rv.setAdapter(functionListAdapter);
-
     }
 }

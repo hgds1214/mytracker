@@ -5,4 +5,14 @@
     <string name="devices">USB设备</string>
     <string name="version">V1.0.0(radan)</string>
     <string name="alram_msg">-----------注意事项采集过程中请不要关闭探头。采集完成后请先连接探头，点击结束采集后再关闭探头，否正可能出现数据丢失及损坏！</string>
+    <string name="title_activity_ycs_merge_data">YcsMergeDataActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_activity_yca_merge_data">YcaMergeDataActivity</string>
 </resources>

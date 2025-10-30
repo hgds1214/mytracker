@@ -33,7 +33,7 @@ public class leida_info implements Serializable {
     public int frequency = 1;
     //public int [] FR = {1000,2000,4000};
     // 放大倍数
-    public int  Amp1 =1;
+    public int  Amp1 =13;
     // 延迟点数
     public int  Delay1 = 1 ;
     // 叠加次数
@@ -41,10 +41,10 @@ public class leida_info implements Serializable {
     // 打点距离（钻杆长度）
     public float drillPipeLength = 100.0f;
     // 时间间隔
-    public float timeSpace = 50;
+    public float timeSpace = 300;
 
     //陀螺阈值
-    public float GYROThreshold = 40;
+    public float GYROThreshold = 20;
 
     //下载地址
     public String dataDownload = "";

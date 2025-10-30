@@ -119,7 +119,6 @@ public class DataCache {
         ReceiveThread = new Thread(()->{
             receive.Run();
         });
-
         ReceiveThread.start();
 
     }

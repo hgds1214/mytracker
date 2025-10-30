@@ -76,6 +76,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
 
     String tmpFoldPath = "";
     String tmpFileName = "";
+    YcsMainCache ycsCache = YcsMainCache.GetInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,17 +89,35 @@ public class YcsDataViewActivity extends AppCompatActivity {
         });
         RecyclerView rv = binding.rvList;
         rv.setLayoutManager(new LinearLayoutManager(this));
-        ycsDataListAdapter.addChildClickViewIds(R.id.tv_share,R.id.tv_share, R.id.tv_merge,R.id.tv_delete);
+        ycsDataListAdapter.addChildClickViewIds(R.id.tv_share, R.id.tv_view, R.id.tv_merge, R.id.tv_delete);
         ycsDataListAdapter.setOnItemChildClickListener((adapter, view, position) -> {
             FeedbackUtil.getInstance().doFeedback();
             switch (view.getId()) {
-                case R.id.tv_view:
-                case R.id.tv_merge: {
+                case R.id.tv_view: {
+
                     doMerge(ycsDataListAdapter.getItem(position));
                     break;
                 }
-                case R.id.tv_share:
-                {
+                case R.id.tv_merge: {
+                    ycsCache.ycsDataFileInfo = ycsDataListAdapter.getItem(position);
+                    if (ycsCache.ycsDataFileInfo == null) {
+                        break;
+                    } else {
+                        if (ycsCache.ycsDataFileInfo.x_ycs_file.equals("")) {
+                            ToastUtils.showShort("X方向数据丢失");
+                        }
+                        if (ycsCache.ycsDataFileInfo.y_ycs_file.equals("")) {
+                            ToastUtils.showShort("Y方向数据丢失");
+                        }
+                        if (ycsCache.ycsDataFileInfo.z_ycs_file.equals("")) {
+                            ToastUtils.showShort("Z方向数据丢失");
+                        }
+                        Intent tmpIntent = new Intent(YcsDataViewActivity.this, YcsMergeDataActivity.class);
+                        startActivity(tmpIntent);
+                    }
+                    break;
+                }
+                case R.id.tv_share: {
                     doShare(ycsDataListAdapter.getItem(position));
                     break;
                 }
@@ -112,12 +131,9 @@ public class YcsDataViewActivity extends AppCompatActivity {
         ycsDataListAdapter.getLoadMoreModule().setEnableLoadMoreIfNotFullPage(false);
         ycsDataListAdapter.getLoadMoreModule().setAutoLoadMore(true);
         ycsDataListAdapter.getLoadMoreModule().setEnableLoadMore(true);
-        ycsDataListAdapter.getLoadMoreModule().setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore() {
-                if (hasMore) {
-                    loadData(pageNum + 1);
-                }
+        ycsDataListAdapter.getLoadMoreModule().setOnLoadMoreListener(() -> {
+            if (hasMore) {
+                loadData(pageNum + 1);
             }
         });
         initListener();
@@ -125,40 +141,40 @@ public class YcsDataViewActivity extends AppCompatActivity {
         refreshDataList();
     }
 
-    private void initListener(){
+    private void initListener() {
         binding.xSwith.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            swithStatus[0]=isChecked;
+            swithStatus[0] = isChecked;
             iPointList.clickOn(currentPosition);
         });
         binding.ySwith.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            swithStatus[1]=isChecked;
+            swithStatus[1] = isChecked;
             iPointList.clickOn(currentPosition);
         });
         binding.zSwith.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            swithStatus[2]=isChecked;
+            swithStatus[2] = isChecked;
             iPointList.clickOn(currentPosition);
         });
 
         binding.mergeDataBtn.setOnClickListener(v -> {
 
-            if (!(DataList.size()>0)){
+            if (!(DataList.size() > 0)) {
                 ToastUtils.showLong("探头数据为0");
                 return;
             }
-            if (!(pointBeanList.size()>0)){
+            if (!(pointBeanList.size() > 0)) {
                 ToastUtils.showLong("打点数据为0");
                 return;
             }
-           TemList = mergeData(DataList , pointBeanList);
-            if (!(TemList.size()>0)){
+            TemList = mergeData(DataList, pointBeanList);
+            if (!(TemList.size() > 0)) {
                 ToastUtils.showLong("合并失败，因为数据匹配数为0！");
                 return;
             }
-                try {
-                    Save_Click(tmpFileName,tmpFoldPath);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                Save_Click(tmpFileName, tmpFoldPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -168,7 +184,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
             tmpFileName = info.projectName;
             tmpFoldPath = info.filePath;
             readDataFIle(info.datPath);
-            InitPointList (info.trdPath);
+            InitPointList(info.trdPath);
             initPointListView(DataList);
             iPointList.clickOn(currentPosition);
         } catch (IOException e) {
@@ -178,26 +194,22 @@ public class YcsDataViewActivity extends AppCompatActivity {
 
     List<TemBean> TemList = new ArrayList<>();
 
-    int[] times = { 1, 17, 33, 49, 65, 81, 97, 113, 129, 161, 193, 225, 257, 289, 321, 353, 385, 449, 513, 577, 641, 705, 769, 833, 897, 1025, 1153, 1281, 1409, 1537, 1665, 1793, 1921, 2177, 2433, 2689, 2945, 3201, 3457, 3713, 3969, 4481, 4993, 5505, 6017, 6529, 7041, 7553, 8065, 9089, 10113, 11137, 12161, 13185, 14209, 15233, 16257, 18305, 20353, 22401, 24449, 26497, 28545, 30593, 32641, 36737, 40833, 44929, 49025, 53121, 57217, 61313, 65409, 73601, 81793, 89985, 98177 };
+    int[] times = {1, 17, 33, 49, 65, 81, 97, 113, 129, 161, 193, 225, 257, 289, 321, 353, 385, 449, 513, 577, 641, 705, 769, 833, 897, 1025, 1153, 1281, 1409, 1537, 1665, 1793, 1921, 2177, 2433, 2689, 2945, 3201, 3457, 3713, 3969, 4481, 4993, 5505, 6017, 6529, 7041, 7553, 8065, 9089, 10113, 11137, 12161, 13185, 14209, 15233, 16257, 18305, 20353, 22401, 24449, 26497, 28545, 30593, 32641, 36737, 40833, 44929, 49025, 53121, 57217, 61313, 65409, 73601, 81793, 89985, 98177};
 
-    private void Save_Click(String FileName, String FoldPath ) throws IOException {
-
-        if (TemList.size() > 0)
-        {
+    private void Save_Click(String FileName, String FoldPath) throws IOException {
+        if (TemList.size() > 0) {
             DataBean bean = TemList.get(0).Data;
             List<FileOutputStream> writerlist = new ArrayList<>();
             List<String> contentlist = new ArrayList<>();
             int directNum = bean.Directs;
-            try
-            {
-                for (int i = 0; i < directNum; i++)
-                {
-                    String TemFIle = FoldPath+File.separator+FileName + "-"+i+".ycs";
-                    if (FileUtils.isFileExists(TemFIle)){
+            try {
+                for (int i = 0; i < directNum; i++) {
+                    String TemFIle = FoldPath + File.separator + FileName + "-" + i + ".ycs";
+                    if (FileUtils.isFileExists(TemFIle)) {
                         FileUtils.delete(TemFIle);
                     }
                     FileUtils.createOrExistsFile(TemFIle);
-                    FileOutputStream  writer = new FileOutputStream(TemFIle,true);
+                    FileOutputStream writer = new FileOutputStream(TemFIle, true);
                     writerlist.add(writer);
                     contentlist.add("");
                 }
@@ -246,36 +258,30 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 content += '\t';
                 content += "方位角";
 
-                int totaltime = (int)(setting.SampleTimes * 1000);
+                int totaltime = (int) (setting.SampleTimes * 1000);
                 int index = 0;
-                for (int i = 0; i < times.length; i++)
-                {
-                    if (times[i] > totaltime)
-                    {
+                for (int i = 0; i < times.length; i++) {
+                    if (times[i] > totaltime) {
                         break;
-                    }
-                    else
-                    {
+                    } else {
                         index = i;
                     }
                 }
-                for (int i = 0; i <= index; i++)
-                {
+                for (int i = 0; i <= index; i++) {
                     content += '\t';
-                    content +=String.valueOf(times[i]);
+                    content += String.valueOf(times[i]);
                 }
                 content += System.getProperty("line.separator");
-                for (int i=0;i<directNum;i++)
-                {
+                for (int i = 0; i < directNum; i++) {
                     writerlist.get(i).write(content.getBytes(StandardCharsets.UTF_8));
                 }
                 int No = 0;
-                for (int i = 0; i < TemList.size(); i++)
-                {
+                for (int i = 0; i < TemList.size(); i++) {
                     TemBean tem = TemList.get(i);
-                    if(tem.Point==null||tem.Data==null){
-                        if (i>0){
-                            tem = TemList.get(i-1);
+
+                    if (tem.Point == null || tem.Data == null) {
+                        if (i > 0) {
+                            tem = TemList.get(i - 1);
                         }
                     }
                     String time = tem.Point.time;
@@ -294,33 +300,26 @@ public class YcsDataViewActivity extends AppCompatActivity {
                     content = content + "0" + '\t';
 
                     int a = 1;
-                    str =String.valueOf(setting.StackCount);
+                    str = String.valueOf(setting.StackCount);
                     content = content + str + '\t';
 
                     content = content + "1" + '\t';
 
-                    str =  String.format("%.6f", setting.TArea);
+                    str = String.format("%.6f", setting.TArea);
                     content = content + str + '\t';
-                    for (int j = 0; j < directNum; j++)
-                    {
+                    for (int j = 0; j < directNum; j++) {
                         contentlist.set(j, content);
-                        if(j==0)
-                        {
-                            str =  String.format("%.6f", setting.RAreaX);
+                        if (j == 0) {
+                            str = String.format("%.6f", setting.RAreaX);
                             contentlist.set(j, contentlist.get(j) + str + '\t');
-                        }
-                        else if(j==1)
-                        {
-                            str =  String.format("%.6f", setting.RAreaY);
+                        } else if (j == 1) {
+                            str = String.format("%.6f", setting.RAreaY);
                             contentlist.set(j, contentlist.get(j) + str + '\t');
-                        }
-                        else if (j == 2)
-                        {
-                            str =  String.format("%.6f", setting.RAreaZ);
+                        } else if (j == 2) {
+                            str = String.format("%.6f", setting.RAreaZ);
                             contentlist.set(j, contentlist.get(j) + str + '\t');
                         }
                     }
-
                     content = "11.531249" + '\t';
 
                     content = content + "5.428950" + '\t';
@@ -331,19 +330,18 @@ public class YcsDataViewActivity extends AppCompatActivity {
 
                     content = content + "1" + '\t';
 
-                    content = content + (index+1) + '\t';
+                    content = content + (index + 1) + '\t';
 
                     content = content + "1" + '\t';
 
                     content = content + times[index] + '\t';
 
                     double value = 0;
-                    for (int j = 0; j < directNum; j++)
-                    {
+                    for (int j = 0; j < directNum; j++) {
                         contentlist.set(j, contentlist.get(j) + content);
 
                         value = tem.Data.Samples.get(j).Roll;
-                        contentlist.set(j, contentlist.get(j) +  String.format("%.3f", value) );
+                        contentlist.set(j, contentlist.get(j) + String.format("%.3f", value));
                         contentlist.set(j, contentlist.get(j) + '\t');
 
                         value = tem.Data.Samples.get(j).Pitch;
@@ -354,45 +352,33 @@ public class YcsDataViewActivity extends AppCompatActivity {
                         contentlist.set(j, contentlist.get(j) + String.format("%.3f", value));
                         contentlist.set(j, contentlist.get(j) + '\t');
                     }
-                    for (int j = 0; j < directNum; j++)
-                    {
-                        double[] sample= tem.Data.Samples.get(j).Result;
-                        for (int t = 0; t <= index; t++)
-                        {
+                    for (int j = 0; j < directNum; j++) {
+                        double[] sample = tem.Data.Samples.get(j).Result;
+                        for (int t = 0; t <= index; t++) {
                             float ts = times[t] * 1.0f;
-                            int pindex = (int)(ts / setting.SampleIntervel);
+                            int pindex = (int) (ts / setting.SampleIntervel);
 
                             value = GetValue(pindex + 1, sample);
 
                             str = String.format("%.6f", value);
-                            if (t == index)
-                            {
+                            if (t == index) {
                                 contentlist.set(j, contentlist.get(j) + str);
-                            }
-                            else
-                            {
+                            } else {
                                 contentlist.set(j, contentlist.get(j) + str + '\t');
                             }
                         }
                     }
-                    for (int j = 0; j < directNum; j++)
-                    {
+                    for (int j = 0; j < directNum; j++) {
 
-                        writerlist.get(j).write((contentlist.get(j)+System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8));
+                        writerlist.get(j).write((contentlist.get(j) + System.getProperty("line.separator")).getBytes(StandardCharsets.UTF_8));
                     }
                     No++;
                 }
-
                 ToastUtils.showShort("合并数据保存成功!");
-            }
-            catch (Exception ex)
-            {
-                ToastUtils.showLong("合并数据出错：" +ex.getMessage());
-            }
-            finally
-            {
-                for (int i = 0; i < directNum; i++)
-                {
+            } catch (Exception ex) {
+                ToastUtils.showLong("合并数据出错：" + ex.getMessage());
+            } finally {
+                for (int i = 0; i < directNum; i++) {
                     if (writerlist.get(i) != null)
                         writerlist.get(i).close();
                 }
@@ -402,14 +388,11 @@ public class YcsDataViewActivity extends AppCompatActivity {
         }
     }
 
-    private double GetValue(int index, double[] Sample)
-    {
+    private double GetValue(int index, double[] Sample) {
         double result = 0;
-        if (index >= 0 && index < Sample.length)
-        {
+        if (index >= 0 && index < Sample.length) {
             result = Sample[index];
         }
-
         return result;
     }
 
@@ -514,9 +497,9 @@ public class YcsDataViewActivity extends AppCompatActivity {
         MesseagWindows.showMessageBox(this, "删除数据", "数据删除后不可恢复", new DialogCallback() {
             @Override
             public void onPositiveButtonClick() {
-                if (FileUtils.isFileExists(info.filePath)){
-                   FileUtils.delete(info.filePath);
-                   refreshDataList();
+                if (FileUtils.isFileExists(info.filePath)) {
+                    FileUtils.delete(info.filePath);
+                    refreshDataList();
                 }
             }
 
@@ -531,7 +514,6 @@ public class YcsDataViewActivity extends AppCompatActivity {
         public long Time;
         public int Directs;
         public List<ProbeBean> Samples = new ArrayList<>();
-
     }
 
     public class ProbeBean {
@@ -547,18 +529,23 @@ public class YcsDataViewActivity extends AppCompatActivity {
         public int SampleLength;
         public double[] Sample;
         public double[] Result;
-
     }
 
     private long GetTime(byte[] Times) {
         long timestampMillis = 0;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            LocalDateTime dateTime = LocalDateTime.of(2000 + (int) Times[0], (int) Times[1], (int) Times[2], (int) Times[3], (int) Times[4], (int) Times[5]);
-            // 指定时区，例如使用系统默认时区
-            ZoneId zoneId = ZoneId.systemDefault();
-            ZonedDateTime zonedDateTime = dateTime.atZone(zoneId);
-            timestampMillis = zonedDateTime.toInstant().getEpochSecond();
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                LocalDateTime dateTime = LocalDateTime.of(2000 + (int) Times[0], (int) Times[1], (int) Times[2], (int) Times[3], (int) Times[4], (int) Times[5]);
+                // 指定时区，例如使用系统默认时区
+                ZoneId zoneId = ZoneId.systemDefault();
+                ZonedDateTime zonedDateTime = dateTime.atZone(zoneId);
+                timestampMillis = zonedDateTime.toInstant().getEpochSecond();
+            }
+        }catch (Exception ex){
+            ex.printStackTrace();
+            int a =0;
         }
+
         return timestampMillis;
     }
 
@@ -585,14 +572,13 @@ public class YcsDataViewActivity extends AppCompatActivity {
         public float PlusPower;
         public float SampleTimes;
         public float GYOThreshold;
-
     }
 
     TestSetting setting;
 
     List<DataBean> DataList = new ArrayList<>();
 
-    public  void readDataFIle(String FilePath) throws FileNotFoundException {
+    public void readDataFIle(String FilePath) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(FilePath);
         DataList.clear();
         BufferedInputStream binaryReader = new BufferedInputStream(inputStream);
@@ -632,6 +618,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 setting.SampleTimes = 25.6f;
             } else if (SampleTimes == 2) {
                 setting.SampleTimes = 51.2f;
+                //setting.SampleIntervel = 1;
             } else if (SampleTimes == 3) {
                 setting.SampleTimes = 102.4f;
             } else {
@@ -649,8 +636,8 @@ public class YcsDataViewActivity extends AppCompatActivity {
             DataBean bean = null;
             byte[] byteBuf = new byte[1];
             int tmp1 = binaryReader.available();
-
-            while (binaryReader.available() != 0) {
+            int indexAll = 0;
+            while (binaryReader.available()!= 0) {
                 binaryReader.read(timeBuf);
                 time = GetTime(timeBuf);
                 binaryReader.read(byteBuf);
@@ -666,7 +653,8 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 float current = readSingle(binaryReader, floatBuf);
                 double[] sample = new double[SampleCount];
                 double value = 0;
-                for (int i = 0; i < SampleCount; i++) {
+                for (int i = 0; i < SampleCount; i++)
+                {
                     value = readSingle(binaryReader, floatBuf);
                     sample[i] = value;
                 }
@@ -689,7 +677,8 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 for (int i = 0; i < point.SampleLength; i++) {
                     double electricCurrent = point.Sample[i];
                     value += electricCurrent;
-                    if ((i % point.PickPointNum) == (point.PickPointNum - 1)) {
+                    if ((i % point.PickPointNum) == (point.PickPointNum - 1))
+                    {
                         if (value == 0) {
                             value = 0.0001;
                         }
@@ -724,9 +713,12 @@ public class YcsDataViewActivity extends AppCompatActivity {
                         DataList.add(bean);
                     }
                 }
+                indexAll ++;
             }
         } catch (Exception ex) {
-            setting = null;
+            ToastUtils.showLong(ex.getMessage());
+            int a =0;
+          //  setting = null;
         } finally {
             if (binaryReader != null) {
                 try {
@@ -737,60 +729,12 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 }
             }
         }
-
     }
 
     public class PointBean {
         public String time;
         public long timecode;
         public double length;
-
-    }
-
-    private List<PointBean> readTrdFile(String PointsFile) throws IOException {
-        List<PointBean> pointBeanList = new ArrayList<>();
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(PointsFile));
-        if (FileUtils.isFileExists(PointsFile)) {
-            String line = "";
-            int PointsCount = 0;
-            Boolean first = true;
-            try {
-                while ((line = bufferedReader.readLine()) != null) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        String[] sArray = line.split("\t");
-                        if (sArray.length == 4) {
-                            PointBean bean = new PointBean();
-                            String time = sArray[0];
-                            long timecode = 0;
-                            double length = 0.0;
-                            timecode = Long.parseLong(sArray[1]);
-                            try {
-                                length = Long.parseLong(sArray[3]);
-                            } catch (Exception ex) {
-                                length = 0;
-                            }
-                            PointsCount++;
-                            bean.time = time;
-                            bean.timecode = timecode;
-                            bean.length = length;
-                            pointBeanList.add(bean);
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-            } finally {
-                if (bufferedReader != null)
-                    bufferedReader.close();
-            }
-            if (first) {
-                ToastUtils.showLong("计时文件参数缺失，无法打开!");
-            }
-        } else {
-            ToastUtils.showLong("计时文件不存在无法打开！");
-        }
-        return pointBeanList;
     }
 
     List<PointBean> pointBeanList = new ArrayList<>();
@@ -832,7 +776,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 } finally {
                     if (bufferedReader != null)
                         bufferedReader.close();
-                  //  initPointListView(pointBeanList);
+                    //  initPointListView(pointBeanList);
                 }
                 if (first) {
                     ToastUtils.showLong("计时文件参数缺失，无法打开!");
@@ -859,9 +803,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
 
         public void clickOn(int position);
 
-        public void swithChange (int index);
-
-
+        public void swithChange(int index);
     }
 
     private int currentPosition = 0;
@@ -891,8 +833,8 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 } else {
                     ToastUtils.showLong("请至少选择一个方向显示");
                 }
-            }catch (Exception e){
-               ToastUtils.showLong(e.getMessage());
+            } catch (Exception e) {
+                ToastUtils.showLong(e.getMessage());
             }
         }
 
@@ -959,7 +901,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
         return TemList;
     }
 
-    private boolean [] swithStatus = {true,true,true};
+    private boolean[] swithStatus = {true, true, true};
 
     private String[] orientationStr = {"Z方向", "Y方向", "X方向"};
 
@@ -974,7 +916,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
         chart.setDescription(description);
         XAxis xAxis = chart.getXAxis();
         xAxis.setAxisMaximum(4.5f);
-        xAxis.setAxisMinimum(0);
+        xAxis.setAxisMinimum(2);
         xAxis.setGranularity(1f); // 每隔 10 显示一个标签
         xAxis.setGranularityEnabled(true);
         xAxis.setValueFormatter(new ValueFormatter() {
@@ -982,14 +924,13 @@ public class YcsDataViewActivity extends AppCompatActivity {
             public String getFormattedValue(float value) {
                 int num1 = (int) value;
                 double num2;
-               if (num1==0){
-                    num2 = 0;
-               }
-               else {
+                if (num1 == 0) {
                     num2 = 0.001;
-               }
+                } else {
+                    num2 = 0.001;
+                }
                 for (int i = 0; i < num1; i++) {
-                    num2 = num2*10;
+                    num2 = num2 * 10;
                 }
                 return String.valueOf(num2);
             }
@@ -1000,7 +941,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
 //        xAxis.setEnabled(true);
 //        xAxis.setTextColor(Color.BLACK);
 //        xAxis.setDrawGridLinesBehindData(true);//当设置为 true：网格线在数据图形的背后绘制。
-         xAxis.setAvoidFirstLastClipping(true);//当设置为 true：X 轴的第一个和最后一个标签将会自动留出一定的空白间距
+        xAxis.setAvoidFirstLastClipping(true);//当设置为 true：X 轴的第一个和最后一个标签将会自动留出一定的空白间距
 //        DashPathEffect dashPathEffect = new DashPathEffect(new float[]{5f, 5f}, 1);
 //        xAxis.setGridDashedLine(dashPathEffect);
 //        xAxis.setAxisLineWidth(2);
@@ -1017,9 +958,9 @@ public class YcsDataViewActivity extends AppCompatActivity {
 //        leftYAxis.setTextColor(Color.BLACK);
 //        leftYAxis.setDrawZeroLine(true);
 //        leftYAxis.setYOffset(5);
-     //   rightYaxis.setEnabled(false);
+        //   rightYaxis.setEnabled(false);
         YAxis yAxis = chart.getAxisLeft();
-       // yAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
+        // yAxis.setPosition(YAxis.YAxisLabelPosition.INSIDE_CHART);
         yAxis.setAxisMaximum(6f);
         yAxis.setYOffset(-5);
         yAxis.setAxisMinimum(-4f);
@@ -1051,24 +992,25 @@ public class YcsDataViewActivity extends AppCompatActivity {
             entries = new ArrayList<>();
             int size = list.get(j).SampleLength;
             ProbeBean tmpprobe = list.get(j);
-            if (Math.log10(tmpprobe.Result[0]) > 0) {
-                entries.add(new Entry(0, (float) (Math.log10(tmpprobe.Result[0]))));
-            } else {
-                entries.add(new Entry(0, (float) (Math.log10(Math.abs(tmpprobe.Result[0])))));
-            }
+//            if (Math.log10(tmpprobe.Result[0]) > 0) {
+//                entries.add(new Entry(0, (float) (Math.log10(tmpprobe.Result[0]))));
+//            } else {
+//                entries.add(new Entry(0, (float) (Math.log10(Math.abs(tmpprobe.Result[0])))));
+//            }
             for (int i = 1; i < size; i++) {
-                if (Math.log10(i * tmpprobe.SampleIntervel)<2.5&&Math.log10(i * tmpprobe.SampleIntervel)>2){
-                    if (i%2!=0){
+                if (Math.log10(i * tmpprobe.SampleIntervel) < 2){
+                    continue;
+                }
+                if (Math.log10(i * tmpprobe.SampleIntervel) < 2.5 && Math.log10(i * tmpprobe.SampleIntervel) > 2) {
+                    if (i % 2 != 0) {
                         continue;
                     }
-                }
-                else if(Math.log10(i * tmpprobe.SampleIntervel)<3.5&&Math.log10(i * tmpprobe.SampleIntervel)>=2.5){
-                    if (i%3!=0){
+                } else if (Math.log10(i * tmpprobe.SampleIntervel) < 3.5 && Math.log10(i * tmpprobe.SampleIntervel) >= 2.5) {
+                    if (i % 3 != 0) {
                         continue;
                     }
-                }
-                else if(Math.log10(i * tmpprobe.SampleIntervel)>=3.5){
-                    if (i%5!=0){
+                } else if (Math.log10(i * tmpprobe.SampleIntervel) >= 3.5) {
+                    if (i % 5 != 0) {
                         continue;
                     }
                 }
@@ -1110,69 +1052,28 @@ public class YcsDataViewActivity extends AppCompatActivity {
             }
             YcsDataFileInfo ycsDataFileInfo = new YcsDataFileInfo();
             ycsDataFileInfo.filePath = ycsList.get(i).getPath();
-            ycsDataFileInfo.projectName = tmplist.get(0).getName().split("\\.")[0];
+            ycsDataFileInfo.projectName = ycsList.get(i).getName();
             for (int j = 0; j < tmplist.size(); j++) {
                 String tmpStr = tmplist.get(j).getName();
-                if (tmpStr.contains(".trd")){
+                if (tmpStr.contains(".trd")) {
                     ycsDataFileInfo.trdFile = tmplist.get(j).getName();
                     ycsDataFileInfo.trdPath = tmplist.get(j).getPath();
-                }
-                else if (tmpStr.contains(".dat"))
-                {
+                } else if (tmpStr.contains(".dat")) {
                     ycsDataFileInfo.datFile = tmplist.get(j).getName();
                     ycsDataFileInfo.datPath = tmplist.get(j).getPath();
-
-                }
-                else if (tmpStr.contains(".zip"))
-                {
+                } else if (tmpStr.contains(".zip")) {
                     ycsDataFileInfo.zipFile = tmplist.get(j).getName();
                     ycsDataFileInfo.zipPath = tmplist.get(j).getPath();
-
-                }
-                else if (tmpStr.contains("-0.ycs")){
+                } else if (tmpStr.contains("-0.ycs")) {
                     ycsDataFileInfo.x_ycs_file = tmplist.get(j).getName();
-
-                }
-                else if (tmpStr.contains("-1.ycs")){
+                } else if (tmpStr.contains("-1.ycs")) {
                     ycsDataFileInfo.y_ycs_file = tmplist.get(j).getName();
-
-                }
-                else if (tmpStr.contains("-2.ycs")){
+                } else if (tmpStr.contains("-2.ycs")) {
                     ycsDataFileInfo.z_ycs_file = tmplist.get(j).getName();
-
                 }
-//                switch (tmpStr) {
-//                    case "trd": {
-//                        ycsDataFileInfo.trdFile = tmplist.get(j).getName();
-//                        ycsDataFileInfo.trdPath = tmplist.get(j).getPath();
-//                        break;
-//                    }
-//                    case "dat": {
-//                        ycsDataFileInfo.datFile = tmplist.get(j).getName();
-//                        ycsDataFileInfo.datPath = tmplist.get(j).getPath();
-//                        break;
-//                    }
-//                    case "zip": {
-//                        ycsDataFileInfo.zipFile = tmplist.get(j).getName();
-//                        ycsDataFileInfo.zipPath = tmplist.get(j).getPath();
-//                        break;
-//                    }
-//                    case "0.ycs":{
-//                        ycsDataFileInfo.x_ycs_file = tmplist.get(j).getName();
-//                        break;
-//                    }
-//                    case "1.ycs":{
-//                        ycsDataFileInfo.y_ycs_file = tmplist.get(j).getName();
-//                        break;
-//                    }
-//                    case "2.ycs":{
-//                        ycsDataFileInfo.z_ycs_file = tmplist.get(j).getName();
-//                        break;
-//                    }
-//                }
             }
             ycsDataFileInfoList.add(ycsDataFileInfo);
-           // ycsDataFileInfo.y_ycs_file = String.valueOf(0);
+            // ycsDataFileInfo.y_ycs_file = String.valueOf(0);
         }
         //  ycsDataFileInfoList = ycsDataFileInfoList.subList(pageNum*pageSize,pageNum*pageSize+pageSize);
         if (pageNum == 0) {

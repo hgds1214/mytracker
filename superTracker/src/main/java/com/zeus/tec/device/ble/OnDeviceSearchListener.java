@@ -1,6 +1,8 @@
-package com.zeus.tec.ui.directionfinder.util;
+package com.zeus.tec.device.ble;
 
 //import yc.bluetooth.androidble.BLEDevice;
+
+import com.zeus.tec.device.ble.BLEDevice;
 
 /**
  * 蓝牙设备搜索监听者

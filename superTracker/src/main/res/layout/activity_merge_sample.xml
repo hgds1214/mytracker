@@ -72,6 +72,20 @@
             android:textSize="20dp"
             tools:ignore="TouchTargetSizeCheck">
         </Button>
+        <Button
+            android:id="@+id/tracker_data_output_btn"
+            android:layout_width="117dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="5dp"
+            android:background="#ffffee"
+            android:drawableLeft="@mipmap/output2"
+            android:drawablePadding="0dp"
+            android:paddingLeft="2dp"
+            android:text="轨迹导出"
+            android:textColor="#000000"
+            android:textSize="20dp"
+            tools:ignore="TouchTargetSizeCheck">
+        </Button>
     </LinearLayout>
 
     <LinearLayout
@@ -357,6 +371,27 @@
            app:indicatorName="BallSpinFadeLoaderIndicator"
            android:visibility="gone"
            app:indicatorColor="#5533ce" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:id="@+id/tracker_output_setting_ly"
+            android:orientation="horizontal"
+            android:layout_gravity="center"
+            android:background="#ffffff"
+            android:visibility="gone"
+            >
+            <TextView
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="导出设置"
+                android:layout_gravity="top"
+                android:gravity="center"
+                android:textColor="#000000"
+                android:background="@color/light_blue_400"
+                />
+
+
+        </LinearLayout>
     </FrameLayout>
 
     <LinearLayout

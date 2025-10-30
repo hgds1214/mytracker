@@ -58,16 +58,8 @@ public class leidaDetailActivity extends AppCompatActivity {
             binding.tvPointDistance.setText(String.valueOf(data.drillPipeLength));
             binding.tvTimespace.setText(String.valueOf(data.timeSpace));
             binding.tvGyro.setText(String.valueOf(data.GYROThreshold));
-
-
-            //  binding.adjustMode.setText(String.valueOf(data.adjustMode));
-
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             initPointList(TrackerDBManager.getrecordByleidaInfoId(data.id));
-
-
-
-
         }
         catch (Exception ex){
 

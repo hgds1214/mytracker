@@ -467,7 +467,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="陀螺阈值(>=50)"
+                        android:text="陀螺阈值(>=1)"
                         android:textColor="#ff606060"
                         android:textSize="14sp" />
 
@@ -479,7 +479,7 @@
                         android:hint="（>50）"
                         android:inputType="numberDecimal"
                         android:maxLength="5"
-                        android:text="50"
+                        android:text="30"
                         android:paddingLeft="10dp"
                         android:textColor="#333333"
                         android:textColorHint="#bbbbbb" />

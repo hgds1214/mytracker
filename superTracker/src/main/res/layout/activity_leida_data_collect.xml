@@ -534,16 +534,16 @@
                             android:layout_width="match_parent"
                             android:orientation="horizontal"
                             android:layout_height="30dp">
+
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="项目信息"
-                                android:gravity="center"
                                 android:layout_gravity="center"
+                                android:gravity="center"
+                                android:text="项目信息"
                                 android:textColor="#ff222222"
                                 android:textSize="15sp"
-                                android:textStyle="bold"
-                                />
+                                android:textStyle="bold" />
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="match_parent"
@@ -902,7 +902,7 @@
                             android:textColor="#ffffff"
                             android:textSize="14dp"
                             android:textStyle="italic"
-                            android:enabled="false"
+                            android:enabled="true"
                             android:background="@drawable/btn_collect_bg"
                             android:gravity="center"
                             android:layout_gravity="right"

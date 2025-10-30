@@ -1,4 +1,4 @@
-package com.zeus.tec.ui.directionfinder.util;
+package com.zeus.tec.device.ble;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;

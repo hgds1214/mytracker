@@ -1,8 +1,6 @@
 package com.zeus.tec.model.leida.main;
 
-import com.hoho.android.usbserial.util.MonotonicClock;
-import com.zeus.tec.ui.tracker.util.TimeUtil;
-
+import com.blankj.utilcode.util.ToastUtils;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -43,12 +41,13 @@ public class ReceiveBean {
             {
                 if(!Status)
                 {
-                    condition.await(1000,TimeUnit.MILLISECONDS);
+                    condition.await(500,TimeUnit.MILLISECONDS);
                 }
             }
             catch (Exception ex)
             {
                 ex.printStackTrace();
+                ToastUtils.showLong(ex.getMessage());
                 Status = false;
             }
             finally
@@ -70,6 +69,7 @@ public class ReceiveBean {
         }
         catch (Exception ex)
         {
+            ToastUtils.showLong(ex.getMessage());
         }
         finally
         {

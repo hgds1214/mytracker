@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewDebug;
 import android.widget.TextView;
 
 import com.blankj.utilcode.util.FileUtils;
@@ -149,7 +150,7 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
         try {
             MergeCache.init();
             pointRecordList =  new ArrayList<>();
-           MergeCache.PipeCount =  ReadRecordingData(info.dataPath);
+            MergeCache.PipeCount =  ReadRecordingData(info.dataPath);
             DrillPipe item ;
             for (int i = 0; i <  MergeCache.PipeCount; i++)
             {
@@ -168,20 +169,40 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
             MergeCache.SpaceSapmle = MergeCache.GetDefaultSpacing(MergeCache.PipeCount);
             int num5 = MergeCache.TimeMatching(MergeCache.DrillPipeList,MergeCache.probePointList);
             if (num5 >0) {
+                get_trackData_head(info);
+                MergeCache.track_data_path = info.dataPath.replace(".trd","gjy")+".trd";
                 int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
                 Intent intent = new Intent(LeidaDataveiewActivity.this,MergeSampleActivity.class);
                 intent.putExtra("INT_KEY", MergeCache.Merge_Fail);
                 startActivity(intent);
             }
             else {
+                get_trackData_head(info);
+                MergeCache.track_data_path = info.dataPath.replace(".trd","gjy")+".trd";
                 int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
                 Intent intent = new Intent(LeidaDataveiewActivity.this,MergeSampleActivity.class);
                 intent.putExtra("INT_KEY", MergeCache.Merge_Success);
                 startActivity(intent);
             }
         }catch (Exception exception){
-
+            ToastUtils.showLong(exception.getMessage());
         }
+    }
+
+    private void get_trackData_head (leida_info leidaInfo){
+        byte [] headbyte = new byte[200];
+        headbyte[0] = 'w';
+        headbyte[1] = 'h';
+        headbyte[2] = 'c';
+        headbyte[3] = 's';
+        leidaInfo.creatTime.toCharArray();
+        leidaInfo.projectId.toCharArray();
+        MergeCache.trackData_head = headbyte;
+        byte [] tmpbuff = ByteBuffer.allocate(2).putShort((short)leidaInfo.drillPipeLength).array();
+        headbyte[167] = tmpbuff[0];
+        headbyte[168] = tmpbuff[1];
+        MergeCache.pointDistance = leidaInfo.drillPipeLength;
+        //  headbyte[167]
     }
 
     private void  readHeader (  BufferedInputStream bis ) throws IOException {
@@ -258,13 +279,11 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
                 item.OriginalIndex = i;
                 long endTimeMillis = System.currentTimeMillis();
                 MergeCache.probePointList.add(item);
-                long durationMillis = endTimeMillis - startTimeMillis;
-                long onetime = twoTimeMillis - startTimeMillis;
-                long twotime = endTimeMillis - twoTimeMillis;
+
                int a =10;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+          ToastUtils.showLong( e.getMessage());
         }
     }
 
@@ -274,7 +293,7 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
         try
         {
             String pattern = "yyyy-MM-dd HH:mm:ss";
-            String str ;
+            String str;
             String [] strArray2 = reader.readLine().split("\t");
             LocalDateTime tmp = parseToLocalDateTime (strArray2[1],pattern);
             MergeCache.PipeLength = Float.parseFloat(strArray2[0])*10f;
@@ -299,7 +318,6 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
     }
 
     public static LocalDateTime parseToLocalDateTime(String str, String pattern) {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         try {

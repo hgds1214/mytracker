@@ -135,7 +135,6 @@ public class MainCache {
         } catch (Exception ex) {
             ToastUtils.showLong(ex.getLocalizedMessage());
         }
-
     }
 
     public void closeSendSocket() {

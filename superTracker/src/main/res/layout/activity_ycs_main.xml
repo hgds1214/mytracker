@@ -23,14 +23,14 @@
             android:padding="5dp"
             android:layout_centerVertical="true"
             android:src="@mipmap/white_arrow_left"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="随钻瞬变探测仪"
+            android:text="矿用瞬变电磁仪"
             android:textColor="#ffffffff"
-            android:textSize="17sp"
-            />
+            android:textSize="17sp" />
 
     </RelativeLayout>
     <androidx.recyclerview.widget.RecyclerView

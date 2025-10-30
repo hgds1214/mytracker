@@ -1,7 +1,6 @@
-package com.zeus.tec.ui.directionfinder.util;
+package com.zeus.tec.device.ble;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.zeus.tec.R;
+import com.zeus.tec.device.ble.BLEDevice;
 
 import java.util.ArrayList;
 import java.util.List;

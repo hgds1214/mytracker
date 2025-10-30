@@ -1,4 +1,4 @@
-package com.zeus.tec.ui.directionfinder.util;
+package com.zeus.tec.device.ble;
 
 import android.bluetooth.BluetoothDevice;
 
@@ -8,7 +8,7 @@ import android.bluetooth.BluetoothDevice;
  *
  * BLE蓝牙设备
  */
-public class BLEDevice {
+public  class BLEDevice {
     private BluetoothDevice bluetoothDevice;  //蓝牙设备
     private int RSSI;  //蓝牙信号
 
@@ -16,6 +16,7 @@ public class BLEDevice {
         this.bluetoothDevice = bluetoothDevice;
         this.RSSI = RSSI;
     }
+
 
     public BluetoothDevice getBluetoothDevice() {
         return bluetoothDevice;

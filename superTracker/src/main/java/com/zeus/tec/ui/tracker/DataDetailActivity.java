@@ -64,7 +64,6 @@ public class DataDetailActivity extends BaseActivity {
         binding.collectTime.setText(sdf.format(data.collectionDateTime));
 
         Glide.with(this).load(data.livePhotos).into(binding.photo);
-
         binding.photo.setOnClickListener( v->{
             FeedbackUtil.getInstance().doFeedback();
             startActivity(FullScreenActivity.newIntent(this, Uri.fromFile(new File(data.livePhotos)).toString()));

@@ -53,12 +53,12 @@ public class sampleshowactivity extends Fragment {
     LineChart lineChart;
 
     LineChart oneSampleChart;
+
     int SampleSize = 0;
 
     public ILeidaReciveListener leidaReciveListener = new ILeidaReciveListener() {
         @Override
         public void onReciveData() {
-
             drawOneSampleChart(cache1.SampleQue.get(cache1.SampleQue.size() - 1));
             drawSampleChart(cache1.SampleQue);
         }

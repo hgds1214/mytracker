@@ -277,7 +277,7 @@ public class DataViewActivity extends AppCompatActivity {
     private void loadData(int pageNum) {
         List<DrillHoleInfo> drillHoleInfos = query.find(pageNum * pageSize, pageSize);
         if (pageNum == 0) {
-            dataListAdapter.setNewInstance(new ArrayList<DrillHoleInfo>());
+            dataListAdapter.setNewInstance(new ArrayList<>());
         }
         if (drillHoleInfos == null || drillHoleInfos.isEmpty()) {
             hasMore = false;

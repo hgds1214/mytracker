@@ -507,7 +507,7 @@
                     android:layout_width="match_parent"
                     android:layout_marginTop="35dp"
                     android:layout_height="wrap_content"
-                    tools:visibility="visible"
+                    tools:visibility="gone"
                     >
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -983,7 +983,7 @@
                     android:padding="12dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    tools:visibility="gone"
+                    tools:visibility="visible"
                     android:background="@drawable/bg_white">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -1004,6 +1004,13 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             ></TextView>
+                        <com.zeus.tec.ui.widget.CountTimeTextView
+                            android:id="@+id/ctt_countdown"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="00:00"
+                            android:textColor="#ffffffff"
+                            android:textSize="22sp" />
                         <TextView
                             android:id="@+id/tv_Point"
                             android:layout_width="70dp"

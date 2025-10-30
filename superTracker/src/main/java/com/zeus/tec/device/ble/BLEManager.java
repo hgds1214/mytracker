@@ -1,4 +1,4 @@
-package com.zeus.tec.ui.directionfinder.util;
+package com.zeus.tec.device.ble;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -14,20 +14,27 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelUuid;
+import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 
+import com.zeus.tec.ui.directionfinder.util.ClsUtils;
+import com.zeus.tec.ui.directionfinder.util.TypeConversion;
+import com.zeus.tec.ui.maoganDataUpload.MaoganMainActivity;
+
+import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -76,14 +83,87 @@ public class BLEManager {
         if (!checkBle(context)) {
             return false;
         } else {
+
             return true;
         }
         // ClsUtils.setPairingConfirmation();
     }
+    public boolean initBle(Context context,Handler handler) {
+        mContext = context;
+        if (!checkBle(context)) {
+            return false;
+        } else {
+            initBroad(handler);
+            return true;
+        }
+        // ClsUtils.setPairingConfirmation();
+    }
+    public static class BleOrder {
+        public static final int CONNECT_SUCCESS = 0x01;
+        public static final int CONNECT_FAILURE = 0x02;
+        public static final int DISCONNECT_SUCCESS = 0x03;
+        public static final int SEND_SUCCESS = 0x04;
+        public static final int SEND_FAILURE = 0x05;
+        public static final int RECEIVE_SUCCESS = 0x06;
+        public static final int RECEIVE_FAILURE = 0x07;
+
+        public static final int START_DISCOVERY = 0x08;
+        public static final int STOP_DISCOVERY = 0x09;
+        public static final int DISCOVERY_DEVICE = 0x0A;
+        public static final int DISCOVERY_OUT_TIME = 0x0B;
+        public static final int SELECT_DEVICE = 0x0C;
+        public static final int BT_OPENED = 0x0D;
+        public static final int BT_CLOSED = 0x0E;
+    }
+    BLEBroadcastReceiver bleBroadcastReceiver;
+    public void initBroad (Handler handler){
+            //注册广播接收
+            bleBroadcastReceiver = new BLEBroadcastReceiver();
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED); //开始扫描
+            intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);//扫描结束
+            intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);//手机蓝牙状态监听
+            mContext.registerReceiver(bleBroadcastReceiver, intentFilter);
+            bHandler = handler;
+    }
+    Handler bHandler ;
+
+    private class BLEBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (TextUtils.equals(action, BluetoothAdapter.ACTION_DISCOVERY_STARTED)) { //开启搜索
+                Message message = new Message();
+                message.what = BleOrder.START_DISCOVERY;
+                bHandler.sendMessage(message);
+
+            } else if (TextUtils.equals(action, BluetoothAdapter.ACTION_DISCOVERY_FINISHED)) {//完成搜素
+                Message message = new Message();
+                message.what =  BleOrder.STOP_DISCOVERY;
+                bHandler.sendMessage(message);
+
+            } else if (TextUtils.equals(action, BluetoothAdapter.ACTION_STATE_CHANGED)) {   //系统蓝牙状态监听
+
+                int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
+                if (state == BluetoothAdapter.STATE_OFF) {
+                    Message message = new Message();
+                    message.what =  BleOrder.BT_CLOSED;
+                    bHandler.sendMessage(message);
+
+                } else if (state == BluetoothAdapter.STATE_ON) {
+                    Message message = new Message();
+                    message.what = BleOrder. BT_OPENED;
+                    bHandler.sendMessage(message);
+
+                }
+            }
+        }
+    }
+
 
     ////////////////////////////////////  扫描设备  ///////////////////////////////////////////////
     //扫描设备回调
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice bluetoothDevice, int rssi, byte[] bytes) {
@@ -144,14 +224,14 @@ public class BLEManager {
         mHandler.postDelayed(stopScanRunnable, scanTime);
     }
 
-    private  ScanCallback scanCallback = new ScanCallback() {
+    private final ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             if (result == null)
                 return;
             BluetoothDevice bluetoothDevice = result.getDevice();
-            if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+           // if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 if (bluetoothDevice.getName() != null) {
                     Log.d(TAG, bluetoothDevice.getName() + "-->" + bluetoothDevice.getAddress());
                 } else {
@@ -159,16 +239,15 @@ public class BLEManager {
                 }
                 ParcelUuid [] uuidList = bluetoothDevice.getUuids();
                 if (uuidList!=null){
-                    ParcelUuid [] tem = uuidList;
-                    Log.d(TAG,tem.toString());
+                    Log.d(TAG, Arrays.toString(uuidList));
                 }
                 BLEDevice bleDevice = new BLEDevice(bluetoothDevice,  result.getRssi());
                 if (onDeviceSearchListener != null) {
                     onDeviceSearchListener.onDeviceFound(bleDevice);  //扫描到设备回调
                 }
-                return;
-            }
-        }
+
+          //  }
+        }//
     };
 
     private Runnable stopScanRunnable = new Runnable() {
@@ -187,7 +266,6 @@ public class BLEManager {
      * 停止扫描
      */
     @SuppressLint("MissingPermission")
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void stopDiscoveryDevice() {
         mHandler.removeCallbacks(stopScanRunnable);
 
@@ -206,7 +284,6 @@ public class BLEManager {
     }
     /////////////////////////////////////  执行连接  //////////////////////////////////////////////
     //连接/通讯结果回调
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback() {
         @Override
         public void onPhyUpdate(BluetoothGatt gatt, int txPhy, int rxPhy, int status) {
@@ -477,10 +554,9 @@ public class BLEManager {
      * @param bluetoothDevice      蓝牙设备
      * @param outTime              连接超时时间
      * @param onBleConnectListener 蓝牙连接监听者
-     * @return
+     *
      */
     @SuppressLint("MissingPermission")
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public BluetoothGatt connectBleDevice(Context context, BluetoothDevice bluetoothDevice, long outTime, String serviceUUID, String readUUID, String writeUUID, OnBleConnectListener onBleConnectListener) {
         if (bluetoothDevice == null) {
             Log.e(TAG, "connectBleDevice()-->bluetoothDevice == null");
@@ -558,9 +634,8 @@ public class BLEManager {
      * @param serviceUUID
      * @param readUUID
      * @param writeUUID
-     * @return
+     *
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     private boolean setupService(BluetoothGatt bluetoothGatt, String serviceUUID, String readUUID, String writeUUID) {
         if (bluetoothGatt == null) {
             Log.e(TAG, "setupService()-->bluetoothGatt == null");
@@ -635,7 +710,6 @@ public class BLEManager {
      * @param gatt           连接
      * @param characteristic 特征
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void enableNotification(boolean enable, BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
         if (gatt == null) {
             Log.e(TAG, "enableNotification-->gatt == null");
@@ -655,7 +729,6 @@ public class BLEManager {
      * @param msg 消息
      * @return true  false
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public boolean sendMessage(String msg) {
         if (writeCharacteristic == null) {
           //  Log.e(TAG, "sendMessage(byte[])-->writeGattCharacteristic == null");
@@ -675,7 +748,6 @@ public class BLEManager {
     /**
      * 断开连接
      */
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void disConnectDevice() {
         if (mBluetoothGatt == null) {
             Log.e(TAG, "disConnectDevice-->bluetoothGatt == null");
@@ -693,20 +765,17 @@ public class BLEManager {
      * @return true--支持4.0  false--不支持4.0
      */
     private boolean checkBle(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {  //API 18 Android 4.3
-            bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-            if (bluetoothManager == null) {
-                return false;
-            }
-            bluetooth4Adapter = bluetoothManager.getAdapter();  //BLUETOOTH权限
-            if (bluetooth4Adapter == null) {
-                return false;
-            } else {
-                Log.d(TAG, "该设备支持蓝牙4.0");
-                return true;
-            }
-        } else {
+        //API 18 Android 4.3
+        bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetoothManager == null) {
             return false;
+        }
+        bluetooth4Adapter = bluetoothManager.getAdapter();  //BLUETOOTH权限
+        if (bluetooth4Adapter == null) {
+            return false;
+        } else {
+            Log.d(TAG, "该设备支持蓝牙4.0");
+            return true;
         }
     }
     /**

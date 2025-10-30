@@ -63,30 +63,29 @@ public class YcsTask extends AsyncTask<Void, Integer, Void> {
         if (DownloadFile(this.Path)) {
             try {
                 Thread.sleep(500);
+                ((Activity) context).runOnUiThread(() -> {
+                    progressBar.setVisibility(View.GONE);
+                    stepview.setText("下载完成");
+                    fastToast.showToast("数据文件下载成功");
+                });
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                ToastUtils.showShort(e.getMessage());
             }
-            ((Activity) context).runOnUiThread(() -> {
-                progressBar.setVisibility(View.GONE);
-                stepview.setText("下载完成");
-                fastToast.showToast("数据文件下载成功");
-            });
+
         }
         else {
             try {
                 Thread.sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            ((Activity) context).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
+                ((Activity) context).runOnUiThread(() -> {
 
                     progressBar.setVisibility(View.GONE);
                     stepview.setText("下载失败");
                     fastToast.showToast("数据文件下载失败");
-                }
-            });
+                });
+            } catch (InterruptedException e) {
+                ToastUtils.showShort(e.getMessage());
+            }
+
         }
 
         return null;
@@ -96,160 +95,159 @@ public class YcsTask extends AsyncTask<Void, Integer, Void> {
         Boolean complete = false;
         String save_file ;
         String tmp_file ;
-        if (this.Who == 1) {
-            try {
-
-                save_file = dataPath;
-                tmp_file = dataPath.replace(".dat",".tmp");
-                if (FileUtils.isFileExists(tmp_file)){
-                    FileUtils.delete(tmp_file);
+        try{
+            if (this.Who == 1) {
+                try {
+                    save_file = dataPath;
+                    tmp_file = dataPath.replace(".dat",".tmp");
+                    if (FileUtils.isFileExists(tmp_file)){
+                        FileUtils.delete(tmp_file);
+                    }
+                    FileUtils.createOrExistsFile(tmp_file);
                 }
-               FileUtils.createOrExistsFile(tmp_file);
-            }
-            catch (Exception ex)
-            {
-                ToastUtils.showLong("文件路径不存在");
-                return false;
-            }
-        }
-        else if (this.Who==0)
-        {
-            try {
-
-                save_file = dataPath;
-                tmp_file = dataPath;
-            }
-            catch (Exception ex)
-            {
-                ToastUtils.showLong("文件路径不存在");
-                return false;
-            }
-        }
-        else {
-            String tmpPath = PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData";
-            File tmpfile = new File(tmpPath);
-            if (!tmpfile.exists()) {
-                if (!FileUtils.createOrExistsDir(tmpPath)) {
-                    LogUtils.e("创建文件失败：" + tmpPath);
-                    ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
+                catch (Exception ex)
+                {
+                    ToastUtils.showLong("文件路径不存在");
                     return false;
                 }
             }
-            save_file =PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData"+File.separator+dataName+".dat";
-            tmp_file = PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData"+File.separator+dataName+".tmp";
-        }
-        final int[] exit = {0};
-        try {
-            if (IOtool.isFileExists(save_file)) {
-                condition = lock.newCondition();
-                lock.lock();
-                ((Activity) context).runOnUiThread(() -> {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    builder.setTitle("是否覆盖原文件")
-                            .setMessage("该文件已存在，是否覆盖原文件")
-                            .setPositiveButton("OK", (dialog, which) -> {
-                                lock.lock();
-                                condition.signalAll();
-                                lock.unlock();
-                            }).setNegativeButton("取消", (dialog, which) -> {
-                                exit[0] =1;
-                                lock.lock();
-                                condition.signalAll();
-                                lock.unlock();
-                            }).show();
-                });
-                condition.await();
-                lock.unlock();
-            }
-            if (exit[0] == 1) {
-                return complete;
-            }
-            int CurrentLength = 0;
-            Boolean isFrist = true;
-            int TotalLength = 0;
-            Boolean isError = false;
-            while (true) {
-                CurrentLength = cache.DownLoadFile(dataName, CurrentLength,tmp_file);
-                if (CurrentLength == 0) {
-                    ((Activity) context).runOnUiThread(() -> Toast.makeText(context, "文件不存在无法下载", Toast.LENGTH_SHORT).show());
-                    break;
-                } else if (CurrentLength == -1) {
-                    ((Activity) context).runOnUiThread(() -> Toast.makeText(context, "网络异常无法下载", Toast.LENGTH_SHORT).show());
-                    break;
-                } else {
-                    if (isFrist) {
-                        TotalLength = cache.DeviceOper.TotalLength;
-                    }
-                    isFrist = false;
-                    if (TotalLength == 0)
-                        isError = true;
-                    if (CurrentLength >= TotalLength) {
-                        //SetPos(Process.Maximum);
-                        complete = true;
-                        publishProgress(100);
-                        break;
-                    } else {
-                        double tmp = ((CurrentLength*100.0)/ TotalLength);
-                        publishProgress((int) tmp);
-                    }
-                }
-            }
-            if (isError) {
-                ((Activity) context).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(context, "文件长度出错", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        } catch (Exception ex) {
-            ((Activity) context).runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(context, "文件下载失败", Toast.LENGTH_SHORT).show();
-                }
-            });
-            return complete;
-        }
-        if (!complete) {
-            if (IOtool.isFileExists(tmp_file)) {
-                File file = new File(tmp_file);
-                file.delete();
-            }
-        }
-        else
-        {
-            if (IOtool.isFileExists(save_file))
+            else if (this.Who==0)
             {
-                try
+                try {
+                    save_file = dataPath;
+                    tmp_file = dataPath;
+                }
+                catch (Exception ex)
                 {
-                    File file = new File(save_file);
-                    File filetmp = new File(tmp_file);
-                    file.delete();
-                    filetmp.renameTo(file);
-                }catch (Exception exception)
-                {
-                    exception.printStackTrace();
+                    ToastUtils.showLong("文件路径不存在");
+                    return false;
                 }
             }
             else {
-                File file = new File(save_file);
-                File filetmp = new File(tmp_file);
-                filetmp.renameTo(file);
-            }
-            if (Who==0){
-
-                try {
-                  //  iLeidaDelectfile.onDelectFile(leidaInfo);
+                String tmpPath = PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData";
+                File tmpfile = new File(tmpPath);
+                if (!tmpfile.exists()) {
+                    if (!FileUtils.createOrExistsDir(tmpPath)) {
+                        LogUtils.e("创建文件失败：" + tmpPath);
+                        ToastUtils.showLong("创建文件失败，请检查磁盘空间后重试!");
+                        return false;
+                    }
                 }
-                catch (Exception exception){
-                    ToastUtils.showLong(exception.getLocalizedMessage());
+                save_file =PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData"+File.separator+dataName+".dat";
+                tmp_file = PathUtils.getExternalAppFilesPath()+ File.separator + "tmpData"+File.separator+dataName+".tmp";
+            }
+            final int[] exit = {0};
+            try {
+                if (IOtool.isFileExists(save_file)) {
+                    condition = lock.newCondition();
+                    lock.lock();
+                    ((Activity) context).runOnUiThread(() -> {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                        builder.setTitle("是否覆盖原文件")
+                                .setMessage("该文件已存在，是否覆盖原文件")
+                                .setPositiveButton("OK", (dialog, which) -> {
+                                    lock.lock();
+                                    condition.signalAll();
+                                    lock.unlock();
+                                }).setNegativeButton("取消", (dialog, which) -> {
+                                    exit[0] =1;
+                                    lock.lock();
+                                    condition.signalAll();
+                                    lock.unlock();
+                                }).show();
+                    });
+                    condition.await();
+                    lock.unlock();
+                }
+                if (exit[0] == 1) {
+                    return complete;
+                }
+                int CurrentLength = 0;
+                Boolean isFrist = true;
+                int TotalLength = 0;
+                Boolean isError = false;
+                while (true) {
+                    CurrentLength = cache.DownLoadFile(dataName, CurrentLength,tmp_file);
+                    if (CurrentLength == 0) {
+                        ((Activity) context).runOnUiThread(() -> Toast.makeText(context, "文件不存在无法下载", Toast.LENGTH_SHORT).show());
+                        break;
+                    } else if (CurrentLength == -1) {
+                        ((Activity) context).runOnUiThread(() -> Toast.makeText(context, "网络异常无法下载", Toast.LENGTH_SHORT).show());
+                        break;
+                    } else {
+                        if (isFrist) {
+                            TotalLength = cache.DeviceOper.TotalLength;
+                        }
+                        isFrist = false;
+                        if (TotalLength == 0)
+                            isError = true;
+                        if (CurrentLength >= TotalLength) {
+                            //SetPos(Process.Maximum);
+                            complete = true;
+                            publishProgress(100);
+                            break;
+                        } else {
+                            double tmp = ((CurrentLength*100.0)/ TotalLength);
+                            publishProgress((int) tmp);
+                        }
+                    }
+                }
+                if (isError) {
+                    ((Activity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(context, "文件长度出错", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            } catch (Exception ex) {
+                ((Activity) context).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(context, "文件下载失败", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return complete;
+            }
+            if (!complete) {
+                if (IOtool.isFileExists(tmp_file)) {
+                    File file = new File(tmp_file);
+                    file.delete();
                 }
             }
+            else
+            {
+                if (IOtool.isFileExists(save_file))
+                {
+                    try
+                    {
+                        File file = new File(save_file);
+                        File filetmp = new File(tmp_file);
+                        file.delete();
+                        filetmp.renameTo(file);
+                    }catch (Exception exception)
+                    {
+                        exception.printStackTrace();
+                    }
+                }
+                else {
+                    File file = new File(save_file);
+                    File filetmp = new File(tmp_file);
+                    filetmp.renameTo(file);
+                }
+                if (Who==0){
+                    try {
+                        //  iLeidaDelectfile.onDelectFile(leidaInfo);
+                    }
+                    catch (Exception exception){
+                        ToastUtils.showLong(exception.getLocalizedMessage());
+                    }
+                }
 
+            }
+        }catch (Exception exception){
+            ToastUtils.showShort(exception.getMessage());
         }
         return complete;
-
     }
-
 }

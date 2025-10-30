@@ -56,7 +56,7 @@ public class CompassData {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, frame[start]+2000);
         start++;
-        calendar.set(Calendar.MONTH, frame[start]+1);
+        calendar.set(Calendar.MONTH, frame[start]-1);
         start++;
         calendar.set(Calendar.DAY_OF_MONTH, frame[start]);
         start++;
