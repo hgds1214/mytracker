@@ -43,6 +43,9 @@ import com.zeus.tec.model.ycs.YcsMainCache;
 import com.zeus.tec.ui.leida.interfaceUtil.DialogCallback;
 import com.zeus.tec.ui.leida.util.IOtool;
 import com.zeus.tec.ui.leida.util.MesseagWindows;
+import com.zeus.tec.util.QureyUtil;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -62,6 +65,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -83,6 +87,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityYcsDataViewBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        intLoadData();
         binding.ivBack.setOnClickListener(view -> {
             FeedbackUtil.getInstance().doFeedback();
             finish();
@@ -1041,15 +1046,22 @@ public class YcsDataViewActivity extends AppCompatActivity {
     List<YcsDataFileInfo> ycsDataFileInfoList = new ArrayList<>();
     int pageSize = 20;
 
-    private void loadData(int pageNum) {
-        // List<leida_info> leidaInfoList = query.find(pageNum * pageSize, pageSize);
+
+    private void intLoadData (){
         ycsDataFileInfoList.clear();
         List<File> ycsList = FileUtils.listFilesInDir(ycsMainCache.rootFilePath);
+        ycsList.remove(0);
+        if (ycsList.size() == 0) {
+           return;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            ycsList.sort((f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+            // tmplist.sort(Comparator.comparingLong(File::lastModified).reversed());
+        }
         for (int i = 0; i < ycsList.size(); i++) {
             List<File> tmplist = FileUtils.listFilesInDir(ycsList.get(i).getPath(), false);
-            if (tmplist.size() == 0) {
-                continue;
-            }
+
+            //  QureyUtil qureyUtil = new QureyUtil(ycsDataFileInfoList);
             YcsDataFileInfo ycsDataFileInfo = new YcsDataFileInfo();
             ycsDataFileInfo.filePath = ycsList.get(i).getPath();
             ycsDataFileInfo.projectName = ycsList.get(i).getName();
@@ -1075,17 +1087,20 @@ public class YcsDataViewActivity extends AppCompatActivity {
             ycsDataFileInfoList.add(ycsDataFileInfo);
             // ycsDataFileInfo.y_ycs_file = String.valueOf(0);
         }
-        //  ycsDataFileInfoList = ycsDataFileInfoList.subList(pageNum*pageSize,pageNum*pageSize+pageSize);
+    }
+
+    private void loadData(int pageNum) {
+        List<YcsDataFileInfo> ycsDataFileInfoPageList = QureyUtil.qureyList(ycsDataFileInfoList,pageNum*pageSize,pageSize);
         if (pageNum == 0) {
             ycsDataListAdapter.setNewInstance(new ArrayList<>());
         }
-        if (ycsDataFileInfoList == null || ycsDataFileInfoList.isEmpty()) {
-            // hasMore = false;
-            ycsDataListAdapter.getLoadMoreModule().loadMoreEnd();
+        if (ycsDataFileInfoPageList == null || ycsDataFileInfoPageList.isEmpty()) {
+             hasMore = false;
+             ycsDataListAdapter.getLoadMoreModule().loadMoreEnd();
             return;
         }
-        ycsDataListAdapter.addData(ycsDataFileInfoList);
-        if (ycsDataFileInfoList.size() < pageSize) {
+        ycsDataListAdapter.addData(ycsDataFileInfoPageList);
+        if (ycsDataFileInfoPageList.size() < pageSize) {
             ycsDataListAdapter.getLoadMoreModule().loadMoreEnd();
         } else {
             ycsDataListAdapter.getLoadMoreModule().loadMoreComplete();

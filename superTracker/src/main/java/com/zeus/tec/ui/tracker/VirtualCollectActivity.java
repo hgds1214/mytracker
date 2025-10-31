@@ -168,7 +168,6 @@ public class VirtualCollectActivity extends AppCompatActivity implements View.On
      **/
     private void updateResultText() {
         StringBuilder sb = new StringBuilder();
-
         tvResult.setText(dateTimeList.get(dateTimeList.size()-1));
     }
 

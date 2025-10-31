@@ -1,5 +1,6 @@
 package com.zeus.tec.ui.leida.Apater;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -46,6 +47,7 @@ public class dataMsgAdapater extends BaseAdapter implements AdapterView.OnItemCl
         return position;
     }
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    @SuppressLint("DefaultLocale")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = LayoutInflater.from(context).inflate(R.layout.leida_datamsg_item, null);
@@ -59,9 +61,10 @@ public class dataMsgAdapater extends BaseAdapter implements AdapterView.OnItemCl
         ProbePoint probePoint = probePointList.get(position);
         serial_tv.setText(String.valueOf(position + 1));
         begin_time_tv.setText(probePoint.SampleTime.format(dateTimeFormatter));
-        directionAngle_tv.setText(String.valueOf(probePoint.Heading));
-        pitchAngle_tv.setText(String.valueOf(probePoint.Pitch));
-        rollAngle_tv.setText(String.valueOf(probePoint.Roll));
+        directionAngle_tv.setText(String.format("%.2f",probePoint.Heading));
+        pitchAngle_tv.setText(String.format("%.2f",probePoint.Pitch));
+
+        rollAngle_tv.setText(String.format("%.2f",probePoint.Roll));
         if (probePoint.Distance == -1) {
             distance.setText(" ");
         } else {

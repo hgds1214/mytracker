@@ -20,18 +20,8 @@ public class MesseagWindows  {
             androidx.appcompat.app.AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title)
                 .setMessage(message)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.onPositiveButtonClick();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.onNegativeButtonClick();
-                    }
-                })
+                .setPositiveButton("确认", (dialog, which) -> callback.onPositiveButtonClick())
+                .setNegativeButton("取消", (dialog, which) -> callback.onNegativeButtonClick())
                 .show();
     }
 
@@ -43,18 +33,8 @@ public class MesseagWindows  {
         builder.setTitle(title)
                 .setMessage(message)
                 .setView(input)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.onPositiveButtonClick();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        callback.onNegativeButtonClick();
-                    }
-                })
+                .setPositiveButton("确认", (dialog, which) -> callback.onPositiveButtonClick())
+                .setNegativeButton("取消", (dialog, which) -> callback.onNegativeButtonClick())
                 .show();
     }
 

@@ -641,3 +641,14 @@ maogan
 4.tracker 增加虚拟采集模块 点击5次设备名，变为可视
 
 5.DataCollectActivity.java 788 用于检查数据合并过程中的逻辑
+
+### 2025-10-30 ### v3.2.0(whcs)
+
+1.修复YscDataViewActivity 数据超过20个时循环展示。
+2.YscDataViewActivity 依据修改时间降序排序。
+3.Ycscollect 返回按钮/ 实现Destroy 内cache.pointList.clear()-> 修复返回设备界面重进采集界面时将打点数据多次录入bug.
+4.YcsProject 增加通信失败时Toast提示
+5.增加打点回退功能(X)->还需讨论
+6.增加qureyUtil 提取任意list指定长度数据 用于分页
+7.leida 数据管理 角度字符过长换行bug(✔)
+8.ycs 更改 dataview 数据合成何数据浏览按钮名称互换。避免歧义

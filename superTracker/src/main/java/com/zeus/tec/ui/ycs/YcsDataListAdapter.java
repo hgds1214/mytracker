@@ -27,13 +27,25 @@ public class YcsDataListAdapter extends BaseQuickAdapter<YcsDataFileInfo, BaseVi
             baseViewHolder.setText(R.id.tv_trd_file, file.trdFile);
             baseViewHolder.setTextColor(R.id.tv_trd_file,Color.BLACK);
         }
+        else {
+            baseViewHolder.setText(R.id.tv_trd_file, "打点文件缺失");
+            baseViewHolder.setTextColor(R.id.tv_trd_file,Color.RED);
+        }
         if (!file.datFile.equals("")){
             baseViewHolder.setText(R.id.tv_data_file, file.datFile);
             baseViewHolder.setTextColor(R.id.tv_data_file,Color.BLACK);
         }
+        else {
+            baseViewHolder.setText(R.id.tv_data_file, "数据文件缺失");
+            baseViewHolder.setTextColor(R.id.tv_data_file,Color.RED);
+        }
         if (!file.zipFile.equals("")){
             baseViewHolder.setText(R.id.tv_zip_file, file.zipFile);
             baseViewHolder.setTextColor(R.id.tv_zip_file,Color.BLACK);
+        }
+        else {
+            baseViewHolder.setText(R.id.tv_zip_file, "压缩文件缺失");
+            baseViewHolder.setTextColor(R.id.tv_zip_file,Color.RED);
         }
         if (!file.x_ycs_file.equals("")){
             baseViewHolder.setText(R.id.tv_x_ycs_file, "合成成功");
@@ -47,8 +59,6 @@ public class YcsDataListAdapter extends BaseQuickAdapter<YcsDataFileInfo, BaseVi
             baseViewHolder.setText(R.id.tv_z_ycs_file, "合成成功");
             baseViewHolder.setTextColor(R.id.tv_z_ycs_file,Color.GREEN);
         }
-
-
     }
 
     @NonNull

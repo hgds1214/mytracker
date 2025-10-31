@@ -76,7 +76,7 @@ public class OKHttpUpdateHttpService implements IUpdateHttpService {
             return false;
         }
         else {
-            ToastUtils.showLong("该软件可能存在错误，请及时联系生产厂家！");
+            ToastUtils.showLong("软件是最新版本！");
             return false;
         }
     }

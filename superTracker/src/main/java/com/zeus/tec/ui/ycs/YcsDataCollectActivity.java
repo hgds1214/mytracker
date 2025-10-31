@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -40,6 +41,9 @@ import com.zeus.tec.ui.leida.util.IOtool;
 import com.zeus.tec.ui.leida.util.MesseagWindows;
 import com.zeus.tec.ui.leida.util.MyApplicationContext;
 import com.zeus.tec.ui.leida.util.MyTask;
+import com.zeus.tec.util.IOnClickCallBack;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -96,7 +100,11 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
     private void step_1() {
         binding.ivStep1.setState(1);
     }
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        cache.pointList.clear();
+    }
     private void loadLastProject() throws IOException {
         cache.RefreshInitFile();
         if (FileUtils.isFileExists(cache.sysFilePath)) {
@@ -143,6 +151,8 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         }
     }
 
+
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
         FeedbackUtil.getInstance().doFeedback();
@@ -166,9 +176,24 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                             ToastUtils.showLong("请先新建项目信息和设备参数");
                             return;
                         }
-                        StartWork();
+                        //增加采集和停止前的二次确认，避免误触发
+                        MesseagWindows.showMessageBox(this, "开始采集", "是否开始采集", new DialogCallback() {
+                            @Override
+                            public void onPositiveButtonClick() {
+                                StartWork();
+                            }
+                            @Override
+                            public void onNegativeButtonClick() {}
+                        });
                     } else if (cache.DeviceStatus.status == 1) {
-                        StopWork();
+                        MesseagWindows.showMessageBox(this, "停止采集", "是否停止采集", new DialogCallback() {
+                            @Override
+                            public void onPositiveButtonClick() {
+                                StopWork();
+                            }
+                            @Override
+                            public void onNegativeButtonClick() {}
+                        });
                     }
                 }
                 break;
@@ -276,10 +301,8 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                                     pointRecord();
                                     isignore = true;
                                 }
-
                                 @Override
-                                public void onNegativeButtonClick() {
-                                }
+                                public void onNegativeButtonClick() { }
                             });
                         }
                     }
@@ -291,15 +314,18 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                                 pointRecord();
                                 isignore = true;
                             }
-
                             @Override
-                            public void onNegativeButtonClick() {
-                            }
+                            public void onNegativeButtonClick() {}
                         });
                     } else {
                         pointRecord();
                     }
                 }
+                break;
+            }
+            case R.id.iv_back:{
+                finish();
+                break;
             }
         }
     }
@@ -370,10 +396,32 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         }
     }
 
+    IOnClickCallBack iOnClickCallBack = new IOnClickCallBack() {
+        @Override
+        public void click(int currentIndex) {
+            FeedbackUtil.getInstance().doFeedback();
+
+            currentPointIndex = currentIndex;
+        }
+
+
+    };
+
+    private int currentPointIndex = 0;
     private void initPointList(List<YcsPoint> pointParamters) {
-        YcsPointListAdapter adapter = new YcsPointListAdapter(YcsDataCollectActivity.this, pointParamters);
+        YcsPointListAdapter adapter = new YcsPointListAdapter(YcsDataCollectActivity.this, pointParamters,iOnClickCallBack);
         binding.listPoint.setAdapter(adapter);
         binding.listPoint.setSelection(adapter.getCount() - 1);
+        binding.listPoint.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (position >= 0) {
+                    view.setSelected(true);
+                    currentPointIndex = position+1;
+                  //  view.findViewById(R.id.pointinfolist_ly).setBackgroundResource(R.drawable.list_item_background_selector);
+                }
+            }
+        });
     }
 
     public void startWork(String fileName) {
@@ -443,10 +491,6 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         }
     }
 
-    public void downLoadData() {
-
-    }
-
     int index = 10;
 
     public void GetFiles() {
@@ -454,7 +498,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         files = cache.GetFilesName();
         if (files != null) {
             files.add(new FileBean());
-            fileListAdapter adapter = new fileListAdapter(YcsDataCollectActivity.this, files);
+            fileListAdapter adapter = new  fileListAdapter(YcsDataCollectActivity.this, files);
             binding.listFile.setAdapter(adapter);
             binding.listFile.setOnItemClickListener((parent, view, position, id) -> {
                 if (position > 0) {
@@ -512,7 +556,6 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                         //人生已经太匆匆，我好害怕总是泪眼朦胧，忘了我就没有痛(忘了你也没有用)，将往事留在风中
                         //为何你不懂(别说我不懂)，只要有爱就有痛(有爱就有痛)，有一天你会知道，人生没有我并不会不同(没用你会不同)，
                         //人生已经太匆匆，我好害怕总是泪眼朦胧，忘了我就没有痛(忘了你也没有用)，将往事留在风中
-
                     }
                     binding.startButton.setEnabled(true);
                     binding.tvDataManage.setEnabled(true);

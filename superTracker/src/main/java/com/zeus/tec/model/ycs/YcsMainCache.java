@@ -18,6 +18,8 @@ import com.zeus.tec.ui.leida.util.IOtool;
 import com.zeus.tec.ui.leida.util.TryParse;
 import com.zeus.tec.ui.ycs.YcsDataFileInfo;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.File;
 import java.net.DatagramSocket;
 import java.util.ArrayList;

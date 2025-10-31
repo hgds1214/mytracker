@@ -2,6 +2,7 @@ package com.zeus.tec.model.ycs;
 
 import android.util.Log;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zeus.tec.model.leida.leida_info;
 import com.zeus.tec.model.leida.main.DeviceInfoBean;
 import com.zeus.tec.model.leida.main.FileBean;
@@ -246,7 +247,6 @@ public class YcsSendMethod {
             {
                 code = 0x00;
             }
-
             ReceiveBean Setting_order = order.SettingOrder(code, FileName, RAreaX, RAreaY, RAreaZ, TArea, MSpacing, SampleCount, SampleIntervel, TFreq, StackCount, PlusPower, SampleTimes, GYOThreshold);
             Boolean success = order.SendOrder(Setting_order, socket, address, local_port, cache.server_port);
             if (success && cache.DeviceOper.Data != null && cache.DeviceOper.Data.length > 0)
@@ -255,6 +255,9 @@ public class YcsSendMethod {
                 tmp[0] = cache.DeviceOper.Data[0];
                 tmp[1] = cache.DeviceOper.Data[1];
                 result = ConvertCode.getint16(tmp, ByteOrder.LITTLE_ENDIAN);
+            }
+            else {
+                ToastUtils.showShort("设备通信失败，请先连接设备!");
             }
         }
         catch (Exception ex)

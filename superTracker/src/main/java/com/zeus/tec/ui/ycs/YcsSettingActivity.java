@@ -2,6 +2,7 @@ package com.zeus.tec.ui.ycs;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 
@@ -34,14 +35,20 @@ public class YcsSettingActivity extends AppCompatActivity implements View.OnClic
 
     private void  initListenter() {
         binding.tvOk.setOnClickListener(this);
+        binding.ivBack.setOnClickListener(this);
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
         FeedbackUtil.getInstance().doFeedback();
         switch (v.getId()){
             case R.id.tv_ok:{
                // writeSetting();
+                break;
+            }
+            case R.id.iv_back:{
+                finish();
                 break;
             }
         }

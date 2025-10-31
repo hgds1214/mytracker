@@ -250,7 +250,6 @@ public class YcsProjectSettingActivity extends AppCompatActivity {
                 , cache.sendFrenquency, cache.overLayNumber, cache.sendEnergyIndex, cache.sampleTimeIndex, cache.gyro);
         if (result == 1)
             //测试
-
             if (true) {
                 String dataFilePath = PathUtils.getExternalAppFilesPath() + File.separator + "YcsData" + File.separator + cache.projectName;
                 if (!FileUtils.createOrExistsDir(dataFilePath)) {
@@ -281,9 +280,6 @@ public class YcsProjectSettingActivity extends AppCompatActivity {
                     }
                     ToastUtils.showLong("设备项目创建成功");
                 }
-            } else if (false) {
-                // Toast.makeText(this,"设备通讯数失败",Toast.LENGTH_SHORT);
-                ToastUtils.showLong("设备通讯失败");
             }
     }
 
