@@ -23,8 +23,8 @@ android {
         targetSdkVersion 34
         vectorDrawables.useSupportLibrary = true
 
-        versionCode 310
-        versionName "V3.1.0(whcs)"
+        versionCode 320
+        versionName "V3.2.0(whcs)"
 
         missingDimensionStrategy 'device', 'anyDevice'
 
@@ -43,6 +43,9 @@ android {
 
     viewBinding {
         enabled = true
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 
@@ -80,6 +83,8 @@ dependencies {
     implementation 'com.github.piasy:GlideImageViewFactory:1.8.1'
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'androidx.navigation:navigation-fragment:2.4.1'
+    implementation 'androidx.navigation:navigation-ui:2.4.1'
 
     debugImplementation("io.objectbox:objectbox-android-objectbrowser:$objectboxVersion")
     releaseImplementation("io.objectbox:objectbox-android:$objectboxVersion")
