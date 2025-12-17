@@ -58,6 +58,7 @@ import java.nio.ByteOrder;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
 
         RecyclerView rv = binding.rvList;
         rv.setLayoutManager(new LinearLayoutManager(this));
-        dataListAdapter.addChildClickViewIds(R.id.tv_continue, R.id.tv_view, R.id.tv_share, R.id.tv_merge, R.id.tv_export);
+        dataListAdapter.addChildClickViewIds(R.id.tv_continue, R.id.tv_view, R.id.tv_share, R.id.tv_merge, R.id.tv_export,R.id.track_out_tv);
         dataListAdapter.setOnItemChildClickListener(new OnItemChildClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -113,6 +114,9 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
                         bindingData(dataListAdapter.getItem(position));
                          // doContinue(dataListAdapter.getItem(position));
                         break;
+                    case R.id.track_out_tv:
+                        trackDataOut(dataListAdapter.getItem(position));
+                        break;
                 }
             }
         });
@@ -130,7 +134,59 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
         });
         refreshData();
     }
-
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void trackDataOut (leida_info info){
+        if (info.dataPath==null){
+            ToastUtils.showLong("打点记录文件不存在");
+            return;
+        }
+        File trdFile = new File(info.dataPath);
+        if(!trdFile.exists()){
+            ToastUtils.showLong("打点记录文件不存在");
+            return;
+        }
+        File datFile = new File(info.dataPath.replace("trd","dat"));
+        if (!datFile.exists()){
+            ToastUtils.showLong("数据文件不存在");
+            return;
+        }
+        try {
+            MergeCache.init();
+            pointRecordList =  new ArrayList<>();
+            MergeCache.PipeCount =  ReadRecordingData(info.dataPath);
+            DrillPipe item ;
+            for (int i = 0; i <  MergeCache.PipeCount; i++)
+            {
+                item = new DrillPipe(pointRecordList.get(i), pointRecordList.get(i + 1));
+                MergeCache.DrillPipeList.add(item);
+            }
+            FileInputStream fs = new FileInputStream(datFile);
+            //region 读取Sample数据
+            BufferedInputStream bis = new BufferedInputStream(fs);
+            readHeader(bis);
+            readProbePoint2(bis,MergeCache.dataHeader.SampleCount);
+            bis.close();
+            fs.close();
+            ToastUtils.showLong("数据合并完成");
+            //endregion
+            MergeCache.SpaceSapmle = MergeCache.GetDefaultSpacing(MergeCache.PipeCount);
+            int num5 = MergeCache.TimeMatching(MergeCache.DrillPipeList,MergeCache.probePointList);
+            if (num5 >0) {
+                get_trackData_head(info);
+                MergeCache.track_data_path = info.dataPath.replace(".trd","gjy")+".trd";
+                int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
+            }
+            else
+            {
+                get_trackData_head(info);
+                MergeCache.track_data_path = info.dataPath.replace(".trd","gjy")+".trd";
+                int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
+            }
+            save_trackData(MergeCache.track_data_path);
+        }catch (Exception exception){
+            ToastUtils.showLong(exception.getMessage());
+        }
+    }
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void bindingData (leida_info info){
         if (info.dataPath==null){
@@ -188,7 +244,60 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
             ToastUtils.showLong(exception.getMessage());
         }
     }
-
+    private byte[] convertByte(short num1) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+        byteBuffer.putShort(num1);
+        byte[] result = byteBuffer.array();
+        return result;
+    }
+    private List<ProbePoint> pick_trackData(float distance) {
+        int num1 = (int) (distance / (MergeCache.lstPointsOrder.get(0).Distance * 100));
+        int num2 = MergeCache.lstPointsOrder.size() / num1;
+        List<ProbePoint> trackPointList = new ArrayList<>();
+        for (int i = 1; i <= num2; i++) {
+            trackPointList.add(MergeCache.lstPointsOrder.get(i * num1 - 1));
+        }
+        return trackPointList;
+    }
+    private void save_trackData(String savePath) {
+        FileOutputStream fos = null;
+        MergeCache.trackPointList = pick_trackData(MergeCache.pointDistance);
+        try {
+            if (FileUtils.isFileExists(savePath)) {
+                FileUtils.delete(savePath);
+            } else {
+                FileUtils.createOrExistsFile(savePath);
+            }
+            fos = new FileOutputStream(savePath);
+            fos.write(MergeCache.trackData_head);  //4 字节
+            fos.write(convertByte(MergeCache.trackPointList.size())); //u5i32
+            for (int i = 0; i < MergeCache.trackPointList.size(); i++) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    int pointTime = (int) MergeCache.trackPointList.get(i).SampleTime.toEpochSecond(ZoneOffset.UTC);
+                    fos.write(convertByte(pointTime));//u32 打点时间 时间戳
+                    fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Roll * 100)));
+                    fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Pitch * 100)));
+                    fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Heading * 100)));
+                }
+            }
+            // fos.write();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+                ToastUtils.showShort("导出轨迹数据成功!");
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+    private byte[] convertByte(int num1) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+        byteBuffer.putInt(num1);
+        byte[] result = byteBuffer.array();
+        return result;
+    }
     private void get_trackData_head (leida_info leidaInfo){
         byte [] headbyte = new byte[200];
         headbyte[0] = 'w';
@@ -268,7 +377,7 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
                 );
                 item.Roll = readSingle(bis,angle);
                 item.Pitch = readSingle(bis,angle);
-                item.Heading = readSingle(bis,angle)+180.0f;
+                item.Heading = readSingle(bis,angle)>=0?readSingle(bis,angle): readSingle(bis,angle)+360.0f;
               //  bis.read(buffer);
                 byte [] tmpbuffer = new byte[4];
                 long twoTimeMillis = System.currentTimeMillis();
@@ -451,7 +560,6 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
         try {
             Uri uri ;
             if (Build.VERSION.SDK_INT >= 24) {
-
                 uri = FileProvider.getUriForFile(this, "com.zeus.tec.fileprovider", f);
                 grantUriPermission(getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 LogUtils.e(uri);
@@ -464,7 +572,6 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
             intent.putExtra(Intent.EXTRA_STREAM, uri);
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.setType("application/octet-stream");
-
             startActivity(Intent.createChooser(intent, "分享到"));
         }
         catch (Exception ex)
@@ -527,7 +634,6 @@ public class LeidaDataveiewActivity extends AppCompatActivity {
             dataListAdapter.getLoadMoreModule().loadMoreComplete();
         }
     }
-
     private void doMerge(leida_info info) {
         if (info == null)
         {

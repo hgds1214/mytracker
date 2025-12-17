@@ -2,6 +2,7 @@ package com.zeus.tec.ui.widget;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
@@ -41,12 +42,23 @@ public class CountTimeTextView extends TextView {
     private long startTime;
     private boolean start = false;
     private int countTimeValue = 0;
+    public int maxTime = 10;
     public void start() {
         start = true;
         startTime = System.currentTimeMillis();
         postDelayed(this::onTick, 500);
     }
 
+    public void setStartRecordPointTime(long startTime) {
+        this.startTime = startTime;
+        setTextColor(Color.RED);
+        onRecordPointrefreshUI();
+    }
+    public void startRecordPoint (){
+        start = true;
+        startTime = System.currentTimeMillis();
+        postDelayed(this::onRecordPointTick, 500);
+    };
     private long countTime;
 
     public void setStartTime(long startTime) {
@@ -79,14 +91,35 @@ public class CountTimeTextView extends TextView {
         }
     }
 
-
-
+    public  void onRecordPointTick (){
+        if (!start) return;
+        onRecordPointrefreshUI();
+        postDelayed(this::onRecordPointTick, 333);
+    }
 
 
     public void onTick() {
         if (!start) return;
         refreshUI();
         postDelayed(this::onTick, 333);
+    }
+
+    public  void onRecordPointrefreshUI(){
+        long now = System.currentTimeMillis();
+        countTime = (now - startTime) / 1000;
+
+        long hms = (countTime % (24*3600));
+        long h = hms / 3600;
+        long m = (hms - h * 3600) / 60;
+        long s = (hms - h * 3600) % 60;
+        //当运行时间为alarmTime时显示提示
+        //ctt_countdown
+      //  setText(String.format("%02d:%02d", 0, s));
+        if (countTime>=maxTime){
+            start=false;
+            setText("开始采集");
+            setTextColor(Color.GREEN);
+        }
     }
 
     private void refreshUI() {

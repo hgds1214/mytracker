@@ -6,10 +6,9 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -18,24 +17,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.PathUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.zeus.tec.R;
-import com.zeus.tec.databinding.ActivityLeidaDataCollectBinding;
 import com.zeus.tec.databinding.ActivityYcsDataCollectBinding;
 import com.zeus.tec.db.TrackerDBManager;
-import com.zeus.tec.model.leida.MergeCache;
-import com.zeus.tec.model.leida.leidaPointRecordInfo;
 import com.zeus.tec.model.leida.leida_info;
 import com.zeus.tec.model.leida.main.FileBean;
-import com.zeus.tec.model.leida.main.PointParamter;
 import com.zeus.tec.model.utils.FeedbackUtil;
 import com.zeus.tec.model.ycs.YcsMainCache;
 import com.zeus.tec.model.ycs.YcsPoint;
-import com.zeus.tec.ui.leida.Apater.PointListAdapter;
 import com.zeus.tec.ui.leida.Apater.fileListAdapter;
-import com.zeus.tec.ui.leida.LeidaDataCollectActivity;
-import com.zeus.tec.ui.leida.ProjectleidainfoActivity;
 import com.zeus.tec.ui.leida.interfaceUtil.DialogCallback;
 import com.zeus.tec.ui.leida.util.IOtool;
 import com.zeus.tec.ui.leida.util.MesseagWindows;
@@ -43,20 +34,28 @@ import com.zeus.tec.ui.leida.util.MyApplicationContext;
 import com.zeus.tec.ui.leida.util.MyTask;
 import com.zeus.tec.util.IOnClickCallBack;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class YcsDataCollectActivity extends AppCompatActivity implements View.OnClickListener {
 
     ActivityYcsDataCollectBinding binding;
     Context context1;
     YcsMainCache cache;
+
+    private ScheduledExecutorService scheduler;
+    private DatagramSocket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +74,64 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         cache.CreatReceiveThread(this);
         Thread th = new Thread(this::RefreshStatus);
         th.start();
+        Thread th1 = new Thread(() -> {
+            try {
+                byte[] buffer = new byte[1024];
+                rec_client = new DatagramSocket(2425);
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                rec_client.receive(packet);
+                cache.server_ip = packet.getAddress().getHostAddress();
+                SharedPreferences sp = this.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+                sp.edit()
+                        .putString(KEY_IP, packet.getAddress().getHostAddress())
+                        .putInt(KEY_PORT, 1234)
+                        .apply();
+                RefreshStatus();
+            } catch (Exception ex) {
+                ToastUtils.showLong(ex.getMessage());
+            }
+        });
+        th1.start();
         initListener();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startUdpLoop();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopUdpLoop();
+    }
+
+    private void startUdpLoop() {
+        stopUdpLoop();  // 防止重复启动
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        scheduler.scheduleAtFixedRate(() -> {
+            try {
+                RefreshStatus();
+            } catch (Exception e) {
+                ToastUtils.showLong(e.getMessage());
+            }
+        }, 0, 5, TimeUnit.SECONDS);
+    }
+
+    private void stopUdpLoop() {
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+            scheduler = null;
+        }
+
+    }
+
+    public DatagramSocket rec_client = null;
+    private static final String PREF = "udp_config";
+    private static final String KEY_IP = "udp_ip";
+    private static final String KEY_PORT = "udp_port";
 
     private void initListener() {
         step_1();
@@ -100,11 +155,19 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
     private void step_1() {
         binding.ivStep1.setState(1);
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        try {
+            rec_client.close();
+            cache.CloseReceiveThread();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         cache.pointList.clear();
     }
+
     private void loadLastProject() throws IOException {
         cache.RefreshInitFile();
         if (FileUtils.isFileExists(cache.sysFilePath)) {
@@ -113,16 +176,15 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 cache.trdFilePath = cache.rootFilePath + File.separator + cache.projectName + File.separator + cache.projectName + ".trd";
                 reader = new BufferedReader(new FileReader(cache.trdFilePath));
                 String[] projectInfoStr = reader.readLine().split("\t");
-                String str ;
-                int index =0;
-                for (int num = 0; ( str = reader.readLine()) != null; num++)
-                {
+                String str;
+                int index = 0;
+                for (int num = 0; (str = reader.readLine()) != null; num++) {
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                        String [] tmpStr  = str.split("\t");
+                        String[] tmpStr = str.split("\t");
                         String time = tmpStr[0];
-                        index ++;
+                        index++;
                         float distance = Float.parseFloat(tmpStr[3]);
-                        cache.pointList.add(new YcsPoint(index,time,distance));
+                        cache.pointList.add(new YcsPoint(index, time, distance));
                     }
                 }
                 reader.close();
@@ -182,8 +244,10 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                             public void onPositiveButtonClick() {
                                 StartWork();
                             }
+
                             @Override
-                            public void onNegativeButtonClick() {}
+                            public void onNegativeButtonClick() {
+                            }
                         });
                     } else if (cache.DeviceStatus.status == 1) {
                         MesseagWindows.showMessageBox(this, "停止采集", "是否停止采集", new DialogCallback() {
@@ -191,8 +255,10 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                             public void onPositiveButtonClick() {
                                 StopWork();
                             }
+
                             @Override
-                            public void onNegativeButtonClick() {}
+                            public void onNegativeButtonClick() {
+                            }
                         });
                     }
                 }
@@ -205,6 +271,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                         Intent intent = new Intent(YcsDataCollectActivity.this, YcsProjectSettingActivity.class);
                         startActivity(intent);
                     }
+
                     @Override
                     public void onNegativeButtonClick() {
                     }
@@ -227,7 +294,6 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 break;
             }
             case R.id.tv_Data_Download: {
-
                 break;
             }
             case R.id.tv_exit: {
@@ -258,6 +324,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                             //  MessageBox.Show("项目文件删除失败!");
                         }
                     }
+
                     @Override
                     public void onNegativeButtonClick() {
                     }
@@ -276,7 +343,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 }
                 break;
             }
-            case R.id.tv_program_paramter:{
+            case R.id.tv_program_paramter: {
                 if (binding.layProgramParamter.getVisibility() == View.GONE) {
                     binding.layProgramParamter.setVisibility(View.VISIBLE);
                     binding.layoutPointRecord.setVisibility(View.GONE);
@@ -301,8 +368,10 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                                     pointRecord();
                                     isignore = true;
                                 }
+
                                 @Override
-                                public void onNegativeButtonClick() { }
+                                public void onNegativeButtonClick() {
+                                }
                             });
                         }
                     }
@@ -314,8 +383,10 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                                 pointRecord();
                                 isignore = true;
                             }
+
                             @Override
-                            public void onNegativeButtonClick() {}
+                            public void onNegativeButtonClick() {
+                            }
                         });
                     } else {
                         pointRecord();
@@ -323,7 +394,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 }
                 break;
             }
-            case R.id.iv_back:{
+            case R.id.iv_back: {
                 finish();
                 break;
             }
@@ -331,6 +402,71 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
     }
 
     private boolean isignore = false;
+
+    private void stringToTimestampSeconds() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime localDateTime = null;
+            localDateTime = LocalDateTime.parse("2025-11-13 08:12:46", formatter);
+            long timestamp = localDateTime
+                    .atZone(ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli();
+        }
+    }
+
+    private void deletePointRecord() {
+        if (FileUtils.isFileExists(cache.sysFilePath)) {
+            BufferedReader reader = null;
+            String projectInfoStr = "";
+            try {
+                cache.trdFilePath = cache.rootFilePath + File.separator + cache.projectName + File.separator + cache.projectName + ".trd";
+                reader = new BufferedReader(new FileReader(cache.trdFilePath));
+                projectInfoStr = reader.readLine();
+                String str;
+                int index = 0;
+                cache.pointList.clear();
+                for (int num = 0; (str = reader.readLine()) != null; num++) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        String[] tmpStr = str.split("\t");
+                        String time = tmpStr[0];
+                        index++;
+                        float distance = Float.parseFloat(tmpStr[3]);
+                        cache.pointList.add(new YcsPoint(index, time, distance, tmpStr[1]));
+                    }
+                }
+                reader.close();
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+            cache.pointList.remove(currentPointIndex - 1);
+
+            try {
+                if (FileUtils.isFileExists(cache.trdFilePath)) {
+                    String current_time = "";
+                    String content;
+                    float TotalDis = 0;
+                    IOtool.saveText(cache.trdFilePath, projectInfoStr);
+                    for (int i = 0; i < cache.pointList.size(); i++) {
+                        TotalDis = (i + 1) * cache.pointDistance;
+                        content = cache.pointList.get(i).time + '\t' + cache.pointList.get(i).timeCode + '\t' + cache.pointDistance + '\t' + TotalDis;
+                        IOtool.saveText(cache.trdFilePath, "\n", true);
+                        IOtool.saveText(cache.trdFilePath, content, true);
+                        cache.pointList.set(i, new YcsPoint(i + 1, cache.pointList.get(i).time, TotalDis));
+                    }
+                    cache.totalPoint = cache.pointList.size();
+                    binding.tv24.setText(String.valueOf(cache.pointList.size()));
+                    binding.tv23.setText(String.format("%.1f", TotalDis / 100f));
+                    initPointList(cache.pointList);
+
+                } else {
+                    Toast.makeText(this, "项目测点文件不存在，无法打点测试！", Toast.LENGTH_LONG).show();
+                }
+            } catch (Exception exception) {
+                ToastUtils.showLong(exception.getMessage());
+            }
+        }
+    }
 
     private void pointRecord() {
         try {
@@ -342,7 +478,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 binding.cttCountdown.setStartTime(currentTime);
                 binding.cttCountdown.start();
 
-                long timecode = System.currentTimeMillis()/1000;//精确到秒
+                long timecode = System.currentTimeMillis() / 1000;//精确到秒
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     now = LocalDateTime.now();
                     int year = now.getYear();
@@ -383,11 +519,14 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 content = current_time + '\t' + timecode + '\t' + cache.pointDistance + '\t' + TotalDis;
                 IOtool.saveText(cache.trdFilePath, "\n", true);
                 IOtool.saveText(cache.trdFilePath, content, true);
-                cache.totalPoint = cache.pointList.size()+1;
-                cache.pointList.add(new YcsPoint(cache.totalPoint, current_time,TotalDis));
+                cache.totalPoint = cache.pointList.size() + 1;
+                cache.pointList.add(new YcsPoint(cache.totalPoint, current_time, TotalDis));
                 initPointList(cache.pointList);
                 binding.tv24.setText(String.valueOf(cache.pointList.size()));
-                binding.tv23.setText(String.format("%.1f", TotalDis/100f));
+                binding.tv23.setText(String.format("%.1f", TotalDis / 100f));
+                long currentTimeMillis = System.currentTimeMillis();
+                binding.cttCountdown.setStartRecordPointTime(currentTimeMillis);
+                binding.cttCountdown.startRecordPoint();
             } else {
                 Toast.makeText(this, "项目测点文件不存在，无法打点测试！", Toast.LENGTH_LONG).show();
             }
@@ -400,27 +539,46 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         @Override
         public void click(int currentIndex) {
             FeedbackUtil.getInstance().doFeedback();
-
             currentPointIndex = currentIndex;
         }
-
-
     };
 
+    private int listPointClickNumb = 0;
     private int currentPointIndex = 0;
+    private static final long DOUBLE_TIME = 1000;
+    private static long lastClickTime = 0;
+    private boolean isWindows = false;
+
     private void initPointList(List<YcsPoint> pointParamters) {
-        YcsPointListAdapter adapter = new YcsPointListAdapter(YcsDataCollectActivity.this, pointParamters,iOnClickCallBack);
+        YcsPointListAdapter adapter = new YcsPointListAdapter(YcsDataCollectActivity.this, pointParamters, iOnClickCallBack);
         binding.listPoint.setAdapter(adapter);
         binding.listPoint.setSelection(adapter.getCount() - 1);
-        binding.listPoint.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        binding.listPoint.setOnItemClickListener((parent, view, position, id) -> {
+            view.setSelected(true);
+            long currentTimeMillis = System.currentTimeMillis();
+            if (currentTimeMillis - lastClickTime < DOUBLE_TIME) {
                 if (position >= 0) {
-                    view.setSelected(true);
-                    currentPointIndex = position+1;
-                  //  view.findViewById(R.id.pointinfolist_ly).setBackgroundResource(R.drawable.list_item_background_selector);
+                    if (currentPointIndex == position + 1) {
+                        if (!isWindows) {
+                            isWindows = true;
+                            MesseagWindows.showMessageBox(context1, "删除点位", "是否删除删除点位", new DialogCallback() {
+                                @Override
+                                public void onPositiveButtonClick() {
+                                    listPointClickNumb = 0;
+                                    deletePointRecord();
+                                    isWindows = false;
+                                }
+                                @Override
+                                public void onNegativeButtonClick() {
+                                    isWindows = false;
+                                }
+                            });
+                        }
+                    }
                 }
             }
+            lastClickTime = currentTimeMillis;
+            currentPointIndex = position + 1;
         });
     }
 
@@ -448,7 +606,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
                 progressBar.setVisibility(View.VISIBLE);
                 binding.tvStep1Text.setText("正在下载");
                 TextView steptext = binding.tvStep1Text;
-                YcsTask task = new YcsTask(progressBar, cache.selectFileName, steptext, 1, cache.trdFilePath.replace(".trd",".dat"));
+                YcsTask task = new YcsTask(progressBar, cache.selectFileName, steptext, 1, cache.trdFilePath.replace(".trd", ".dat"));
                 task.execute();
             } else {
                 MesseagWindows.showMessageBox(YcsDataCollectActivity.this, "是否下载", "该数据不是本次检测的数据,是否继续下载", new DialogCallback() {
@@ -498,7 +656,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         files = cache.GetFilesName();
         if (files != null) {
             files.add(new FileBean());
-            fileListAdapter adapter = new  fileListAdapter(YcsDataCollectActivity.this, files);
+            fileListAdapter adapter = new fileListAdapter(YcsDataCollectActivity.this, files);
             binding.listFile.setAdapter(adapter);
             binding.listFile.setOnItemClickListener((parent, view, position, id) -> {
                 if (position > 0) {
@@ -575,7 +733,7 @@ public class YcsDataCollectActivity extends AppCompatActivity implements View.On
         }
     }
 
-    private void StartWork()  {
+    private void StartWork() {
         RefreshStatus();
         if (cache.DeviceStatus != null) {
             if (cache.DeviceStatus.status == 1) {

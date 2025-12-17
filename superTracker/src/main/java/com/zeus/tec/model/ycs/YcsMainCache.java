@@ -88,7 +88,7 @@ public class YcsMainCache {
     public String password = "";
     public int local_port = 2222;
     public int server_port = 1234;
-    public String server_ip = "192.168.43.30";
+    public String server_ip = "10.73.163.21";
 
     public int totalPoint ;
     public int currentPoint;
@@ -107,7 +107,7 @@ public class YcsMainCache {
             INIutil.writeproperties(tmpProperties,filePath);
         }
         if (IOtool.isFileExists(filePath)) {
-            server_ip = INIutil.readINI(filePath, "server_ip", "192.168.43.30");
+           // server_ip = INIutil.readINI(filePath, "server_ip", "192.168.43.30");
             String port = INIutil.readINI(filePath, "port", "1234");
             String time = INIutil.readINI(filePath, "OutTime", "1000");
 

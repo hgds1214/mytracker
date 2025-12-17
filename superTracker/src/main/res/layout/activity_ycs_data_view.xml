@@ -32,6 +32,7 @@
             android:textSize="17sp"
             />
     </RelativeLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -175,10 +176,19 @@
                 />
 
         </LinearLayout>
-
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/loading_avi"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            app:indicatorName="BallSpinFadeLoaderIndicator"
+            app:indicatorColor="#0E65EE"
+            />
 
 
     </FrameLayout>
+
 
 
 

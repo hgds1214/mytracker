@@ -218,7 +218,6 @@ public class BLEManager {
                 .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
                 .build();
         bluetoothLeScanner.startScan(null, settings,scanCallback);
-
         //bluetooth4Adapter.startLeScan(leScanCallback);
         //设定最长扫描时间
         mHandler.postDelayed(stopScanRunnable, scanTime);
@@ -338,8 +337,6 @@ public class BLEManager {
             mHandler.removeCallbacks(connectOutTimeRunnable);
 
             if (newState == BluetoothGatt.STATE_CONNECTED) {
-
-
                 Log.w(TAG, "连接成功");
                 //连接成功去发现服务
                 gatt.discoverServices();

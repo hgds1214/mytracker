@@ -5,6 +5,7 @@ import android.graphics.Region;
 import android.os.Environment;
 
 import java.io.File;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.security.PublicKey;
@@ -53,6 +54,8 @@ public class MainCache {
     public float gyro;
     public String selectFileName;
     public int newProject = 0;
+
+    public int UDP_IP_Port = 2425;
 
     public Properties properties = new Properties();
     public ArrayList<PointParamter> pointList = new ArrayList<>();
@@ -146,6 +149,26 @@ public class MainCache {
                 ToastUtils.showLong(ex.getLocalizedMessage());
             }
         }
+    }
+    public DatagramSocket rec_client = null;
+
+    public void CreatIPReceiceThread ()  {
+        Thread th1 = new Thread(()->{
+            try {
+                byte[] buffer = new byte[1024];
+                rec_client = new DatagramSocket(2425);
+                DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
+                rec_client.receive(packet);
+                packet.getAddress();
+                int size =  packet.getLength();
+                int a =0;
+            }catch (Exception ex){
+                ToastUtils.showLong(ex.getMessage());
+            }
+        });
+        th1.start();
+
+
     }
 
     public void CreatReceiveThread(Context context) {

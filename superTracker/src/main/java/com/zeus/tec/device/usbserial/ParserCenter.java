@@ -109,8 +109,6 @@ public class ParserCenter implements Handler.Callback, OnParseOneFrameCallback {
         }
         boolean ret = USBSerialManager.getInstance().send(frameWrapper.data);
 
-        //if (BuildConfig.DEBUG) SuperLogUtil.sd("命令成功发送：" + ret);
-
         if (!ret) {
             frameWrapper.sendCallback.onFail("发送命令失败，isConnected:"+USBSerialManager.getInstance().isConnected());
             return;

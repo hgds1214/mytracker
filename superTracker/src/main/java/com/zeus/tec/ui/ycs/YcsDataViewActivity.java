@@ -20,6 +20,7 @@ import android.widget.ListView;
 import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.PathUtils;
+import com.blankj.utilcode.util.ThreadUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.listener.OnItemChildClickListener;
@@ -36,6 +37,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityYcsDataViewBinding;
 import com.zeus.tec.databinding.ActivityYcsMainBinding;
+import com.zeus.tec.model.leida.MergeCache;
 import com.zeus.tec.model.leida.leida_info;
 import com.zeus.tec.model.leida.sampleTest.DataCache;
 import com.zeus.tec.model.utils.FeedbackUtil;
@@ -63,6 +65,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -99,26 +102,33 @@ public class YcsDataViewActivity extends AppCompatActivity {
             FeedbackUtil.getInstance().doFeedback();
             switch (view.getId()) {
                 case R.id.tv_view: {
-
+                    binding.loadingAvi.setVisibility(View.VISIBLE);
                     doMerge(ycsDataListAdapter.getItem(position));
                     break;
                 }
                 case R.id.tv_merge: {
-                    ycsCache.ycsDataFileInfo = ycsDataListAdapter.getItem(position);
-                    if (ycsCache.ycsDataFileInfo == null) {
-                        break;
-                    } else {
-                        if (ycsCache.ycsDataFileInfo.x_ycs_file.equals("")) {
-                            ToastUtils.showShort("X方向数据丢失");
+                    try {
+                        ycsCache.ycsDataFileInfo = ycsDataListAdapter.getItem(position);
+                        if (ycsCache.ycsDataFileInfo == null) {
+                            break;
+                        } else {
+                            if (ycsCache.ycsDataFileInfo.x_ycs_file.equals("")) {
+                                ToastUtils.showShort("X方向数据丢失");
+                                break;
+                            }
+                            if (ycsCache.ycsDataFileInfo.y_ycs_file.equals("")) {
+                                ToastUtils.showShort("Y方向数据丢失");
+                                break;
+                            }
+                            if (ycsCache.ycsDataFileInfo.z_ycs_file.equals("")) {
+                                ToastUtils.showShort("Z方向数据丢失");
+                                break;
+                            }
+                            Intent tmpIntent = new Intent(YcsDataViewActivity.this, YcsMergeDataActivity.class);
+                            startActivity(tmpIntent);
                         }
-                        if (ycsCache.ycsDataFileInfo.y_ycs_file.equals("")) {
-                            ToastUtils.showShort("Y方向数据丢失");
-                        }
-                        if (ycsCache.ycsDataFileInfo.z_ycs_file.equals("")) {
-                            ToastUtils.showShort("Z方向数据丢失");
-                        }
-                        Intent tmpIntent = new Intent(YcsDataViewActivity.this, YcsMergeDataActivity.class);
-                        startActivity(tmpIntent);
+                    }catch (Exception ex){
+                        ToastUtils.showShort(ex.getMessage());
                     }
                     break;
                 }
@@ -161,7 +171,6 @@ public class YcsDataViewActivity extends AppCompatActivity {
         });
 
         binding.mergeDataBtn.setOnClickListener(v -> {
-
             if (!(DataList.size() > 0)) {
                 ToastUtils.showLong("探头数据为0");
                 return;
@@ -176,6 +185,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 return;
             }
             try {
+
                 Save_Click(tmpFileName, tmpFoldPath);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -183,18 +193,117 @@ public class YcsDataViewActivity extends AppCompatActivity {
         });
     }
 
-    private void doMerge(YcsDataFileInfo info) {
+    private void get_trackData_head (leida_info leidaInfo){
+        byte [] headbyte = new byte[200];
+        headbyte[0] = 'w';
+        headbyte[1] = 'h';
+        headbyte[2] = 'c';
+        headbyte[3] = 's';
+        leidaInfo.creatTime.toCharArray();
+        leidaInfo.projectId.toCharArray();
+        MergeCache.trackData_head = headbyte;
+        byte [] tmpbuff = ByteBuffer.allocate(2).putShort((short)leidaInfo.drillPipeLength).array();
+        headbyte[167] = tmpbuff[0];
+        headbyte[168] = tmpbuff[1];
+        MergeCache.pointDistance = leidaInfo.drillPipeLength;
+        //  headbyte[167]
+    }
+    private void saveTrackData (List<TemBean> temList,String savePath){
+       // get_trackData_head(info);
+     //   MergeCache.track_data_path = info.dataPath.replace(".trd","gjy")+".trd";
+     //   int result =  MergeCache.OrganizeList(MergeCache.DrillPipeList,MergeCache.probePointList,MergeCache.PipeLength,MergeCache.SpaceSapmle,0);
+        FileOutputStream fos = null;
+       // MergeCache.trackPointList = pick_trackData(MergeCache.pointDistance);
         try {
-            initMergeShowLy();
-            tmpFileName = info.projectName;
-            tmpFoldPath = info.filePath;
-            readDataFIle(info.datPath);
-            InitPointList(info.trdPath);
-            initPointListView(DataList);
-            iPointList.clickOn(currentPosition);
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (FileUtils.isFileExists(savePath)) {
+                FileUtils.delete(savePath);
+            } else {
+                FileUtils.createOrExistsFile(savePath);
+            }
+            fos = new FileOutputStream(savePath);
+            byte [] headbyte = new byte[200];
+            headbyte[0] = 'w';
+            headbyte[1] = 'h';
+            headbyte[2] = 'c';
+            headbyte[3] = 's';
+            byte [] tmpbuff = ByteBuffer.allocate(2).putShort((short)100).array();
+            headbyte[167] = tmpbuff[0];
+            headbyte[168] = tmpbuff[1];
+            fos.write(headbyte);  //4 字节
+            fos.write(convertByte(temList.size())); //u5i32
+            for (int i = 0; i < temList.size(); i++)
+            {
+                if
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    int pointTime = (int) temList.get(i).Data.Time;
+                    fos.write(convertByte(pointTime));//u32 打点时间 时间戳
+                    fos.write(convertByte((short) (temList.get(i).Data.Samples.get(0).Roll*100 )));
+                    fos.write(convertByte((short) (temList.get(i).Data.Samples.get(0).Pitch*100 )));
+                    float heading = temList.get(i).Data.Samples.get(0).Heading*100;
+                    fos.write(convertByte((short)(heading>=0?heading:heading+36000)));
+                }
+            }
+            // fos.write();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+                ToastUtils.showShort("导出轨迹数据成功!");
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
         }
+    }
+    private byte[] convertByte(short num1) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(2);
+        byteBuffer.putShort(num1);
+        byte[] result = byteBuffer.array();
+        return result;
+    }
+    private byte[] convertByte(int num1) {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4);
+        byteBuffer.putInt(num1);
+        byte[] result = byteBuffer.array();
+        return result;
+    }
+    private void doMerge(YcsDataFileInfo info) {
+        tmpFileName = info.projectName;
+        tmpFoldPath = info.filePath;
+        Thread th = new Thread(() -> {
+            try {
+                readDataFIle(info.datPath);
+                InitPointList(info.trdPath);
+                ThreadUtils.runOnUiThread(() -> {
+                    initMergeShowLy();
+                    initPointListView(DataList);
+                    iPointList.clickOn(currentPosition);
+                    binding.loadingAvi.setVisibility(View.GONE);
+                });
+                if (!(DataList.size() > 0)) {
+                    ToastUtils.showLong("探头数据为0");
+                    return;
+                }
+                if (!(pointBeanList.size() > 0)) {
+                    ToastUtils.showLong("打点数据为0");
+                    return;
+                }
+                TemList = mergeData(DataList, pointBeanList);
+                if (!(TemList.size() > 0)) {
+                    ToastUtils.showLong("合并失败，因为数据匹配数为0！");
+                    return;
+                }
+                try {
+                    saveTrackData(TemList,info.trdPath.replace(".trd","gjy.dat"));
+                    Save_Click(tmpFileName, tmpFoldPath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        th.start();
     }
 
     List<TemBean> TemList = new ArrayList<>();
@@ -255,14 +364,12 @@ public class YcsDataViewActivity extends AppCompatActivity {
                 content += "起始窗口";
                 content += '\t';
                 content += "终止窗口";
-
                 content += '\t';
                 content += "滚动角";
                 content += '\t';
                 content += "俯仰角";
                 content += '\t';
                 content += "方位角";
-
                 int totaltime = (int) (setting.SampleTimes * 1000);
                 int index = 0;
                 for (int i = 0; i < times.length; i++) {
@@ -303,7 +410,6 @@ public class YcsDataViewActivity extends AppCompatActivity {
                     content = content + "1" + '\t';
                     content = content + No + '\t';
                     content = content + "0" + '\t';
-
                     int a = 1;
                     str = String.valueOf(setting.StackCount);
                     content = content + str + '\t';
@@ -362,9 +468,7 @@ public class YcsDataViewActivity extends AppCompatActivity {
                         for (int t = 0; t <= index; t++) {
                             float ts = times[t] * 1.0f;
                             int pindex = (int) (ts / setting.SampleIntervel);
-
                             value = GetValue(pindex + 1, sample);
-
                             str = String.format("%.6f", value);
                             if (t == index) {
                                 contentlist.set(j, contentlist.get(j) + str);
@@ -429,7 +533,6 @@ public class YcsDataViewActivity extends AppCompatActivity {
         File f = new File(info.zipPath);
         if (!f.exists()) {
             List<File> fileList = FileUtils.listFilesInDir(info.filePath);
-
             String[] filepathlist = new String[fileList.size()];
             if (fileList.size() > 0) {
                 for (int i = 0; i < fileList.size(); i++) {
@@ -478,11 +581,9 @@ public class YcsDataViewActivity extends AppCompatActivity {
         try {
             Uri uri;
             if (Build.VERSION.SDK_INT >= 24) {
-
                 uri = FileProvider.getUriForFile(this, "com.zeus.tec.fileprovider", f);
                 grantUriPermission(getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 LogUtils.e(uri);
-
             } else {
                 uri = Uri.fromFile(f);
             }
@@ -491,7 +592,6 @@ public class YcsDataViewActivity extends AppCompatActivity {
             intent.putExtra(Intent.EXTRA_STREAM, uri);
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.setType("application/octet-stream");
-
             startActivity(Intent.createChooser(intent, "分享到"));
         } catch (Exception ex) {
             ToastUtils.showLong(ex.getLocalizedMessage());
@@ -507,7 +607,6 @@ public class YcsDataViewActivity extends AppCompatActivity {
                     refreshDataList();
                 }
             }
-
             @Override
             public void onNegativeButtonClick() {
 
@@ -1060,7 +1159,6 @@ public class YcsDataViewActivity extends AppCompatActivity {
         }
         for (int i = 0; i < ycsList.size(); i++) {
             List<File> tmplist = FileUtils.listFilesInDir(ycsList.get(i).getPath(), false);
-
             //  QureyUtil qureyUtil = new QureyUtil(ycsDataFileInfoList);
             YcsDataFileInfo ycsDataFileInfo = new YcsDataFileInfo();
             ycsDataFileInfo.filePath = ycsList.get(i).getPath();
@@ -1071,8 +1169,10 @@ public class YcsDataViewActivity extends AppCompatActivity {
                     ycsDataFileInfo.trdFile = tmplist.get(j).getName();
                     ycsDataFileInfo.trdPath = tmplist.get(j).getPath();
                 } else if (tmpStr.contains(".dat")) {
-                    ycsDataFileInfo.datFile = tmplist.get(j).getName();
-                    ycsDataFileInfo.datPath = tmplist.get(j).getPath();
+                    if (!tmpStr.contains("gjy")) {
+                        ycsDataFileInfo.datFile = tmplist.get(j).getName();
+                        ycsDataFileInfo.datPath = tmplist.get(j).getPath();
+                    }
                 } else if (tmpStr.contains(".zip")) {
                     ycsDataFileInfo.zipFile = tmplist.get(j).getName();
                     ycsDataFileInfo.zipPath = tmplist.get(j).getPath();

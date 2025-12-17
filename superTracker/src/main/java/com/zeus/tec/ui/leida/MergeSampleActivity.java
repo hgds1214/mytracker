@@ -731,7 +731,9 @@ public class MergeSampleActivity extends AppCompatActivity implements View.OnCli
                     fos.write(convertByte(pointTime));//u32 打点时间 时间戳
                     fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Roll * 100)));
                     fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Pitch * 100)));
-                    fos.write(convertByte((short) (MergeCache.trackPointList.get(i).Heading * 100)));
+                    float heading = MergeCache.trackPointList.get(i).Heading*100;
+                    fos.write(convertByte((short)(heading>=0?heading:heading+36000)));
+                   // fos.write(convertByte((shor t) (MergeCache.trackPointList.get(i).Heading * 100)));
                 }
             }
             // fos.write();

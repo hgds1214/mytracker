@@ -164,8 +164,8 @@
             android:layout_marginRight="12dp"
             android:background="@drawable/bg_white"
             android:orientation="vertical"
-            android:paddingTop="20dp"
-            android:paddingBottom="20dp">
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -1004,17 +1004,20 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             ></TextView>
+
                         <com.zeus.tec.ui.widget.CountTimeTextView
                             android:id="@+id/ctt_countdown"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="00:00"
-                            android:textColor="#ffffffff"
-                            android:textSize="22sp" />
+                            android:layout_gravity="center"
+                            android:paddingRight="10dp"
+                            android:text="开始采集"
+                            android:textColor="#00ff00"
+                            android:textSize="18sp" />
                         <TextView
                             android:id="@+id/tv_Point"
-                            android:layout_width="70dp"
-                            android:layout_height="30dp"
+                            android:layout_width="85dp"
+                            android:layout_height="40dp"
                             android:text="打点"
 
                             android:textColor="#ffffff"

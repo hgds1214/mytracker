@@ -781,12 +781,10 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     Toast.makeText(mContext, "开始搜索设备。。。", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "开始搜索设备...");
                     break;
-
                 case  BLEManager.BleOrder.STOP_DISCOVERY:
                     Toast.makeText(mContext, "停止搜索设备。。。", Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "停止搜索设备...");
                     break;
-
                 case  BLEManager.BleOrder.DISCOVERY_DEVICE:  //扫描到设备
                     BLEDevice bleDevice = (BLEDevice) msg.obj;
                     String bleDeviceName = bleDevice.getBluetoothDevice().getName();
@@ -800,7 +798,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                         }
                     }
                     break;
-
                 case  BLEManager.BleOrder.SELECT_DEVICE:
                     curBluetoothDevice = (BluetoothDevice) msg.obj;
                     binding.ivStep1.setState(1);
@@ -808,13 +805,11 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     Toast.makeText(mContext, "正在连接设备：" + curBluetoothDevice.getName(), Toast.LENGTH_SHORT).show();
                     bleManager.connectBleDevice(mContext, curBluetoothDevice, 15000, SERVICE_UUID, READ_UUID, WRITE_UUID, onBleConnectListener);
                     break;
-
                 case  BLEManager.BleOrder.CONNECT_FAILURE: //连接失败
                     binding.ivStep1.setState(3);
                     binding.tvStep1Text.setText("连接设备失败：" + curBluetoothDevice.getName());
                     Log.d(TAG, "连接失败");
                     break;
-
                 case  BLEManager.BleOrder.CONNECT_SUCCESS:  //连接成功
                     Log.d(TAG, "连接成功");
                     // tvCurConState.setText("连接成功");
@@ -826,33 +821,27 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     binding.llDevices.setVisibility(View.GONE);
                     binding.layoutPointRecord.setVisibility(View.VISIBLE);
                     // binding.layProgramParamter.setVisibility(View.VISIBLE);
-
                     binding.tvProgramParamter.setVisibility(View.VISIBLE);
                     break;
-
                 case  BLEManager.BleOrder.DISCONNECT_SUCCESS:
                     Log.d(TAG, "断开成功");
                     // tvCurConState.setText("断开成功");
                     curConnState = false;
                     break;
-
                 case  BLEManager.BleOrder.SEND_FAILURE: //发送失败
                     byte[] sendBufFail = (byte[]) msg.obj;
                     String sendFail = TypeConversion.bytes2HexString(sendBufFail, sendBufFail.length);
                     //  tvSendResult.setText("发送数据失败，长度" + sendBufFail.length + "--> " + sendFail);
                     break;
-
                 case  BLEManager.BleOrder.SEND_SUCCESS:  //发送成功
                     byte[] sendBufSuc = (byte[]) msg.obj;
                     String sendResult = TypeConversion.bytes2HexString(sendBufSuc, sendBufSuc.length);
                     // tvSendResult.setText("发送数据成功，长度" + sendBufSuc.length + "--> " + sendResult);
                     break;
-
                 case  BLEManager.BleOrder.RECEIVE_FAILURE: //接收失败
                     String receiveError = (String) msg.obj;
                     // tvReceive.setText(receiveError);
                     break;
-
                 case  BLEManager.BleOrder.RECEIVE_SUCCESS:  //接收成功
                     byte[] recBufSuc = (byte[]) msg.obj;
                     //long t1 = System.currentTimeMillis();
@@ -863,11 +852,9 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
                     //  String receiveResult = TypeConversion.bytes2HexString(recBufSuc, recBufSuc.length);
                     // tvReceive.setText("接收数据成功，长度" + recBufSuc.length + "--> " + receiveResult);
                     break;
-
                 case  BLEManager.BleOrder.BT_CLOSED:
                     Log.d(TAG, "系统蓝牙已关闭");
                     break;
-
                 case  BLEManager.BleOrder.BT_OPENED:
                     Log.d(TAG, "系统蓝牙已打开");
                     break;
@@ -1168,7 +1155,6 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
             System.arraycopy(buff, start, tmpBuff, 0, 4);
             maoganFileHead.hp_freq = ByteBuffer.wrap(tmpBuff).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFF;
             start += 4;
-
         } else {
             ToastUtils.showLong("文件头长度错误，为" + buff.length);
         }
@@ -1358,32 +1344,35 @@ public class MaoganMainActivity extends AppCompatActivity implements View.OnClic
 
     //搜索设备
     private void searchBtDevice() {
-        if (bleManager == null) {
-            Log.d(TAG, "searchBtDevice()-->bleManager == null");
-            return;
-        }
-
-        if (bleManager.isDiscovery()) { //当前正在搜索设备...
-            bleManager.stopDiscoveryDevice();
-        }
-
-        if (lvDevicesAdapter != null) {
-            lvDevicesAdapter.clear();  //清空列表
-        }
-        binding.tvStep1Text.setText("正在搜索设备。。。");
-        binding.ivStep1.setState(1);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ScanSettings settings = new ScanSettings.Builder()
-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                    .build();
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+        try {
+            if (bleManager == null) {
+                Log.d(TAG, "searchBtDevice()-->bleManager == null");
                 return;
             }
-            bluetoothLeScanner.startScan(null, settings, scanCallback);
-        } else {
-            bleManager.startDiscoveryDevice(onDeviceSearchListener, 15000);
+            if (bleManager.isDiscovery()) { //当前正在搜索设备...
+                bleManager.stopDiscoveryDevice();
+            }
+            if (lvDevicesAdapter != null) {
+                lvDevicesAdapter.clear();  //清空列表
+            }
+            binding.tvStep1Text.setText("正在搜索设备。。。");
+            binding.ivStep1.setState(1);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ScanSettings settings = new ScanSettings.Builder()
+                        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                        .build();
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                bluetoothLeScanner.startScan(null, settings, scanCallback);
+            } else {
+                bleManager.startDiscoveryDevice(onDeviceSearchListener, 15000);
+            }
+            //开始搜索
+        }catch (Exception ex){
+            ToastUtils.showLong(ex.getMessage());
         }
-        //开始搜索
+
     }
 
     ScanCallback scanCallback = new ScanCallback() {

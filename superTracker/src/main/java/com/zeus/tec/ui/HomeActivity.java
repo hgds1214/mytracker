@@ -20,6 +20,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -57,7 +58,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         // BarUtils.transparentStatusBar(this);
         setContentView(R.layout.activity_home);
-        Resources.Theme theme =this.getTheme();
+        Resources.Theme theme = this.getTheme();
         Log.d("ThemeCheck", "Theme = " + theme);
         BarUtils.setStatusBarVisibility(this, true);
         // BarUtils.addMarginTopEqualStatusBarHeight(findViewById(R.layout.activity_home));
@@ -68,6 +69,7 @@ public class HomeActivity extends AppCompatActivity {
         findViewById(R.id.rl_Ycs).setOnClickListener(v -> ycsClick());
         initView();
         getPermission();
+
         findViewById(R.id.device_list_txb).setOnClickListener(v -> {
             clickNumb++;
             if (clickNumb > 4) {
@@ -78,7 +80,7 @@ public class HomeActivity extends AppCompatActivity {
         });
         findViewById(R.id.rl_Maogan).setOnClickListener(v -> {
             FeedbackUtil.getInstance().doFeedback();//设置音频资源
-            if (PermissionUtils.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            if (PermissionUtils.isGranted(Manifest.permission.READ_MEDIA_AUDIO)) {
                 //gotoDirectionfinder();
                 startActivity(new Intent(HomeActivity.this, MaoganMainActivity.class));
                 return;
@@ -87,11 +89,31 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void getPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(new String[]{
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_AUDIO,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_ADVERTISE
+
+
+            }, 1);
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[]{
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, 1);
+            }
+        }
+
         String[] permissionStrs = new String[]{
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.ACCESS_NETWORK_STATE};
         checkPermission(this, permissionStrs, 1);
+
+
     }
 
 
@@ -133,11 +155,11 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (checkGrant(grantResults)){
+        if (checkGrant(grantResults)) {
             ToastUtils.showShort("权限获取成功");
-        }else{
-           // finish();
-            ToastUtils.showShort( "权限获取失败");
+        } else {
+            // finish();
+            ToastUtils.showShort("权限获取失败");
         }
     }
 
@@ -246,11 +268,9 @@ public class HomeActivity extends AppCompatActivity {
                 customDialog.dismiss();
             });
             customDialog.show();
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ToastUtils.showShort(ex.getMessage());
         }
-
-
     }
 
     private int clickNumb = 0;
@@ -258,18 +278,17 @@ public class HomeActivity extends AppCompatActivity {
     // region leida
     private void clickTrackerLeiDa() {
         FeedbackUtil.getInstance().doFeedback();//设置音频资源
-        if (PermissionUtils.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
             gotoLeida();
             return;
-        }
+
     }
 
     private void ycsClick() {
         FeedbackUtil.getInstance().doFeedback();//设置音频资源
-        if (PermissionUtils.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            startActivity((new Intent(HomeActivity.this, YcsMainActivity.class)));
-            return;
-        }
+        startActivity((new Intent(HomeActivity.this, YcsMainActivity.class)));
+        return;
+
     }
 
     private void gotoEncoderWorking() {
@@ -279,7 +298,7 @@ public class HomeActivity extends AppCompatActivity {
     private void clickEncoderWorking() {
         FeedbackUtil.getInstance().doFeedback();//设置音频资源
 
-        if (PermissionUtils.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (PermissionUtils.isGranted(Manifest.permission.READ_MEDIA_AUDIO)) {
             gotoEncoderWorking();
             return;
         }
@@ -298,7 +317,7 @@ public class HomeActivity extends AppCompatActivity {
     private void clickTracker() {
         FeedbackUtil.getInstance().doFeedback();//设置音频资源
 
-        if (PermissionUtils.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+        if (PermissionUtils.isGranted(Manifest.permission.READ_MEDIA_AUDIO)) {
             gotoTracker();
             return;
         }
@@ -338,10 +357,9 @@ public class HomeActivity extends AppCompatActivity {
     //region Directionfinder
     private void clickDirectionfinder() {
         FeedbackUtil.getInstance().doFeedback();//设置音频资源
-        if (PermissionUtils.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             gotoDirectionfinder();
             return;
-        }
+
 
     }
 

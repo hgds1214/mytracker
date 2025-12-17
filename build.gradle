@@ -4,15 +4,17 @@ buildscript {
     ext.objectboxVersion = "3.2.1"
 
     repositories {
+        google()
         maven { url 'https://maven.aliyun.com/repository/jcenter' }
         maven { url 'https://maven.aliyun.com/repository/google'}
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin'}
         maven { url 'https://maven.aliyun.com/repository/public'}
         mavenCentral()
-        google()
+
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.3.0'
+
         classpath("io.objectbox:objectbox-gradle-plugin:$objectboxVersion")
     }
 }
@@ -20,9 +22,10 @@ buildscript {
 allprojects {
 
     repositories {
+        google()
         maven { url 'https://jitpack.io' }
         jcenter()
         mavenCentral()
-        google()
+
     }
 }

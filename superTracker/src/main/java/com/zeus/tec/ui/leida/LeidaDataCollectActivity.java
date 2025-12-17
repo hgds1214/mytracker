@@ -90,6 +90,7 @@ public class LeidaDataCollectActivity extends AppCompatActivity {
         programParamterButton = binding.tvProgramParamter;
         cache = MainCache.GetInstance();
         cache.FileSavePath = privatePath;
+     //   cache.CreatIPReceiceThread();
         LoadLastProject();
         cache.CreatReceiveThread(LeidaDataCollectActivity.this);
         cache.CreatSendSocket();

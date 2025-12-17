@@ -3,11 +3,14 @@ package com.zeus.tec.ui.ycs;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 
 import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.PathUtils;
+import com.blankj.utilcode.util.ToastUtils;
 import com.zeus.tec.R;
 import com.zeus.tec.databinding.ActivityYcsSettingBinding;
 import com.zeus.tec.model.utils.FeedbackUtil;
@@ -36,6 +39,7 @@ public class YcsSettingActivity extends AppCompatActivity implements View.OnClic
     private void  initListenter() {
         binding.tvOk.setOnClickListener(this);
         binding.ivBack.setOnClickListener(this);
+        binding.tvCancel.setOnClickListener(this);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -44,10 +48,12 @@ public class YcsSettingActivity extends AppCompatActivity implements View.OnClic
         FeedbackUtil.getInstance().doFeedback();
         switch (v.getId()){
             case R.id.tv_ok:{
-               // writeSetting();
+                writeSetting();
+                ToastUtils.showShort("系统设置保存成功!");
                 break;
             }
-            case R.id.iv_back:{
+            case R.id.iv_back:
+            case R.id.tv_cancel: {
                 finish();
                 break;
             }
@@ -83,7 +89,8 @@ public class YcsSettingActivity extends AppCompatActivity implements View.OnClic
 
     private void writeSetting (){
         Properties tmpProperties = new Properties();
-        tmpProperties.setProperty("server_ip", "192.168.43.30");
+        String str1 = binding.edtVol.getText().toString();
+        tmpProperties.setProperty("server_ip",  str1 );
         tmpProperties.setProperty("port", "1234");
         tmpProperties.setProperty("Local_port", "2222");
         tmpProperties.setProperty("OutTime", "1000");
